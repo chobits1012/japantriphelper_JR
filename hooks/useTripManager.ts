@@ -13,11 +13,11 @@ const LEGACY_CHECKLIST_KEY = 'kansai-trip-checklist';
 
 export const useTripManager = () => {
   const [trips, setTrips] = useLocalStorage<TripMetadata[]>(TRIPS_LIST_KEY, []);
-  
+
   // Auto-migration & Default Initialization
   useEffect(() => {
     const hasInitialized = localStorage.getItem('app-initialized-v3');
-    
+
     if (!hasInitialized) {
       // 1. Try to migrate legacy data first
       const legacySettingsStr = localStorage.getItem(LEGACY_SETTINGS_KEY);
@@ -28,9 +28,9 @@ export const useTripManager = () => {
           const settings = JSON.parse(legacySettingsStr);
           const itineraryStr = localStorage.getItem(LEGACY_ITINERARY_KEY);
           const itinerary = itineraryStr ? JSON.parse(itineraryStr) : ITINERARY_DATA;
-          
+
           const legacyId = 'legacy-trip';
-          
+
           initialTrips.push({
             id: legacyId,
             name: settings.name || '我的舊旅程',
@@ -57,34 +57,34 @@ export const useTripManager = () => {
       const defaultId = 'default-kansai';
       // Only create default if no legacy and no existing trips (clean slate)
       if (initialTrips.length === 0 && trips.length === 0) {
-         initialTrips.push({
-            id: defaultId,
-            name: '關西冬之旅',
-            startDate: '2026-01-23',
-            season: 'winter',
-            days: ITINERARY_DATA.length,
-            lastAccessed: Date.now(),
-            coverImage: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?q=80&w=2070"
-         });
-         
-         // Initialize Default Data
-         localStorage.setItem(`trip-${defaultId}-settings`, JSON.stringify({ name: '關西冬之旅', startDate: '2026-01-23', season: 'winter' }));
-         localStorage.setItem(`trip-${defaultId}-itinerary`, JSON.stringify(ITINERARY_DATA));
-         localStorage.setItem(`trip-${defaultId}-expenses`, '[]');
-         localStorage.setItem(`trip-${defaultId}-checklist`, '[]');
+        initialTrips.push({
+          id: defaultId,
+          name: '關西冬之旅',
+          startDate: '2026-01-23',
+          season: 'winter',
+          days: ITINERARY_DATA.length,
+          lastAccessed: Date.now(),
+          coverImage: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?q=80&w=2070"
+        });
+
+        // Initialize Default Data
+        localStorage.setItem(`trip-${defaultId}-settings`, JSON.stringify({ name: '關西冬之旅', startDate: '2026-01-23', season: 'winter' }));
+        localStorage.setItem(`trip-${defaultId}-itinerary`, JSON.stringify(ITINERARY_DATA));
+        localStorage.setItem(`trip-${defaultId}-expenses`, '[]');
+        localStorage.setItem(`trip-${defaultId}-checklist`, '[]');
       }
 
       if (initialTrips.length > 0) {
         setTrips(prev => [...initialTrips, ...prev]);
       }
-      
+
       localStorage.setItem('app-initialized-v3', 'true');
     }
   }, []);
 
   const createTrip = (name: string, startDate: string, days: number, season: TripSeason) => {
     const newId = Math.random().toString(36).substr(2, 9);
-    
+
     // Generate initial itinerary
     const newItinerary: ItineraryDay[] = Array.from({ length: days }, (_, i) => {
       const dateObj = new Date(startDate);
@@ -137,8 +137,8 @@ export const useTripManager = () => {
 
     // Clone ITINERARY_DATA with new IDs to avoid reference issues
     const newItinerary = ITINERARY_DATA.map(day => ({
-        ...day,
-        id: Math.random().toString(36).substr(2, 9)
+      ...day,
+      id: Math.random().toString(36).substr(2, 9)
     }));
 
     const newTripMeta: TripMetadata = {
@@ -162,7 +162,7 @@ export const useTripManager = () => {
 
   const deleteTrip = (id: string) => {
     setTrips(prev => prev.filter(t => t.id !== id));
-    
+
     // Cleanup keys
     localStorage.removeItem(`trip-${id}-settings`);
     localStorage.removeItem(`trip-${id}-itinerary`);
@@ -184,10 +184,10 @@ export const useTripManager = () => {
 };
 
 function getSeasonCover(season: TripSeason) {
-  switch(season) {
+  switch (season) {
     case 'spring': return "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop"; // Cherry Blossoms (Kiyomizu-dera)
     case 'summer': return "https://images.unsplash.com/photo-1504198266287-1659872e6590?q=80&w=2070&auto=format&fit=crop"; // Summer Festival (Kyoto Lanterns)
-    case 'autumn': return "https://images.unsplash.com/photo-1508020963102-c6c723be5395?q=80&w=2070&auto=format&fit=crop"; // Autumn Leaves (Japan Temple)
+    case 'autumn': return "https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=2070&auto=format&fit=crop"; // Autumn Leaves (Japan Temple)
     case 'winter': return "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?q=80&w=2070&auto=format&fit=crop"; // Winter Snow (Kyoto Street)
     default: return "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop";
   }
