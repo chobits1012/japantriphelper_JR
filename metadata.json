@@ -1,0 +1,5 @@
+{
+  "name": "Gemini React Base",
+  "description": "A robust, production-ready React + TypeScript + Tailwind starter template integrated with the Google GenAI SDK, ready for you to paste your existing project code for migration or refactoring.",
+  "requestFramePermissions": []
+}

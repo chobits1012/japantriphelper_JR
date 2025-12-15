@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover 讓內容可以延伸到 iPhone 的瀏海區域 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>2026 關西冬之旅</title>
+
+    <!-- iOS PWA 專用設定 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="關西之旅" />
+
+    <!-- 連結 Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- 設定 iOS 主畫面圖示 -->
+    <link rel="apple-touch-icon" href="/kansai.png" />
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class', // Enable manual dark mode
+        theme: {
+          extend: {
+            colors: {
+              'japan-blue': '#2b4f81',
+              'japan-red': '#c93a40',
+              'paper': '#fcfbf9',
+              'ink': '#2c2c2c',
+            },
+            fontFamily: {
+              sans: ['"Noto Sans TC"', 'sans-serif'],
+              serif: ['"Noto Serif JP"', 'serif'],
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+      * { -webkit-tap-highlight-color: transparent; }
+      body { margin: 0; padding: 0; background-color: #fcfbf9; }
+      
+      /* Dark mode background */
+      html.dark body { background-color: #020617; }
+
+      /* 確保全螢幕時，內容不會被 iPhone 瀏海或底部橫條擋住 */
+      body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/client": "https://aistudiocdn.com/react-dom@^19.2.1/client",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "@dnd-kit/core": "https://aistudiocdn.com/@dnd-kit/core@^6.3.1",
+    "@dnd-kit/sortable": "https://aistudiocdn.com/@dnd-kit/sortable@^10.0.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lz-string": "https://aistudiocdn.com/lz-string@^1.5.0",
+    "@dnd-kit/utilities": "https://aistudiocdn.com/@dnd-kit/utilities@^3.2.2"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

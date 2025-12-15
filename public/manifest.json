@@ -1,0 +1,21 @@
+{
+  "name": "2026 關西冬之旅",
+  "short_name": "關西之旅",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fcfbf9",
+  "theme_color": "#2b4f81",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/kansai.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/kansai.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
