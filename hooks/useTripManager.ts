@@ -186,7 +186,7 @@ export const useTripManager = () => {
 function getSeasonCover(season: TripSeason) {
   switch (season) {
     case 'spring': return "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop"; // Cherry Blossoms (Kiyomizu-dera)
-    case 'summer': return "https://images.unsplash.com/photo-1504198266287-1659872e6590?q=80&w=2070&auto=format&fit=crop"; // Summer Festival (Kyoto Lanterns)
+    case 'summer': return "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?q=80&w=2070&auto=format&fit=crop"; // Summer Seaside (Enoshima/Kamakura)
     case 'autumn': return "https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=2070&auto=format&fit=crop"; // Autumn Leaves (Japan Temple)
     case 'winter': return "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?q=80&w=2070&auto=format&fit=crop"; // Winter Snow (Kyoto Street)
     default: return "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop";
