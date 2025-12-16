@@ -1,4 +1,3 @@
-```javascript
 import React, { forwardRef } from 'react';
 import { ChevronRight, Calendar, GripVertical } from 'lucide-react';
 import { WASHI_PATTERN } from '../constants';
@@ -29,9 +28,9 @@ export const TripCard = forwardRef<HTMLDivElement, TripCardProps>(({
             style={style}
             // attributes and listeners REMOVED from here to prevent whole-card dragging
             className={`
-                group relative bg - white / 90 backdrop - blur - md rounded - 2xl overflow - hidden cursor - pointer shadow - lg transition - all duration - 300 border border - white / 40 mb - 6
-                ${ isOverlay ? 'scale-105 shadow-2xl rotate-2 ring-4 ring-japan-blue/50 z-50' : 'hover:shadow-2xl hover:scale-[1.01]' }
-`}
+                group relative bg-white/90 backdrop-blur-md rounded-2xl overflow-hidden cursor-pointer shadow-lg transition-all duration-300 border border-white/40 mb-6
+                ${isOverlay ? 'scale-105 shadow-2xl rotate-2 ring-4 ring-japan-blue/50 z-50' : 'hover:shadow-2xl hover:scale-[1.01]'}
+            `}
         >
             {/* Drag Handle - Only show if listeners exist (i.e., not just a static view) */}
             {!isOverlay && listeners && (
@@ -46,7 +45,7 @@ export const TripCard = forwardRef<HTMLDivElement, TripCardProps>(({
 
             {/* If overlay, show a static handle or nothing? usually a handle looks good to indicate "grabbed" state */}
             {isOverlay && (
-                 <div className="absolute top-2 right-2 z-30 p-2 text-japan-blue cursor-grabbing">
+                <div className="absolute top-2 right-2 z-30 p-2 text-japan-blue cursor-grabbing">
                     <GripVertical size={20} />
                 </div>
             )}
@@ -54,7 +53,7 @@ export const TripCard = forwardRef<HTMLDivElement, TripCardProps>(({
             <div className="flex flex-col md:flex-row h-auto md:h-48" onClick={onClick}>
                 {/* Image Section */}
                 <div className="w-full md:w-1/3 h-40 md:h-full relative overflow-hidden">
-                    <div className={`absolute top - 3 left - 3 z - 10 ${ getSeasonColor(trip.season) } text - white text - [10px] font - bold px - 2 py - 1 rounded - md shadow - md uppercase tracking - wider`}>
+                    <div className={`absolute top-3 left-3 z-10 ${getSeasonColor(trip.season)} text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-md uppercase tracking-wider`}>
                         {trip.season}
                     </div>
                     <img
