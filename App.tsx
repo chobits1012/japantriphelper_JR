@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Map, Calendar, ChevronRight, Copy, Plane, Sparkles } from 'lucide-react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import { WASHI_PATTERN, HERO_IMAGE } from './constants';
@@ -8,24 +8,33 @@ import { useTripManager } from './hooks/useTripManager';
 import TripView from './components/TripView';
 import TripSetup from './components/TripSetup';
 import { SortableTripCard } from './components/SortableTripCard';
+import { TripCard } from './components/TripCard';
 import type { TripSeason } from './types';
 
 const App: React.FC = () => {
   const { trips, createTrip, createTemplateTrip, deleteTrip, updateTripMeta, reorderTrips } = useTripManager();
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [isSetupOpen, setIsSetupOpen] = useState(false);
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveDragId(event.active.id as string);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveDragId(null);
     if (over && active.id !== over.id) {
       reorderTrips(active.id as string, over.id as string);
     }
   };
+
+  const activeDragTrip = activeDragId ? trips.find(t => t.id === activeDragId) : null;
 
   // If a trip is selected, show the TripView
   if (selectedTripId) {
@@ -108,6 +117,7 @@ const App: React.FC = () => {
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
+            onDragStart={handleDragStart}
           >
             <SortableContext
               items={trips.map(t => t.id)}
@@ -128,6 +138,16 @@ const App: React.FC = () => {
                 ))}
               </div>
             </SortableContext>
+
+            <DragOverlay>
+              {activeDragTrip ? (
+                <TripCard
+                  trip={activeDragTrip}
+                  getSeasonColor={getSeasonColor}
+                  isOverlay
+                />
+              ) : null}
+            </DragOverlay>
           </DndContext>
         </div>
 
