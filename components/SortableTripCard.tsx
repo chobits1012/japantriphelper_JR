@@ -22,10 +22,9 @@ export const SortableTripCard: React.FC<SortableTripCardProps> = ({ trip, onClic
     } = useSortable({ id: trip.id });
 
     const style = {
-        transform: CSS.Transform.toString(transform),
+        transform: CSS.Translate.toString(transform),
         transition,
-        zIndex: isDragging ? 50 : 'auto',
-        opacity: isDragging ? 0.5 : 1,
+        opacity: isDragging ? 0.3 : 1,
     };
 
     return (
@@ -35,7 +34,7 @@ export const SortableTripCard: React.FC<SortableTripCardProps> = ({ trip, onClic
             {...attributes}
             {...listeners}
             onClick={onClick}
-            className={`group relative bg-white/90 backdrop-blur-md rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 border border-white/40 mb-6 ${isDragging ? 'rotate-2 scale-105 shadow-2xl ring-4 ring-japan-blue/50' : ''}`}
+            className="group relative bg-white/90 backdrop-blur-md rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 border border-white/40 mb-6"
         >
             <div className="flex flex-col md:flex-row h-auto md:h-48">
                 {/* Image Section */}
