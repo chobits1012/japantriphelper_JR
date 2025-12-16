@@ -8,34 +8,19 @@ body {
 }
 
 /* Custom Utilities used in App.tsx and components */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-@layer base {
-  body {
-    @apply transition-colors duration-500 ease-in-out;
-  }
+/* Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
-
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .safe-area-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 /* Text Shadow */
 .text-shadow-lg {
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 4px 8px rgba(0,0,0,0.5);
 }
 
 /* Animations */
@@ -44,13 +29,8 @@ body {
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Weather Forecast Fade Mask */
