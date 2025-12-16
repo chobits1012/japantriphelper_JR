@@ -425,6 +425,10 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
         <BottomSheet
           isOpen={selectedDay !== null && window.innerWidth < 1024} // Only show if selected and screen is small
           onClose={handleCloseDetail}
+          onNext={handleNext}
+          onPrev={handlePrev}
+          hasNext={selectedDayIndex < itineraryData.length - 1}
+          hasPrev={selectedDayIndex > 0}
         >
           {selectedDay && (
             <DetailPanel
