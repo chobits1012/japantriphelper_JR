@@ -174,12 +174,26 @@ export const useTripManager = () => {
     setTrips(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
   };
 
+  const reorderTrips = (activeId: string, overId: string) => {
+    setTrips((items) => {
+      const oldIndex = items.findIndex((item) => item.id === activeId);
+      const newIndex = items.findIndex((item) => item.id === overId);
+
+      const newItems = [...items];
+      const [movedItem] = newItems.splice(oldIndex, 1);
+      newItems.splice(newIndex, 0, movedItem);
+
+      return newItems;
+    });
+  };
+
   return {
     trips,
     createTrip,
     createTemplateTrip, // Export this
     deleteTrip,
-    updateTripMeta
+    updateTripMeta,
+    reorderTrips
   };
 };
 
