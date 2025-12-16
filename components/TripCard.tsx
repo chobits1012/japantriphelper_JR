@@ -1,5 +1,6 @@
+```javascript
 import React, { forwardRef } from 'react';
-import { ChevronRight, Calendar } from 'lucide-react';
+import { ChevronRight, Calendar, GripVertical } from 'lucide-react';
 import { WASHI_PATTERN } from '../constants';
 import type { TripMetadata, TripSeason } from '../types';
 
@@ -26,18 +27,34 @@ export const TripCard = forwardRef<HTMLDivElement, TripCardProps>(({
         <div
             ref={ref}
             style={style}
-            {...attributes}
-            {...listeners}
-            onClick={onClick}
+            // attributes and listeners REMOVED from here to prevent whole-card dragging
             className={`
-                group relative bg-white/90 backdrop-blur-md rounded-2xl overflow-hidden cursor-pointer shadow-lg transition-all duration-300 border border-white/40 mb-6
-                ${isOverlay ? 'scale-105 shadow-2xl rotate-2 ring-4 ring-japan-blue/50 z-50' : 'hover:shadow-2xl hover:scale-[1.01]'}
-            `}
+                group relative bg - white / 90 backdrop - blur - md rounded - 2xl overflow - hidden cursor - pointer shadow - lg transition - all duration - 300 border border - white / 40 mb - 6
+                ${ isOverlay ? 'scale-105 shadow-2xl rotate-2 ring-4 ring-japan-blue/50 z-50' : 'hover:shadow-2xl hover:scale-[1.01]' }
+`}
         >
-            <div className="flex flex-col md:flex-row h-auto md:h-48">
+            {/* Drag Handle - Only show if listeners exist (i.e., not just a static view) */}
+            {!isOverlay && listeners && (
+                <div
+                    {...attributes}
+                    {...listeners}
+                    className="absolute top-2 right-2 z-30 p-2 text-gray-300 hover:text-gray-500 hover:bg-black/5 rounded-full cursor-grab active:cursor-grabbing touch-none transition-colors"
+                >
+                    <GripVertical size={20} />
+                </div>
+            )}
+
+            {/* If overlay, show a static handle or nothing? usually a handle looks good to indicate "grabbed" state */}
+            {isOverlay && (
+                 <div className="absolute top-2 right-2 z-30 p-2 text-japan-blue cursor-grabbing">
+                    <GripVertical size={20} />
+                </div>
+            )}
+
+            <div className="flex flex-col md:flex-row h-auto md:h-48" onClick={onClick}>
                 {/* Image Section */}
                 <div className="w-full md:w-1/3 h-40 md:h-full relative overflow-hidden">
-                    <div className={`absolute top-3 left-3 z-10 ${getSeasonColor(trip.season)} text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-md uppercase tracking-wider`}>
+                    <div className={`absolute top - 3 left - 3 z - 10 ${ getSeasonColor(trip.season) } text - white text - [10px] font - bold px - 2 py - 1 rounded - md shadow - md uppercase tracking - wider`}>
                         {trip.season}
                     </div>
                     <img
@@ -54,7 +71,8 @@ export const TripCard = forwardRef<HTMLDivElement, TripCardProps>(({
                     <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: `url("${WASHI_PATTERN}")` }} />
 
                     <div className="relative z-10">
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="flex justify-between items-start mb-2 pr-8">
+                            {/* Added pr-8 to verify title doesn't overlap handle */}
                             <h2 className="text-2xl md:text-3xl font-serif font-bold text-ink group-hover:text-japan-blue transition-colors line-clamp-1">
                                 {trip.name}
                             </h2>
