@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { X, Wallet, CheckSquare, Plus, Trash2, RefreshCw, TrendingUp, Coins, Cloud, FileJson, ChevronDown, ChevronRight, FolderPlus, Pencil, Save, Upload, Copy, Check, AlertTriangle } from 'lucide-react';
+import { X, Wallet, CheckSquare, Plus, Trash2, RefreshCw, TrendingUp, Coins, Cloud, FileJson, ChevronDown, ChevronRight, FolderPlus, Pencil, Save, Upload, Copy, Check, AlertTriangle, Sparkles } from 'lucide-react';
 import LZString from 'lz-string';
 import type { ExpenseItem, ChecklistCategory, ChecklistItem, TripSettings, ItineraryDay } from '../types';
 import ConfirmModal from './ConfirmModal';
-import { EXCHANGE_RATE_API_URL } from '../constants';
+import { EXCHANGE_RATE_API_URL, CLOUD_SYNC_CONFIG_KEY } from '../constants';
+import { uploadToCloud, downloadFromCloud, FirebaseConfig } from '../lib/firebaseSync';
 
 interface TravelToolboxProps {
   isOpen: boolean;
@@ -44,7 +45,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
   expenses, onUpdateExpenses,
   checklist, onUpdateChecklist
 }) => {
-  const [activeTab, setActiveTab] = useState<'currency' | 'expense' | 'checklist' | 'backup'>('expense');
+  const [activeTab, setActiveTab] = useState<'currency' | 'expense' | 'checklist' | 'backup' | 'cloud'>('expense');
 
   // --- Confirm Modal State ---
   const [confirmModal, setConfirmModal] = useState<{
@@ -86,6 +87,22 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
   const [newItemInputs, setNewItemInputs] = useState<Record<string, string>>({});
   const [editingCatId, setEditingCatId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
+
+  // --- Cloud Sync State ---
+  const [firebaseConfig, setFirebaseConfig] = useState<FirebaseConfig | null>(() => {
+    const saved = localStorage.getItem(CLOUD_SYNC_CONFIG_KEY);
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [configInput, setConfigInput] = useState<string>(() => {
+    const saved = localStorage.getItem(CLOUD_SYNC_CONFIG_KEY);
+    return saved ? JSON.stringify(JSON.parse(saved), null, 2) : '';
+  });
+  const [cloudId, setCloudId] = useState('');
+  const [cloudIdInput, setCloudIdInput] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStage, setSyncStage] = useState<string>('');
+  const [showConfigEdit, setShowConfigEdit] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   // Initialize Checklist if empty
   useEffect(() => {
@@ -448,15 +465,83 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
           onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
         });
       }
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      reader.readAsText(file);
     };
-    reader.readAsText(file);
   };
+
+
+  const handleSaveConfig = () => {
+    try {
+      const config = JSON.parse(configInput);
+      setFirebaseConfig(config);
+      localStorage.setItem(CLOUD_SYNC_CONFIG_KEY, JSON.stringify(config));
+      setShowConfigEdit(false);
+      setSyncError(null);
+    } catch (e) {
+      alert("Firebase Config 格式錯誤，請貼上正確的 JSON 格式。");
+    }
+  };
+
+  const handleResetConfig = () => {
+    setFirebaseConfig(null);
+    setConfigInput('');
+    localStorage.removeItem(CLOUD_SYNC_CONFIG_KEY);
+    setShowConfigEdit(true);
+    setSyncError(null);
+  };
+
+  const handleUploadCloud = async () => {
+    if (!firebaseConfig) {
+      setShowConfigEdit(true);
+      return;
+    }
+    setIsSyncing(true);
+    setSyncStage('準備中...');
+    setSyncError(null);
+    try {
+      const data = getExportData();
+      const id = await uploadToCloud(firebaseConfig, data, (stage) => setSyncStage(stage));
+      setCloudId(id);
+    } catch (e: any) {
+      let msg = e.message;
+      if (msg.includes('auth/api-key-not-valid')) {
+        msg = "Firebase API Key 無效。請檢查：1. 是否已在 Firebase Console 啟用『匿名登入』並儲存？ 2. JSON 是否正確？";
+      } else if (msg.includes('Missing or insufficient permissions')) {
+        msg = "資料庫權限不足。請檢查 Firebase Console 的 Firestore Rules，是否已改為『測試模式』或允許寫入。";
+      }
+      setSyncError(msg);
+      alert("上傳失敗: " + msg);
+    } finally {
+      setIsSyncing(false);
+      setSyncStage('');
+    }
+  };
+
+  const handleDownloadCloud = async () => {
+    if (!firebaseConfig) {
+      setShowConfigEdit(true);
+      return;
+    }
+    if (!cloudIdInput.trim()) return;
+    setIsSyncing(true);
+    setSyncStage('準備中...');
+    setSyncError(null);
+    try {
+      const data = await downloadFromCloud(firebaseConfig, cloudIdInput.trim(), (stage) => setSyncStage(stage));
+      processImportData(data);
+    } catch (e: any) {
+      setSyncError(e.message);
+      alert("下載失敗: " + e.message);
+    } finally {
+      setIsSyncing(false);
+      setSyncStage('');
+    }
+  };
+
 
   const triggerFileUpload = () => {
     fileInputRef.current?.click();
   };
-
 
   if (!isOpen) return null;
 
@@ -504,10 +589,16 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
             <CheckSquare size={16} /> <span className="hidden sm:inline">清單</span>
           </button>
           <button
+            onClick={() => setActiveTab('cloud')}
+            className={`flex-1 min-w-[80px] py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'cloud' ? 'text-japan-blue border-b-2 border-japan-blue bg-blue-50/50 dark:bg-slate-800 dark:text-sky-400 dark:border-sky-500' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+          >
+            <Cloud size={16} /> <span className="hidden sm:inline">雲端</span>
+          </button>
+          <button
             onClick={() => setActiveTab('backup')}
             className={`flex-1 min-w-[80px] py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'backup' ? 'text-japan-blue border-b-2 border-japan-blue bg-blue-50/50 dark:bg-slate-800 dark:text-sky-400 dark:border-sky-500' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
           >
-            <Cloud size={16} /> <span className="hidden sm:inline">備份</span>
+            <Copy size={16} /> <span className="hidden sm:inline">備份</span>
           </button>
         </div>
 
@@ -570,7 +661,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 <div className="h-4 w-full bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
                   {totalJPY > 0 && Object.entries(categoryStats).map(([cat, amount]) => {
                     if (amount === 0) return null;
-                    const pct = (amount / totalJPY) * 100;
+                    const pct = ((amount as number) / totalJPY) * 100;
 
                     const colorClass = EXPENSE_CATEGORIES[cat]?.bg || 'bg-gray-400';
                     return (
@@ -657,12 +748,12 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                     <div key={item.id} className="flex items-center justify-between bg-white dark:bg-slate-900 p-3 rounded-lg border border-gray-100 dark:border-slate-800 shadow-sm animate-in slide-in-from-bottom-2">
                       <div className="flex items-center gap-3">
                         <div className={`
-                             w-8 h-8 rounded-full flex items-center justify-center text-xs text-white font-bold flex-shrink-0
-                             ${item.category === 'food' ? 'bg-orange-400' :
+                           w-8 h-8 rounded-full flex items-center justify-center text-xs text-white font-bold flex-shrink-0
+                           ${item.category === 'food' ? 'bg-orange-400' :
                             item.category === 'shopping' ? 'bg-purple-400' :
                               item.category === 'transport' ? 'bg-gray-400' :
                                 item.category === 'hotel' ? 'bg-indigo-400' : 'bg-blue-400'}
-                          `}>
+                        `}>
                           {item.category[0].toUpperCase()}
                         </div>
                         <div className="min-w-0">
@@ -823,9 +914,9 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                             >
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className={`
-                                           w-4 h-4 rounded border border-gray-300 dark:border-slate-600 flex items-center justify-center transition-colors flex-shrink-0
-                                           ${item.checked ? 'bg-japan-blue border-japan-blue dark:bg-sky-500 dark:border-sky-500 text-white' : 'bg-white dark:bg-slate-800'}
-                                        `}>
+                                         w-4 h-4 rounded border border-gray-300 dark:border-slate-600 flex items-center justify-center transition-colors flex-shrink-0
+                                         ${item.checked ? 'bg-japan-blue border-japan-blue dark:bg-sky-500 dark:border-sky-500 text-white' : 'bg-white dark:bg-slate-800'}
+                                      `}>
                                   {item.checked && <Check size={10} />}
                                 </div>
                                 <span className={`text-sm truncate ${item.checked ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-slate-300'}`}>
@@ -895,10 +986,148 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
             </div>
           )}
 
+          {/* --- CLOUD SYNC TAB --- */}
+          {activeTab === 'cloud' && (
+            <div className="space-y-6 pt-2 pb-10">
+              {/* Tutorial / Help Link */}
+              <div className="bg-blue-50 dark:bg-sky-900/10 border border-blue-100 dark:border-sky-900/30 rounded-xl p-4 flex items-start gap-3">
+                <div className="text-blue-500 mt-1 flex-shrink-0">
+                  <Sparkles size={18} />
+                </div>
+                <div className="text-xs text-blue-700 dark:text-sky-400 leading-relaxed">
+                  <p className="font-bold mb-1">如何使用雲端同步？</p>
+                  <ol className="list-decimal list-inside space-y-1">
+                    <li>前往 <a href="https://console.firebase.google.com/" target="_blank" className="underline font-bold">Firebase 控制台</a> 建立專案。</li>
+                    <li>開啟 **Firestore** 與 **Anonymous Auth**。</li>
+                    <li>在專案設定中複製 **Config JSON** 貼到下方。</li>
+                  </ol>
+                </div>
+              </div>
+
+              {/* Config Section */}
+              <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-sm font-bold text-ink dark:text-white flex items-center gap-2">
+                    <Save size={14} /> Firebase 設定
+                  </h4>
+                  <button
+                    onClick={() => setShowConfigEdit(!showConfigEdit)}
+                    className="text-xs font-bold text-japan-blue dark:text-sky-400"
+                  >
+                    {showConfigEdit ? '取消' : '修改設定'}
+                  </button>
+                </div>
+
+                {showConfigEdit || !firebaseConfig ? (
+                  <div className="space-y-3">
+                    <textarea
+                      value={configInput}
+                      onChange={e => setConfigInput(e.target.value)}
+                      placeholder='請貼上 Firebase Config JSON...'
+                      className="w-full h-32 p-3 text-[10px] font-mono bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg outline-none focus:border-japan-blue dark:text-white"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSaveConfig}
+                        className="flex-1 py-2 bg-japan-blue text-white rounded-lg font-bold text-sm dark:bg-sky-600"
+                      >
+                        儲存設定
+                      </button>
+                      {firebaseConfig && (
+                        <button
+                          onClick={handleResetConfig}
+                          className="px-3 py-2 border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                          title="清除所有設定"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg">
+                      <span className="flex items-center gap-1"><Check size={14} /> 已連接專案: {firebaseConfig.projectId}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Section */}
+              <div className="space-y-4">
+                <div className="bg-gray-50 dark:bg-slate-900 p-5 rounded-xl border border-gray-100 dark:border-slate-800 text-center">
+                  <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md text-japan-blue dark:text-sky-400">
+                    <Cloud size={24} className={isSyncing ? "animate-bounce" : ""} />
+                  </div>
+                  <h4 className="font-bold text-ink dark:text-white mb-2">上傳至雲端</h4>
+                  <p className="text-[10px] text-gray-500 dark:text-slate-400 mb-4 px-4">
+                    將目前的行程、記帳與清單上傳，並獲取一組 Cloud ID 分享給朋友。
+                  </p>
+
+                  {syncError && (
+                    <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-lg flex items-start gap-2">
+                      <AlertTriangle className="text-red-500 mt-0.5 flex-shrink-0" size={14} />
+                      <p className="text-[10px] text-red-600 dark:text-red-400 text-left leading-relaxed">
+                        {syncError}
+                      </p>
+                    </div>
+                  )}
+
+                  {cloudId ? (
+                    <div className="space-y-3">
+                      <div className="bg-japan-blue/5 dark:bg-sky-400/5 p-3 rounded-xl border-2 border-dashed border-japan-blue/30 dark:border-sky-400/30">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">您的 Cloud ID</p>
+                        <p className="text-3xl font-mono font-bold text-japan-blue dark:text-sky-400 tracking-widest">{cloudId}</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(cloudId);
+                          alert("Cloud ID 已複製到剪貼簿！");
+                        }}
+                        className="text-xs font-bold text-japan-blue dark:text-sky-400 flex items-center justify-center gap-1 mx-auto"
+                      >
+                        <Copy size={12} /> 複製 ID
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleUploadCloud}
+                      disabled={isSyncing || !firebaseConfig}
+                      className="w-full py-3 bg-japan-blue text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 dark:bg-sky-600"
+                    >
+                      {isSyncing ? (syncStage || "同步中...") : "產生 Cloud ID 並上傳"}
+                    </button>
+                  )}
+                </div>
+
+                <div className="relative flex items-center py-2">
+                  <div className="flex-grow border-t border-gray-200 dark:border-slate-800"></div>
+                  <span className="flex-shrink-0 mx-4 text-gray-300 text-[10px] font-bold tracking-widest">或從雲端下載</span>
+                  <div className="flex-grow border-t border-gray-200 dark:border-slate-800"></div>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    value={cloudIdInput}
+                    onChange={e => setCloudIdInput(e.target.value.toUpperCase())}
+                    placeholder="輸入朋友的 Cloud ID..."
+                    className="flex-1 p-3 text-sm font-mono border border-gray-200 dark:border-slate-800 rounded-xl outline-none focus:border-japan-blue dark:bg-slate-900 dark:text-white"
+                  />
+                  <button
+                    onClick={handleDownloadCloud}
+                    disabled={isSyncing || !firebaseConfig || !cloudIdInput}
+                    className="px-6 bg-gray-900 dark:bg-slate-700 text-white rounded-xl font-bold hover:bg-black transition-colors disabled:opacity-50"
+                  >
+                    {isSyncing ? <RefreshCw className="animate-spin" size={18} /> : "下載"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* --- BACKUP TAB --- */}
           {activeTab === 'backup' && (
             <div className="space-y-6 pt-2">
-
               {/* WARNING ALERT */}
               <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 rounded-xl p-4 flex items-start gap-3">
                 <div className="text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0">
@@ -908,10 +1137,8 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                   <h4 className="font-bold text-yellow-800 dark:text-yellow-400 text-sm mb-1">重要提示：請定期備份</h4>
                   <p className="text-xs text-yellow-700 dark:text-yellow-500/80 leading-relaxed">
                     您的旅程資料目前僅儲存在這台裝置的瀏覽器中。
-                    <br />
                     若清除瀏覽紀錄或遺失手機，資料可能會消失。
-                    <br />
-                    <strong>建議您定期點擊下方按鈕，將檔案下載保存或複製代碼傳給自己。</strong>
+                    建議您定期點擊下方按鈕，將檔案下載保存或複製代碼傳給自己。
                   </p>
                 </div>
               </div>
@@ -956,14 +1183,14 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 </button>
               </div>
 
+              {/* Import Section */}
               <div className="relative flex items-center py-2">
                 <div className="flex-grow border-t border-gray-200 dark:border-slate-700"></div>
                 <span className="flex-shrink-0 mx-4 text-gray-300 dark:text-slate-600 text-xs font-bold">OR IMPORT</span>
                 <div className="flex-grow border-t border-gray-200 dark:border-slate-700"></div>
               </div>
 
-              {/* Import Section */}
-              <div className="space-y-3">
+              <div className="space-y-3 pb-8">
                 <input
                   type="file"
                   accept=".json"
@@ -984,7 +1211,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                     value={importCode}
                     onChange={(e) => setImportCode(e.target.value)}
                     placeholder="或貼上壓縮代碼..."
-                    className="flex-1 p-3 text-xs font-mono border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:border-japan-blue dark:focus:border-sky-500 min-w-0 bg-transparent dark:text-white placeholder-gray-400"
+                    className="flex-1 p-3 text-sm font-mono border border-gray-200 dark:border-slate-800 rounded-xl outline-none focus:border-japan-blue dark:focus:border-sky-500 min-w-0 bg-transparent dark:text-white placeholder-gray-400"
                   />
                   <button
                     onClick={handleImportCode}

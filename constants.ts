@@ -7,6 +7,7 @@ export const WASHI_PATTERN = `data:image/svg+xml,%3Csvg width='60' height='60' v
 export const HERO_IMAGE = "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop";
 
 export const EXCHANGE_RATE_API_URL = 'https://api.exchangerate-api.com/v4/latest/JPY';
+export const CLOUD_SYNC_CONFIG_KEY = 'cloud-sync-firebase-config';
 
 export const REGIONS = [
     "關西地區",
