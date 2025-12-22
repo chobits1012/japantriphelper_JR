@@ -1098,7 +1098,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                         <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">您的 Cloud ID</p>
                         <p className="text-3xl font-mono font-bold text-japan-blue dark:text-sky-400 tracking-widest">{cloudId}</p>
                       </div>
-                      <div className="flex gap-2 justify-center">
+                      <div className="flex gap-2 justify-center flex-wrap">
                         <button
                           onClick={() => {
                             navigator.clipboard.writeText(cloudId);
