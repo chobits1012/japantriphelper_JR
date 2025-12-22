@@ -37,7 +37,7 @@ const initFirebase = async (config: FirebaseConfig) => {
     return app;
 };
 
-export const uploadToCloud = async (config: FirebaseConfig, data: any, onProgress?: (stage: string) => void) => {
+export const uploadToCloud = async (config: FirebaseConfig, data: any, onProgress?: (stage: string) => void, customId?: string) => {
     const timeout = setTimeout(() => {
         throw new Error("連線逾時（30秒），請檢查網路狀況或 Firestore 是否已建立。");
     }, 30000);
@@ -52,8 +52,8 @@ export const uploadToCloud = async (config: FirebaseConfig, data: any, onProgres
         await signInAnonymously(auth);
 
         onProgress?.('正在上傳資料...');
-        // Generate a random 6-character Cloud ID
-        const cloudId = Math.random().toString(36).substring(2, 8).toUpperCase();
+        // Use customId if provided, otherwise generate a random 6-character Cloud ID
+        const cloudId = customId || Math.random().toString(36).substring(2, 8).toUpperCase();
 
         await setDoc(doc(db, "trips", cloudId), {
             data,

@@ -517,6 +517,25 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
     }
   };
 
+  const handleUpdateCloud = async () => {
+    if (!firebaseConfig || !cloudId) return;
+    setIsSyncing(true);
+    setSyncStage('更新中...');
+    setSyncError(null);
+    try {
+      const data = getExportData();
+      // Pass existing cloudId to update it
+      await uploadToCloud(firebaseConfig, data, (stage) => setSyncStage(stage), cloudId);
+      alert("更新成功！您的雲端資料已同步。");
+    } catch (e: any) {
+      setSyncError(e.message);
+      alert("更新失敗: " + e.message);
+    } finally {
+      setIsSyncing(false);
+      setSyncStage('');
+    }
+  };
+
   const handleDownloadCloud = async () => {
     if (!firebaseConfig) {
       setShowConfigEdit(true);
@@ -1079,15 +1098,25 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                         <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">您的 Cloud ID</p>
                         <p className="text-3xl font-mono font-bold text-japan-blue dark:text-sky-400 tracking-widest">{cloudId}</p>
                       </div>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(cloudId);
-                          alert("Cloud ID 已複製到剪貼簿！");
-                        }}
-                        className="text-xs font-bold text-japan-blue dark:text-sky-400 flex items-center justify-center gap-1 mx-auto"
-                      >
-                        <Copy size={12} /> 複製 ID
-                      </button>
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(cloudId);
+                            alert("Cloud ID 已複製到剪貼簿！");
+                          }}
+                          className="text-xs font-bold text-japan-blue dark:text-sky-400 flex items-center justify-center gap-1 bg-blue-50 dark:bg-slate-800 px-3 py-2 rounded-lg"
+                        >
+                          <Copy size={12} /> 複製 ID
+                        </button>
+                        <button
+                          onClick={handleUpdateCloud}
+                          disabled={isSyncing}
+                          className="text-xs font-bold text-white bg-japan-blue dark:bg-sky-600 hover:bg-japan-blue/90 dark:hover:bg-sky-500 flex items-center justify-center gap-1 px-3 py-2 rounded-lg shadow-sm transition-colors"
+                        >
+                          {isSyncing ? <RefreshCw className="animate-spin" size={12} /> : <RefreshCw size={12} />}
+                          更新雲端資料
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <button
