@@ -28,6 +28,8 @@ export interface ItineraryEvent {
   highlight?: boolean;
   category?: EventCategory;
   mapQuery?: string;
+  ticketUrl?: string; // Website Link
+  ticketImg?: string; // Base64 Image (Compressed)
 }
 
 export interface Accommodation {
@@ -48,12 +50,12 @@ export interface ItineraryDay {
   passColor?: string; // New: Custom color for pass label
   bg: string;
   location?: string;
-  
+
   weatherIcon?: 'sunny' | 'cloudy' | 'rain' | 'snow';
   temp?: string;
   tips?: string;
   accommodation?: Accommodation;
-  
+
   events: ItineraryEvent[];
 }
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Train, Plane, MapPin, Camera, Utensils, ShoppingBag, BedDouble, Ticket, ExternalLink, Copy, Check } from 'lucide-react';
+import { Train, Plane, MapPin, Camera, Utensils, ShoppingBag, BedDouble, Ticket, ExternalLink, Copy, Check, Image as ImageIcon } from 'lucide-react';
 import type { ItineraryEvent, EventCategory } from '../types';
+import ImageModal from './ImageModal';
 
 interface TimelineEventProps {
   event: ItineraryEvent;
@@ -35,7 +36,8 @@ const getCategoryLabel = (category?: EventCategory) => {
 
 const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
   const [copied, setCopied] = useState(false);
-  
+  const [showTicketModal, setShowTicketModal] = useState(false);
+
   const handleMapClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     const query = event.mapQuery || event.title;
@@ -50,6 +52,8 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const hasTicket = event.ticketUrl || event.ticketImg;
+
   return (
     <div className={`relative pl-8 pb-8 group ${isLast ? '' : ''}`}>
       {/* Vertical Connector Line */}
@@ -58,16 +62,15 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
       )}
 
       {/* Time Dot */}
-      <div 
-        className={`absolute -left-[11px] top-1 w-[22px] h-[22px] rounded-full border-[3px] z-10 bg-white dark:bg-slate-900 transition-all duration-700 flex items-center justify-center ${
-          event.highlight 
-            ? 'border-japan-red shadow-lg scale-110' 
+      <div
+        className={`absolute -left-[11px] top-1 w-[22px] h-[22px] rounded-full border-[3px] z-10 bg-white dark:bg-slate-900 transition-all duration-700 flex items-center justify-center ${event.highlight
+            ? 'border-japan-red shadow-lg scale-110'
             : 'border-japan-blue group-hover:border-japan-blue/70 dark:border-sky-500 dark:group-hover:border-sky-400'
-        }`} 
+          }`}
       >
         <div className={`w-2 h-2 rounded-full ${event.highlight ? 'bg-japan-red' : 'bg-transparent'}`} />
       </div>
-      
+
       {/* Content */}
       <div className="flex flex-col items-start w-full -mt-1">
         <div className="flex items-center gap-3 mb-1">
@@ -76,8 +79,8 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
           </span>
           {event.category && (
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 text-[10px] font-bold text-gray-600 uppercase tracking-wider dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 transition-colors duration-700">
-               {getCategoryIcon(event.category)}
-               <span>{getCategoryLabel(event.category)}</span>
+              {getCategoryIcon(event.category)}
+              <span>{getCategoryLabel(event.category)}</span>
             </div>
           )}
         </div>
@@ -86,21 +89,21 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
           <h4 className={`text-lg md:text-xl font-serif font-bold text-ink leading-tight dark:text-slate-100 transition-colors duration-700 ${event.highlight ? 'text-japan-blue underline decoration-japan-blue/20 decoration-2 underline-offset-4 dark:text-sky-400 dark:decoration-sky-500/30' : ''}`}>
             {event.title}
           </h4>
-          
+
           {/* Action Buttons Container */}
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             {/* Copy Button */}
-            <button 
-                onClick={handleCopy}
-                className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400 hover:text-japan-blue transition-colors duration-300 dark:hover:bg-slate-800 dark:text-slate-500 dark:hover:text-sky-400"
-                title="複製地點/標題"
-              >
-                {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+            <button
+              onClick={handleCopy}
+              className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400 hover:text-japan-blue transition-colors duration-300 dark:hover:bg-slate-800 dark:text-slate-500 dark:hover:text-sky-400"
+              title="複製地點/標題"
+            >
+              {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
             </button>
 
             {/* Google Map Button */}
             {(event.mapQuery || event.category === 'sightseeing' || event.category === 'food' || event.category === 'hotel') && (
-              <button 
+              <button
                 onClick={handleMapClick}
                 className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400 hover:text-japan-blue transition-colors duration-300 dark:hover:bg-slate-800 dark:text-slate-500 dark:hover:text-sky-400"
                 title="在 Google 地圖中查看"
@@ -114,14 +117,40 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
         <div className="mt-2 text-sm md:text-base text-gray-600 leading-relaxed bg-white/60 backdrop-blur-sm px-4 py-3 rounded-lg shadow-sm border border-white/50 w-full md:w-auto hover:bg-white/80 transition-colors duration-700 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800/80">
           {event.desc}
         </div>
-        
-        {/* Special Transport Badge */}
-        {event.transport && (
-          <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-[#8c7b6c] text-white text-xs rounded-full shadow-sm dark:bg-slate-700 transition-colors duration-700">
-            {event.category === 'flight' ? <Plane size={12} /> : <Train size={12} />}
-            <span className="font-medium font-sans tracking-wide">{event.transport === 'Airport' ? 'Airport Transfer' : event.transport}</span>
-          </div>
-        )}
+
+        {/* Badges Container */}
+        <div className="flex flex-wrap gap-2 mt-2">
+          {/* Transport Badge */}
+          {event.transport && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#8c7b6c] text-white text-xs rounded-full shadow-sm dark:bg-slate-700 transition-colors duration-700">
+              {event.category === 'flight' ? <Plane size={12} /> : <Train size={12} />}
+              <span className="font-medium font-sans tracking-wide">{event.transport === 'Airport' ? 'Airport Transfer' : event.transport}</span>
+            </div>
+          )}
+
+          {/* Ticket Badge */}
+          {hasTicket && (
+            <>
+              <button
+                onClick={() => event.ticketImg ? setShowTicketModal(true) : window.open(event.ticketUrl, '_blank')}
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-japan-red text-white text-xs rounded-full shadow-sm hover:bg-japan-red/90 transition-transform active:scale-95"
+              >
+                {event.ticketImg ? <ImageIcon size={12} /> : <ExternalLink size={12} />}
+                <span className="font-bold">{event.ticketImg ? '查看票券' : '開啟連結'}</span>
+              </button>
+
+              {/* Image Modal */}
+              {event.ticketImg && (
+                <ImageModal
+                  isOpen={showTicketModal}
+                  imageUrl={event.ticketImg}
+                  linkUrl={event.ticketUrl}
+                  onClose={() => setShowTicketModal(false)}
+                />
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
