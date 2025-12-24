@@ -55,8 +55,28 @@ export const uploadToCloud = async (config: FirebaseConfig, data: any, onProgres
         // Use customId if provided, otherwise generate a random 6-character Cloud ID
         const cloudId = customId || Math.random().toString(36).substring(2, 8).toUpperCase();
 
+        const sanitizeForFirestore = (obj: any): any => {
+            if (obj === undefined) return null;
+            if (obj === null) return null;
+            if (typeof obj !== 'object') return obj;
+
+            if (Array.isArray(obj)) {
+                return obj.map(sanitizeForFirestore);
+            }
+
+            const newObj: any = {};
+            for (const key in obj) {
+                if (obj[key] !== undefined) {
+                    newObj[key] = sanitizeForFirestore(obj[key]);
+                }
+            }
+            return newObj;
+        };
+
+        const cleanData = sanitizeForFirestore(data);
+
         await setDoc(doc(db, "trips", cloudId), {
-            data,
+            data: cleanData,
             updatedAt: new Date().toISOString()
         });
 
