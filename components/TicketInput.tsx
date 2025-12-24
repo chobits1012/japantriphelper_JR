@@ -28,8 +28,8 @@ const TicketInput: React.FC<TicketInputProps> = ({ url, imgs = [], legacyImg, cu
     // Helper: Compress Image to Base64
     const compressImage = async (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
-            const MAX_WIDTH = 1200; // Increased resolution for better zoom
-            const QUALITY = 0.7;   // Slightly higher quality for readability
+            const MAX_WIDTH = 1000; // Plan B: Balanced for 6-7 tickets
+            const QUALITY = 0.5;   // Compressed: Targets ~150KB/image
 
             const reader = new FileReader();
             reader.readAsDataURL(file);
