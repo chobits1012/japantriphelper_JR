@@ -268,69 +268,71 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
         {/* Navigation Bar Info */}
         <div className="mb-8 pt-4">
 
-          {/* Plan Tabs (Compact Row Above Title) */}
-          <div className="flex items-center gap-1 mb-1">
-            <div className="flex gap-1 bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg">
-              {PLANS.map(plan => {
-                const isActive = currentPlanId === plan;
-                const hasContent = plan === currentPlanId ? editData.events.length > 0 : (editData.subPlans?.[plan]?.events.length || 0) > 0;
-                return (
-                  <button
-                    key={plan}
-                    onClick={() => handleSwitchPlan(plan)}
-                    className={`
-                      px-3 py-0.5 rounded-md text-[10px] font-bold transition-all flex items-center gap-1
-                      ${isActive
-                        ? 'bg-white dark:bg-slate-700 text-japan-blue dark:text-sky-400 shadow-sm'
-                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-slate-300'}
-                    `}
-                  >
-                    <span>{plan}</span>
-                    {hasContent && <div className={`w-1 h-1 rounded-full ${isActive ? 'bg-japan-blue dark:bg-sky-400' : 'bg-gray-300'}`} />}
-                  </button>
-                );
-              })}
-              {/* Clear Plan Button */}
-              {editData.events.length > 0 && (
-                <button
-                  onClick={handleClearPlan}
-                  className="px-1.5 ml-0.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                  title={`清空方案 ${currentPlanId}`}
-                >
-                  <Trash2 size={12} />
-                </button>
-              )}
-            </div>
-            <span className="text-[10px] text-gray-300 font-bold ml-1">方案</span>
-          </div>
-
           <div className="flex items-center gap-4">
             <span className="text-4xl font-serif font-bold text-japan-blue/20 dark:text-sky-400/20 select-none">{day.day}</span>
             <div className="h-8 w-px bg-japan-blue/20 dark:bg-slate-700"></div>
 
-            <div className="flex gap-2 w-full sm:w-auto">
-              <span className="text-xs font-bold tracking-widest text-japan-blue dark:text-sky-400 uppercase">{day.date} • {day.weekday}</span>
-              {day.temp && !isEditing && (
-                <div className="flex flex-col gap-2 mt-1 w-full">
-                  <a href={weatherUrl} target="_blank" rel="noreferrer" className="group flex items-center gap-3 text-sm font-medium text-gray-500 dark:text-slate-400 cursor-pointer transition-transform active:scale-95 origin-left">
-                    <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">{getWeatherIcon(day.weatherIcon)}<span>{day.temp}</span></div>
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-full shadow-sm border border-gray-200/60 dark:border-slate-700/60 text-ink dark:text-slate-200 group-hover:border-japan-blue/50 group-hover:text-japan-blue transition-colors">
-                      {loadingWeather ? <Loader2 size={12} className="animate-spin text-japan-blue dark:text-sky-400" /> : liveWeather ? <>{getLiveWeatherIcon(liveWeather.code)}<span className="text-xs font-bold font-mono">Live: {liveWeather.temp}°</span></> : <div className="flex items-center gap-1 text-xs text-gray-400"><ExternalLink size={10} /><span>{day.location}</span></div>}
-                    </div>
-                  </a>
-                  {forecast.length > 0 && (
-                    <div className="w-full overflow-x-auto no-scrollbar flex items-center gap-2 pb-1 mask-linear-fade pr-12">
-                      {forecast.map((f, i) => (
-                        <div key={i} className="flex-shrink-0 flex flex-col items-center justify-center bg-white/40 dark:bg-slate-800/40 p-1.5 rounded-lg border border-white/60 dark:border-slate-700 min-w-[50px]">
-                          <span className="text-[10px] text-gray-500 dark:text-slate-400 font-mono">{f.date}</span>
-                          <div className="my-1">{getLiveWeatherIcon(f.code, 14)}</div>
-                          <span className="text-[10px] font-bold text-gray-600 dark:text-slate-300">{Math.round(f.max)}°</span>
-                        </div>
-                      ))}
-                    </div>
+            <div className="flex flex-col flex-1 min-w-0">
+              {/* Plan Tabs (Compact Row Below Title) */}
+              <div className="flex items-center gap-1 mb-1.5 self-start">
+                <div className="flex gap-1 bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg">
+                  {PLANS.map(plan => {
+                    const isActive = currentPlanId === plan;
+                    const hasContent = plan === currentPlanId ? editData.events.length > 0 : (editData.subPlans?.[plan]?.events.length || 0) > 0;
+                    return (
+                      <button
+                        key={plan}
+                        onClick={() => handleSwitchPlan(plan)}
+                        className={`
+                          px-3 py-0.5 rounded-md text-[10px] font-bold transition-all flex items-center gap-1
+                          ${isActive
+                            ? 'bg-white dark:bg-slate-700 text-japan-blue dark:text-sky-400 shadow-sm'
+                            : 'text-gray-400 hover:text-gray-600 dark:hover:text-slate-300'}
+                        `}
+                      >
+                        <span>{plan}</span>
+                        {hasContent && <div className={`w-1 h-1 rounded-full ${isActive ? 'bg-japan-blue dark:bg-sky-400' : 'bg-gray-300'}`} />}
+                      </button>
+                    );
+                  })}
+                  {/* Clear Plan Button */}
+                  {editData.events.length > 0 && (
+                    <button
+                      onClick={handleClearPlan}
+                      className="px-1.5 ml-0.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                      title={`清空方案 ${currentPlanId}`}
+                    >
+                      <Trash2 size={12} />
+                    </button>
                   )}
                 </div>
-              )}
+                <span className="text-[10px] text-gray-300 font-bold ml-1">方案</span>
+              </div>
+
+              <div className="flex gap-2 w-full sm:w-auto">
+                <span className="text-xs font-bold tracking-widest text-japan-blue dark:text-sky-400 uppercase">{day.date} • {day.weekday}</span>
+                {day.temp && !isEditing && (
+                  <div className="flex flex-col gap-2 mt-1 w-full">
+                    <a href={weatherUrl} target="_blank" rel="noreferrer" className="group flex items-center gap-3 text-sm font-medium text-gray-500 dark:text-slate-400 cursor-pointer transition-transform active:scale-95 origin-left">
+                      <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">{getWeatherIcon(day.weatherIcon)}<span>{day.temp}</span></div>
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-full shadow-sm border border-gray-200/60 dark:border-slate-700/60 text-ink dark:text-slate-200 group-hover:border-japan-blue/50 group-hover:text-japan-blue transition-colors">
+                        {loadingWeather ? <Loader2 size={12} className="animate-spin text-japan-blue dark:text-sky-400" /> : liveWeather ? <>{getLiveWeatherIcon(liveWeather.code)}<span className="text-xs font-bold font-mono">Live: {liveWeather.temp}°</span></> : <div className="flex items-center gap-1 text-xs text-gray-400"><ExternalLink size={10} /><span>{day.location}</span></div>}
+                      </div>
+                    </a>
+                    {forecast.length > 0 && (
+                      <div className="w-full overflow-x-auto no-scrollbar flex items-center gap-2 pb-1 mask-linear-fade pr-12">
+                        {forecast.map((f, i) => (
+                          <div key={i} className="flex-shrink-0 flex flex-col items-center justify-center bg-white/40 dark:bg-slate-800/40 p-1.5 rounded-lg border border-white/60 dark:border-slate-700 min-w-[50px]">
+                            <span className="text-[10px] text-gray-500 dark:text-slate-400 font-mono">{f.date}</span>
+                            <div className="my-1">{getLiveWeatherIcon(f.code, 14)}</div>
+                            <span className="text-[10px] font-bold text-gray-600 dark:text-slate-300">{Math.round(f.max)}°</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -507,7 +509,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
         <span className="text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap dark:text-slate-500">{day.day}</span>
         <button onClick={onNext} disabled={!hasNext || isEditing} className={`flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-lg transition-all ${hasNext && !isEditing ? 'text-japan-blue hover:bg-japan-blue/5 dark:text-sky-400 dark:hover:bg-slate-800' : 'text-gray-300 cursor-not-allowed dark:text-slate-700'}`}><span className="hidden md:inline">下一天</span><ChevronRight size={16} /></button>
       </div>
-    </div>
+    </div >
   );
 };
 

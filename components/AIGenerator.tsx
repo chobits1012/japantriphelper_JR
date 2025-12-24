@@ -6,7 +6,7 @@ import { ItineraryDay } from '../types';
 interface AIGeneratorProps {
   isOpen: boolean;
   onClose: () => void;
-  onGenerate: (data: ItineraryDay[], isFullReplace: boolean) => void;
+  onGenerate: (data: ItineraryDay[], isFullReplace: boolean, targetPlan?: string) => void;
   existingDays: ItineraryDay[];
   startDate: string; // New: Trip start date
   tripName: string;  // New: Trip name for context
@@ -69,6 +69,7 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
   const [error, setError] = useState('');
 
   const [targetDay, setTargetDay] = useState<string>('all');
+  const [targetPlan, setTargetPlan] = useState<string>('B'); // Default to Plan B for safety
 
   if (!isOpen) return null;
 
@@ -157,7 +158,7 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
         try {
           const cleanedText = cleanJsonString(response.text);
           const data = JSON.parse(cleanedText) as ItineraryDay[];
-          onGenerate(data, !isSingleDay);
+          onGenerate(data, !isSingleDay, targetPlan);
           onClose();
         } catch (parseError) {
           console.error("JSON Parse Error:", parseError);
@@ -217,7 +218,7 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
               <CalendarRange size={16} />
               生成範圍
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <button
                 onClick={() => setTargetDay('all')}
                 className={`p-3 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition-all ${targetDay === 'all' ? 'bg-japan-blue text-white border-japan-blue' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
@@ -225,18 +226,33 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
                 <CalendarRange size={16} />
                 整趟旅程 ({existingDays.length} 天)
               </button>
-              <select
-                value={targetDay}
-                onChange={(e) => setTargetDay(e.target.value)}
-                className={`p-3 rounded-lg border text-sm font-bold outline-none transition-all ${targetDay !== 'all' ? 'bg-japan-blue text-white border-japan-blue' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
-              >
-                <option value="all" className="text-gray-800 bg-white">單日修改 (請選擇)...</option>
-                {existingDays.map(day => (
-                  <option key={day.day} value={day.day} className="text-gray-800 bg-white">
-                    {day.day} ({day.date})
-                  </option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select
+                  value={targetDay}
+                  onChange={(e) => setTargetDay(e.target.value)}
+                  className={`flex-1 p-3 rounded-lg border text-sm font-bold outline-none transition-all ${targetDay !== 'all' ? 'bg-japan-blue text-white border-japan-blue' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
+                >
+                  <option value="all" className="text-gray-800 bg-white">單日修改 (請選擇)...</option>
+                  {existingDays.map(day => (
+                    <option key={day.day} value={day.day} className="text-gray-800 bg-white">
+                      {day.day} ({day.date})
+                    </option>
+                  ))}
+                </select>
+
+                {targetDay !== 'all' && (
+                  <select
+                    value={targetPlan}
+                    onChange={(e) => setTargetPlan(e.target.value)}
+                    className="w-24 p-3 rounded-lg border border-japan-blue bg-white text-japan-blue text-sm font-bold outline-none cursor-pointer"
+                    title="選擇要存入的方案"
+                  >
+                    <option value="A">方案 A</option>
+                    <option value="B">方案 B</option>
+                    <option value="C">方案 C</option>
+                  </select>
+                )}
+              </div>
             </div>
           </div>
 
