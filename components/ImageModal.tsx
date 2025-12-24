@@ -162,7 +162,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ isOpen, imageUrls, initialIndex
             onClick={onClose}
         >
             {/* Top Bar: Controls */}
-            <div className="absolute top-0 left-0 right-0 p-4 safe-area-top flex justify-between items-center z-50 bg-gradient-to-b from-black/90 to-transparent" onClick={e => e.stopPropagation()}>
+            <div className="absolute top-0 left-0 right-0 p-4 pt-[calc(1rem+env(safe-area-inset-top))] flex justify-between items-center z-50 bg-gradient-to-b from-black/90 to-transparent" onClick={e => e.stopPropagation()}>
                 <div className="text-white text-base font-bold flex items-center gap-2 drop-shadow-md">
                     <ImageIcon size={18} />
                     {currentIndex + 1} / {imageUrls.length}
