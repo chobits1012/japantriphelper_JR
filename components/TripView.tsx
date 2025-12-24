@@ -212,9 +212,15 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
             };
           } else {
             // Case 2: Switching Plans (e.g. A -> B)
-            // Save current events to the OLD plan slot
+            // Save current events to the OLD plan slot (Deep Copy to avoid mutation)
             const updatedSubPlans = { ...(day.subPlans || {}) };
-            updatedSubPlans[currentActive] = { events: day.events };
+
+            // Critical Fix: Use spread to clone the array so we don't save a reference that might be mutated
+            updatedSubPlans[currentActive] = {
+              events: day.events ? JSON.parse(JSON.stringify(day.events)) : []
+            };
+
+            console.log(`[AI] Switching Plan from ${currentActive} to ${target}. Saved ${day.events?.length} events to ${currentActive}.`);
 
             // Switch to NEW plan
             return {
