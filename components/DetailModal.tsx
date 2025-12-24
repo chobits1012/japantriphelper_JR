@@ -9,6 +9,7 @@ import ConfirmModal from './ConfirmModal';
 import PassManager from './PassManager';
 import { SeasonBackground } from './SeasonBackground';
 import TicketInput from './TicketInput';
+import { calculateDataSizeMB } from '../lib/storageCalculator';
 
 interface DetailPanelProps {
   day: ItineraryDay;
@@ -315,6 +316,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
                           url={event.ticketUrl}
                           imgs={event.ticketImgs}
                           legacyImg={event.ticketImg}
+                          currentTotalSizeMB={calculateDataSizeMB(allDays) - calculateDataSizeMB(day) + calculateDataSizeMB(editData)}
                           onUpdate={(updates) => {
                             const newEvents = [...editData.events];
                             newEvents[index] = { ...newEvents[index], ...updates };

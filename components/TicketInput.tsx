@@ -1,22 +1,29 @@
 import React, { useState, useRef } from 'react';
-import { Ticket, Image as ImageIcon, Link as LinkIcon, Trash2, X, Loader2, Plus } from 'lucide-react';
+import { Ticket, Image as ImageIcon, Link as LinkIcon, Trash2, X, Loader2, Plus, AlertTriangle } from 'lucide-react';
 import type { ItineraryEvent } from '../types';
+import { calculateDataSizeMB, STORAGE_LIMITS, formatSize } from '../lib/storageCalculator';
 
 interface TicketInputProps {
     url?: string;
     imgs?: string[];
     // Legacy support
     legacyImg?: string;
+    currentTotalSizeMB?: number; // New prop for storage check
     onUpdate: (updates: Partial<ItineraryEvent>) => void;
 }
 
-const TicketInput: React.FC<TicketInputProps> = ({ url, imgs = [], legacyImg, onUpdate }) => {
+const TicketInput: React.FC<TicketInputProps> = ({ url, imgs = [], legacyImg, currentTotalSizeMB = 0, onUpdate }) => {
     const [showInput, setShowInput] = useState(false);
     const [isCompressing, setIsCompressing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Merge legacy image into array if exists and standard array is empty
     const currentImgs = legacyImg && imgs.length === 0 ? [legacyImg] : imgs;
+
+    // Determine Storage Status
+    const isCloudRisk = currentTotalSizeMB > STORAGE_LIMITS.CLOUD_WARNING;
+    const isLocalFull = currentTotalSizeMB > STORAGE_LIMITS.LOCAL_MAX;
+
 
     // Helper: Compress Image to Base64
     const compressImage = async (file: File): Promise<string> => {
@@ -148,29 +155,56 @@ const TicketInput: React.FC<TicketInputProps> = ({ url, imgs = [], legacyImg, on
                 ))}
 
                 {/* Add Image Button */}
-                <div className="aspect-square">
+                <div className="aspect-square relative">
                     <input
                         type="file"
                         accept="image/*"
-                        // REMOVED: capture="environment" to allow gallery access
                         ref={fileInputRef}
                         className="hidden"
                         onChange={handleFileChange}
+                        disabled={isLocalFull}
                     />
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        disabled={isCompressing}
-                        className="w-full h-full border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-md flex flex-col items-center justify-center gap-1 text-gray-400 hover:bg-white hover:border-japan-blue hover:text-japan-blue dark:hover:bg-slate-800 dark:hover:border-sky-500 dark:hover:text-sky-400 transition-all cursor-pointer disabled:opacity-50"
+                        disabled={isCompressing || isLocalFull}
+                        className={`w-full h-full border-2 border-dashed rounded-md flex flex-col items-center justify-center gap-1 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
+               ${isLocalFull
+                                ? 'border-red-300 bg-red-50 text-red-400 dark:bg-red-900/10 dark:border-red-900/30'
+                                : 'border-gray-300 dark:border-slate-600 text-gray-400 hover:bg-white hover:border-japan-blue hover:text-japan-blue dark:hover:bg-slate-800 dark:hover:border-sky-500 dark:hover:text-sky-400'
+                            }`}
                     >
                         {isCompressing ? (
                             <Loader2 size={20} className="animate-spin" />
                         ) : (
                             <Plus size={24} />
                         )}
-                        <span className="text-[9px] font-bold">{isCompressing ? '處理中' : '新增圖片'}</span>
+                        <span className="text-[9px] font-bold">
+                            {isCompressing ? '處理中' : isLocalFull ? '已滿' : '新增圖片'}
+                        </span>
                     </button>
                 </div>
             </div>
+
+            {/* Storage Warning Indicators */}
+            {isCloudRisk && !isLocalFull && (
+                <div className="flex items-start gap-1.5 text-[10px] text-orange-500 bg-orange-50 dark:bg-orange-900/10 p-2 rounded border border-orange-100 dark:border-orange-900/20">
+                    <AlertTriangle size={12} className="flex-shrink-0 mt-0.5" />
+                    <span>
+                        <b>資料量偏大 ({formatSize(currentTotalSizeMB)})</b><br />
+                        接近雲端同步上限，建議減少圖片。
+                    </span>
+                </div>
+            )}
+
+            {isLocalFull && (
+                <div className="flex items-start gap-1.5 text-[10px] text-red-500 bg-red-50 dark:bg-red-900/10 p-2 rounded border border-red-100 dark:border-red-900/20">
+                    <AlertTriangle size={12} className="flex-shrink-0 mt-0.5" />
+                    <span>
+                        <b>手機容量已滿 ({formatSize(currentTotalSizeMB)})</b><br />
+                        無法再新增圖片，請刪除舊票券以釋放空間。
+                    </span>
+                </div>
+            )}
         </div>
     );
 };

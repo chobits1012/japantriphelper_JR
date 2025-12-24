@@ -5,6 +5,7 @@ import type { ExpenseItem, ChecklistCategory, ChecklistItem, TripSettings, Itine
 import ConfirmModal from './ConfirmModal';
 import { EXCHANGE_RATE_API_URL, CLOUD_SYNC_CONFIG_KEY } from '../constants';
 import { uploadToCloud, downloadFromCloud, FirebaseConfig } from '../lib/firebaseSync';
+import { calculateDataSizeMB, STORAGE_LIMITS, formatSize } from '../lib/storageCalculator';
 
 interface TravelToolboxProps {
   isOpen: boolean;
@@ -1022,6 +1023,37 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                   </ol>
                 </div>
               </div>
+
+              {/* STORAGE INDICATOR */}
+              {(() => {
+                const totalData = { settings: tripSettings, itinerary: itineraryData, expenses, checklist };
+                const sizeMB = calculateDataSizeMB(totalData);
+                const percent = Math.min((sizeMB / STORAGE_LIMITS.CLOUD_MAX) * 100, 100);
+                const isWarning = sizeMB > STORAGE_LIMITS.CLOUD_WARNING;
+
+                return (
+                  <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm">
+                    <div className="flex justify-between items-end mb-2">
+                      <h4 className="text-xs font-bold text-gray-500 dark:text-slate-400">目前資料大小</h4>
+                      <span className={`text-xs font-mono font-bold ${isWarning ? 'text-orange-500' : 'text-japan-blue dark:text-sky-400'}`}>
+                        {formatSize(sizeMB)} / {STORAGE_LIMITS.CLOUD_MAX}.0 MB
+                      </span>
+                    </div>
+                    <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-500 ${isWarning ? 'bg-orange-500' : 'bg-japan-blue dark:bg-sky-500'}`}
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                    {isWarning && (
+                      <p className="text-[10px] text-orange-500 mt-2 flex items-center gap-1">
+                        <AlertTriangle size={10} />
+                        接近雲端傳輸上限，建議移除部分照片以確保同步成功。
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Config Section */}
               <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm">
