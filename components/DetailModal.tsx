@@ -133,6 +133,23 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
     setEditingEventIndex(null);
   };
 
+  const handleClearPlan = () => {
+    if (confirm('確定要清空目前方案的所有行程嗎？此動作無法復原。')) {
+      const emptyEvents: ItineraryEvent[] = [];
+      const updatedSubPlans = { ...(editData.subPlans || {}) };
+
+      // Update the storage for current plan
+      updatedSubPlans[currentPlanId] = { events: [] };
+
+      setEditData({
+        ...editData,
+        subPlans: updatedSubPlans,
+        events: emptyEvents
+      });
+      setEditingEventIndex(null);
+    }
+  };
+
   const PLANS = ['A', 'B', 'C'];
   // ------------------------
 
@@ -274,6 +291,17 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
                   </button>
                 );
               })}
+
+              {/* Clear Plan Button */}
+              {editData.events.length > 0 && (
+                <button
+                  onClick={handleClearPlan}
+                  className="px-2 ml-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  title={`清空方案 ${currentPlanId}`}
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
             </div>
 
             <div className="flex gap-2 w-full sm:w-auto">
