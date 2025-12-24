@@ -196,7 +196,10 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
 
           // Multi-Plan Logic
           const currentActive = day.activePlanId || 'A';
-          const target = targetPlanId || currentActive; // Default to current if not specified
+          const target = targetPlanId || currentActive;
+
+          console.log(`[TripView] AI Update for Day ${day.day}. Current: ${currentActive}, Target: ${target}`);
+          console.log(`[TripView] Pre-Update subPlans:`, day.subPlans);
 
           if (target === currentActive) {
             // Case 1: Just update current plan events + shared info
@@ -220,7 +223,8 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
               events: day.events ? JSON.parse(JSON.stringify(day.events)) : []
             };
 
-            console.log(`[AI] Switching Plan from ${currentActive} to ${target}. Saved ${day.events?.length} events to ${currentActive}.`);
+            console.log(`[TripView] Switching from ${currentActive} to ${target}. Saved ${updatedSubPlans[currentActive].events.length} events to ${currentActive}.`);
+            console.log(`[TripView] New subPlans state:`, updatedSubPlans);
 
             // Switch to NEW plan
             return {

@@ -105,6 +105,8 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
   const handleSwitchPlan = (targetPlanId: string) => {
     if (targetPlanId === currentPlanId) return;
 
+    console.log(`[DetailModal] Switching from ${currentPlanId} to ${targetPlanId}`);
+
     // 1. Save current events to the "outgoing" plan storage
     const updatedSubPlans = { ...(editData.subPlans || {}) };
 
@@ -121,6 +123,8 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
     // Let's start with empty list for a clean slate, or copy if it's the first time creation?
     // User requested "Plan B", usually implies a fresh start or clone. Let's do empty for now, easier to understand.
     const targetEvents = updatedSubPlans[targetPlanId]?.events || [];
+
+    console.log(`[DetailModal] Loaded ${targetEvents.length} events for ${targetPlanId}. Source:`, updatedSubPlans[targetPlanId]);
 
     setEditData({
       ...editData,
