@@ -126,12 +126,20 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
 
     console.log(`[DetailModal] Loaded ${targetEvents.length} events for ${targetPlanId}. Source:`, updatedSubPlans[targetPlanId]);
 
-    setEditData({
+    const newData = {
       ...editData,
       subPlans: updatedSubPlans,
       activePlanId: targetPlanId,
       events: targetEvents // The view always renders 'events'
-    });
+    };
+
+    setEditData(newData);
+
+    // FIX: If in View Mode, persist the change immediately so the UI updates (since View Mode renders from 'day' prop)
+    if (!isEditing) {
+      console.log(`[DetailModal] View Mode Switch: Persisting change to parent immediately.`);
+      onUpdate(newData);
+    }
 
     // Reset editing state to avoid index out of bounds
     setEditingEventIndex(null);
