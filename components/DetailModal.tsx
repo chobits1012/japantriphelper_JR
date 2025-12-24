@@ -273,43 +273,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
             <div className="h-8 w-px bg-japan-blue/20 dark:bg-slate-700"></div>
 
             <div className="flex flex-col flex-1 min-w-0">
-              {/* Plan Tabs (Compact Row Below Title) */}
-              <div className="flex items-center gap-1 mb-1.5 self-start">
-                <div className="flex gap-1 bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg">
-                  {PLANS.map(plan => {
-                    const isActive = currentPlanId === plan;
-                    const hasContent = plan === currentPlanId ? editData.events.length > 0 : (editData.subPlans?.[plan]?.events.length || 0) > 0;
-                    return (
-                      <button
-                        key={plan}
-                        onClick={() => handleSwitchPlan(plan)}
-                        className={`
-                          px-3 py-0.5 rounded-md text-[10px] font-bold transition-all flex items-center gap-1
-                          ${isActive
-                            ? 'bg-white dark:bg-slate-700 text-japan-blue dark:text-sky-400 shadow-sm'
-                            : 'text-gray-400 hover:text-gray-600 dark:hover:text-slate-300'}
-                        `}
-                      >
-                        <span>{plan}</span>
-                        {hasContent && <div className={`w-1 h-1 rounded-full ${isActive ? 'bg-japan-blue dark:bg-sky-400' : 'bg-gray-300'}`} />}
-                      </button>
-                    );
-                  })}
-                  {/* Clear Plan Button */}
-                  {editData.events.length > 0 && (
-                    <button
-                      onClick={handleClearPlan}
-                      className="px-1.5 ml-0.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                      title={`清空方案 ${currentPlanId}`}
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  )}
-                </div>
-                <span className="text-[10px] text-gray-300 font-bold ml-1">方案</span>
-              </div>
-
-              <div className="flex gap-2 w-full sm:w-auto">
+              <div className="flex gap-2 w-full sm:w-auto mt-2">
                 <span className="text-xs font-bold tracking-widest text-japan-blue dark:text-sky-400 uppercase">{day.date} • {day.weekday}</span>
                 {day.temp && !isEditing && (
                   <div className="flex flex-col gap-2 mt-1 w-full">
@@ -334,6 +298,41 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
                 )}
               </div>
             </div>
+          </div>
+          {/* Plan Tabs (Moved Below Header) */}
+          <div className="mt-4 flex items-center gap-1">
+            <div className="flex gap-1 bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg">
+              {PLANS.map(plan => {
+                const isActive = currentPlanId === plan;
+                const hasContent = plan === currentPlanId ? editData.events.length > 0 : (editData.subPlans?.[plan]?.events.length || 0) > 0;
+                return (
+                  <button
+                    key={plan}
+                    onClick={() => handleSwitchPlan(plan)}
+                    className={`
+                       px-3 py-0.5 rounded-md text-[10px] font-bold transition-all flex items-center gap-1
+                       ${isActive
+                        ? 'bg-white dark:bg-slate-700 text-japan-blue dark:text-sky-400 shadow-sm'
+                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-slate-300'}
+                     `}
+                  >
+                    <span>{plan}</span>
+                    {hasContent && <div className={`w-1 h-1 rounded-full ${isActive ? 'bg-japan-blue dark:bg-sky-400' : 'bg-gray-300'}`} />}
+                  </button>
+                );
+              })}
+              {/* Clear Plan Button */}
+              {editData.events.length > 0 && (
+                <button
+                  onClick={handleClearPlan}
+                  className="px-1.5 ml-0.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  title={`清空方案 ${currentPlanId}`}
+                >
+                  <Trash2 size={12} />
+                </button>
+              )}
+            </div>
+            <span className="text-[10px] text-gray-300 font-bold ml-1">方案</span>
           </div>
         </div>
 
