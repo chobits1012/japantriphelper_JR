@@ -220,7 +220,9 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
 
             // Critical Fix: Use spread to clone the array so we don't save a reference that might be mutated
             updatedSubPlans[currentActive] = {
-              events: day.events ? JSON.parse(JSON.stringify(day.events)) : []
+              events: day.events ? JSON.parse(JSON.stringify(day.events)) : [],
+              title: day.title,
+              desc: day.desc
             };
 
             console.log(`[TripView] Switching from ${currentActive} to ${target}. Saved ${updatedSubPlans[currentActive].events.length} events to ${currentActive}.`);

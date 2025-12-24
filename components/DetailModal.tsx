@@ -107,30 +107,40 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
 
     console.log(`[DetailModal] Switching from ${currentPlanId} to ${targetPlanId}`);
 
-    // 1. Save current events to the "outgoing" plan storage
+    // 1. Save current events AND title/desc to the "outgoing" plan storage
     const updatedSubPlans = { ...(editData.subPlans || {}) };
 
-    // If we are currently on 'A', we don't need to save to subPlans['A'] explicitly 
-    // because 'events' IS 'A' by default. But for consistency in swap, let's treat A as just another key when inactive.
-    // Actually, the "Swap" logic is:
-    // - Store current `events` into `subPlans[currentPlanId]`
-    // - Load `subPlans[targetPlanId]` into `events`
+    updatedSubPlans[currentPlanId] = {
+      events: editData.events,
+      title: editData.title,
+      desc: editData.desc
+    };
 
-    updatedSubPlans[currentPlanId] = { events: editData.events };
+    // 2. Load target events, title, and desc
+    const targetSubPlan = updatedSubPlans[targetPlanId];
+    const targetEvents = targetSubPlan?.events || [];
 
-    // 2. Load target events
-    // If target doesn't exist yet, give it an empty list or copy from A? 
-    // Let's start with empty list for a clean slate, or copy if it's the first time creation?
-    // User requested "Plan B", usually implies a fresh start or clone. Let's do empty for now, easier to understand.
-    const targetEvents = updatedSubPlans[targetPlanId]?.events || [];
+    // If target doesn't have a specific title yet, fallback to current day title? 
+    // OR should we default to empty/generic for new plans?
+    // User wants independent titles. If switching to a new plan, maybe keep current (copy) or reset.
+    // Let's copy current title/desc as a starting point if undefined, 
+    // BUT if we want them to be *different*, we should respect what was saved.
+    // Logic: If targetSubPlan exists and has title, use it. 
+    // If not (e.g. first time switching to B), inherit from Day (or A) so it's not blank?
+    // Better UX: Inherit if it's the first time visiting that plan (i.e. empty subPlan).
 
-    console.log(`[DetailModal] Loaded ${targetEvents.length} events for ${targetPlanId}. Source:`, updatedSubPlans[targetPlanId]);
+    const targetTitle = targetSubPlan?.title !== undefined ? targetSubPlan.title : day.title;
+    const targetDesc = targetSubPlan?.desc !== undefined ? targetSubPlan.desc : day.desc;
+
+    console.log(`[DetailModal] Loading ${targetPlanId}: ${targetEvents.length} events, Title: ${targetTitle}`);
 
     const newData = {
       ...editData,
       subPlans: updatedSubPlans,
       activePlanId: targetPlanId,
-      events: targetEvents // The view always renders 'events'
+      events: targetEvents,
+      title: targetTitle,
+      desc: targetDesc
     };
 
     setEditData(newData);

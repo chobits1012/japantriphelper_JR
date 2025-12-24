@@ -63,6 +63,8 @@ export interface ItineraryDay {
   subPlans?: {
     [key: string]: {
       events: ItineraryEvent[];
+      title?: string; // New: Per-plan title
+      desc?: string;  // New: Per-plan description
     }
   };
   activePlanId?: string; // 'A', 'B', 'C', default undefined (A)
