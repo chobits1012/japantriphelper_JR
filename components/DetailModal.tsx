@@ -267,11 +267,10 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
       <div className="flex-1 overflow-y-auto relative z-10 px-6 py-8 md:px-12 md:py-10 no-scrollbar pb-32 safe-area-bottom">
         {/* Navigation Bar Info */}
         <div className="mb-8 pt-4">
-          <div className="flex items-center gap-4">
-            <span className="text-4xl font-serif font-bold text-japan-blue/20 dark:text-sky-400/20 select-none">{day.day}</span>
-            <div className="h-8 w-px bg-japan-blue/20 dark:bg-slate-700"></div>
-            {/* Plan Tabs */}
-            <div className="flex gap-1 bg-gray-100 dark:bg-slate-800 p-1 rounded-lg self-start">
+
+          {/* Plan Tabs (Compact Row Above Title) */}
+          <div className="flex items-center gap-1 mb-1">
+            <div className="flex gap-1 bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg">
               {PLANS.map(plan => {
                 const isActive = currentPlanId === plan;
                 const hasContent = plan === currentPlanId ? editData.events.length > 0 : (editData.subPlans?.[plan]?.events.length || 0) > 0;
@@ -280,29 +279,34 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
                     key={plan}
                     onClick={() => handleSwitchPlan(plan)}
                     className={`
-                      px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1
+                      px-3 py-0.5 rounded-md text-[10px] font-bold transition-all flex items-center gap-1
                       ${isActive
                         ? 'bg-white dark:bg-slate-700 text-japan-blue dark:text-sky-400 shadow-sm'
                         : 'text-gray-400 hover:text-gray-600 dark:hover:text-slate-300'}
                     `}
                   >
-                    <span>方案 {plan}</span>
-                    {hasContent && <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-japan-blue dark:bg-sky-400' : 'bg-gray-300'}`} />}
+                    <span>{plan}</span>
+                    {hasContent && <div className={`w-1 h-1 rounded-full ${isActive ? 'bg-japan-blue dark:bg-sky-400' : 'bg-gray-300'}`} />}
                   </button>
                 );
               })}
-
               {/* Clear Plan Button */}
               {editData.events.length > 0 && (
                 <button
                   onClick={handleClearPlan}
-                  className="px-2 ml-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  className="px-1.5 ml-0.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                   title={`清空方案 ${currentPlanId}`}
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={12} />
                 </button>
               )}
             </div>
+            <span className="text-[10px] text-gray-300 font-bold ml-1">方案</span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <span className="text-4xl font-serif font-bold text-japan-blue/20 dark:text-sky-400/20 select-none">{day.day}</span>
+            <div className="h-8 w-px bg-japan-blue/20 dark:bg-slate-700"></div>
 
             <div className="flex gap-2 w-full sm:w-auto">
               <span className="text-xs font-bold tracking-widest text-japan-blue dark:text-sky-400 uppercase">{day.date} • {day.weekday}</span>
