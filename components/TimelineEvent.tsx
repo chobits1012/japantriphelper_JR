@@ -52,7 +52,8 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const hasTicket = event.ticketUrl || event.ticketImg;
+  const imgs = event.ticketImgs || (event.ticketImg ? [event.ticketImg] : []);
+  const hasTicket = event.ticketUrl || imgs.length > 0;
 
   return (
     <div className={`relative pl-8 pb-8 group ${isLast ? '' : ''}`}>
@@ -64,8 +65,8 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
       {/* Time Dot */}
       <div
         className={`absolute -left-[11px] top-1 w-[22px] h-[22px] rounded-full border-[3px] z-10 bg-white dark:bg-slate-900 transition-all duration-700 flex items-center justify-center ${event.highlight
-            ? 'border-japan-red shadow-lg scale-110'
-            : 'border-japan-blue group-hover:border-japan-blue/70 dark:border-sky-500 dark:group-hover:border-sky-400'
+          ? 'border-japan-red shadow-lg scale-110'
+          : 'border-japan-blue group-hover:border-japan-blue/70 dark:border-sky-500 dark:group-hover:border-sky-400'
           }`}
       >
         <div className={`w-2 h-2 rounded-full ${event.highlight ? 'bg-japan-red' : 'bg-transparent'}`} />
@@ -132,22 +133,24 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
           {hasTicket && (
             <>
               <button
-                onClick={() => event.ticketImg ? setShowTicketModal(true) : window.open(event.ticketUrl, '_blank')}
+                onClick={() => imgs.length > 0 ? setShowTicketModal(true) : window.open(event.ticketUrl, '_blank')}
                 className="inline-flex items-center gap-1.5 px-3 py-1 bg-japan-red text-white text-xs rounded-full shadow-sm hover:bg-japan-red/90 transition-transform active:scale-95"
               >
-                {event.ticketImg ? <ImageIcon size={12} /> : <ExternalLink size={12} />}
-                <span className="font-bold">{event.ticketImg ? '查看票券' : '開啟連結'}</span>
+                {imgs.length > 0 ? <ImageIcon size={12} /> : <ExternalLink size={12} />}
+                <span className="font-bold">
+                  {imgs.length > 0 ? `查看票券 (${imgs.length})` : '開啟連結'}
+                </span>
               </button>
 
               {/* Image Modal */}
-              {event.ticketImg && (
-                <ImageModal
-                  isOpen={showTicketModal}
-                  imageUrl={event.ticketImg}
-                  linkUrl={event.ticketUrl}
-                  onClose={() => setShowTicketModal(false)}
-                />
-              )}
+              <ImageModal
+                isOpen={showTicketModal}
+                imageUrls={imgs}
+                linkUrl={event.ticketUrl}
+                onClose={() => setShowTicketModal(false)}
+              />
+
+
             </>
           )}
         </div>

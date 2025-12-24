@@ -313,7 +313,8 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
                         {/* Ticket Input Section */}
                         <TicketInput
                           url={event.ticketUrl}
-                          img={event.ticketImg}
+                          imgs={event.ticketImgs}
+                          legacyImg={event.ticketImg}
                           onUpdate={(updates) => {
                             const newEvents = [...editData.events];
                             newEvents[index] = { ...newEvents[index], ...updates };

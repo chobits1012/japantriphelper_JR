@@ -29,7 +29,8 @@ export interface ItineraryEvent {
   category?: EventCategory;
   mapQuery?: string;
   ticketUrl?: string; // Website Link
-  ticketImg?: string; // Base64 Image (Compressed)
+  ticketImg?: string; // Deprecated: Single Image (migration target)
+  ticketImgs?: string[]; // New: Multiple Images
 }
 
 export interface Accommodation {

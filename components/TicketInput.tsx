@@ -1,23 +1,28 @@
 import React, { useState, useRef } from 'react';
-import { Ticket, Image as ImageIcon, Link as LinkIcon, Trash2, X, Loader2, Upload } from 'lucide-react';
+import { Ticket, Image as ImageIcon, Link as LinkIcon, Trash2, X, Loader2, Plus } from 'lucide-react';
 import type { ItineraryEvent } from '../types';
 
 interface TicketInputProps {
     url?: string;
-    img?: string;
+    imgs?: string[];
+    // Legacy support
+    legacyImg?: string;
     onUpdate: (updates: Partial<ItineraryEvent>) => void;
 }
 
-const TicketInput: React.FC<TicketInputProps> = ({ url, img, onUpdate }) => {
+const TicketInput: React.FC<TicketInputProps> = ({ url, imgs = [], legacyImg, onUpdate }) => {
     const [showInput, setShowInput] = useState(false);
     const [isCompressing, setIsCompressing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Merge legacy image into array if exists and standard array is empty
+    const currentImgs = legacyImg && imgs.length === 0 ? [legacyImg] : imgs;
+
     // Helper: Compress Image to Base64
     const compressImage = async (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
-            const MAX_WIDTH = 800; // Safe for mobile, enough for QR codes
-            const QUALITY = 0.6;   // Good balance
+            const MAX_WIDTH = 1200; // Increased resolution for better zoom
+            const QUALITY = 0.7;   // Slightly higher quality for readability
 
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -57,17 +62,29 @@ const TicketInput: React.FC<TicketInputProps> = ({ url, img, onUpdate }) => {
         setIsCompressing(true);
         try {
             const compressedData = await compressImage(file);
-            onUpdate({ ticketImg: compressedData });
+            const newImgs = [...currentImgs, compressedData];
+
+            // Update both new field and clear legacy field to avoid duplication
+            onUpdate({
+                ticketImgs: newImgs,
+                ticketImg: undefined
+            });
         } catch (err) {
             console.error("Compression failed", err);
             alert("圖片處理失敗，請試著換一張圖片。");
         } finally {
             setIsCompressing(false);
+            // Reset input so same file can be selected again
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
-    const handleRemoveImage = () => {
-        onUpdate({ ticketImg: undefined });
+    const handleRemoveImage = (index: number) => {
+        const newImgs = currentImgs.filter((_, i) => i !== index);
+        onUpdate({
+            ticketImgs: newImgs,
+            ticketImg: undefined
+        });
     };
 
     const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +92,7 @@ const TicketInput: React.FC<TicketInputProps> = ({ url, img, onUpdate }) => {
     };
 
     // If no ticket data, show minimal "Add Ticket" button
-    if (!showInput && !url && !img) {
+    if (!showInput && !url && currentImgs.length === 0) {
         return (
             <button
                 onClick={() => setShowInput(true)}
@@ -90,9 +107,9 @@ const TicketInput: React.FC<TicketInputProps> = ({ url, img, onUpdate }) => {
         <div className="bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg p-3 space-y-3 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center">
                 <label className="text-[10px] font-bold text-japan-blue dark:text-sky-400 uppercase flex items-center gap-1">
-                    <Ticket size={14} /> 電子票券 (Link / Image)
+                    <Ticket size={14} /> 電子票券 (Links & Images)
                 </label>
-                {(!url && !img) && (
+                {(!url && currentImgs.length === 0) && (
                     <button onClick={() => setShowInput(false)} className="text-gray-400 hover:text-red-500">
                         <X size={14} />
                     </button>
@@ -111,52 +128,48 @@ const TicketInput: React.FC<TicketInputProps> = ({ url, img, onUpdate }) => {
                 />
             </div>
 
-            {/* Image Input */}
-            <div className="flex items-start gap-3">
-                {img ? (
-                    <div className="relative group">
+            {/* Image Gallery Grid */}
+            <div className="grid grid-cols-3 gap-2">
+                {currentImgs.map((imgSrc, index) => (
+                    <div key={index} className="relative group aspect-square">
                         <img
-                            src={img}
-                            alt="Ticket Preview"
-                            className="h-20 w-auto rounded-md border border-gray-200 dark:border-slate-600 object-cover"
+                            src={imgSrc}
+                            alt={`Ticket ${index + 1}`}
+                            className="w-full h-full object-cover rounded-md border border-gray-200 dark:border-slate-600"
                         />
                         <button
-                            onClick={handleRemoveImage}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => handleRemoveImage(index)}
+                            className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                            title="刪除"
                         >
                             <Trash2 size={10} />
                         </button>
-                        <div className="text-[10px] text-gray-400 mt-1 text-center font-mono">已壓縮</div>
                     </div>
-                ) : (
-                    <div className="flex-1">
-                        <input
-                            type="file"
-                            accept="image/*"
-                            capture="environment" // Defines it as a capture if on mobile
-                            ref={fileInputRef}
-                            className="hidden"
-                            onChange={handleFileChange}
-                        />
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isCompressing}
-                            className="w-full h-20 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-md flex flex-col items-center justify-center gap-1 text-gray-400 hover:bg-white hover:border-japan-blue hover:text-japan-blue dark:hover:bg-slate-800 dark:hover:border-sky-500 dark:hover:text-sky-400 transition-all cursor-pointer disabled:opacity-50"
-                        >
-                            {isCompressing ? (
-                                <>
-                                    <Loader2 size={20} className="animate-spin" />
-                                    <span className="text-[10px] font-bold">處理中...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <ImageIcon size={20} />
-                                    <span className="text-[10px] font-bold">上傳圖片/截圖</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
-                )}
+                ))}
+
+                {/* Add Image Button */}
+                <div className="aspect-square">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        // REMOVED: capture="environment" to allow gallery access
+                        ref={fileInputRef}
+                        className="hidden"
+                        onChange={handleFileChange}
+                    />
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isCompressing}
+                        className="w-full h-full border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-md flex flex-col items-center justify-center gap-1 text-gray-400 hover:bg-white hover:border-japan-blue hover:text-japan-blue dark:hover:bg-slate-800 dark:hover:border-sky-500 dark:hover:text-sky-400 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                        {isCompressing ? (
+                            <Loader2 size={20} className="animate-spin" />
+                        ) : (
+                            <Plus size={24} />
+                        )}
+                        <span className="text-[9px] font-bold">{isCompressing ? '處理中' : '新增圖片'}</span>
+                    </button>
+                </div>
             </div>
         </div>
     );
