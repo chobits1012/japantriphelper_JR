@@ -99,6 +99,43 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
     fetchWeather();
   }, [day]);
 
+  // --- Multi-Plan Logic ---
+  const currentPlanId = editData.activePlanId || 'A';
+
+  const handleSwitchPlan = (targetPlanId: string) => {
+    if (targetPlanId === currentPlanId) return;
+
+    // 1. Save current events to the "outgoing" plan storage
+    const updatedSubPlans = { ...(editData.subPlans || {}) };
+
+    // If we are currently on 'A', we don't need to save to subPlans['A'] explicitly 
+    // because 'events' IS 'A' by default. But for consistency in swap, let's treat A as just another key when inactive.
+    // Actually, the "Swap" logic is:
+    // - Store current `events` into `subPlans[currentPlanId]`
+    // - Load `subPlans[targetPlanId]` into `events`
+
+    updatedSubPlans[currentPlanId] = { events: editData.events };
+
+    // 2. Load target events
+    // If target doesn't exist yet, give it an empty list or copy from A? 
+    // Let's start with empty list for a clean slate, or copy if it's the first time creation?
+    // User requested "Plan B", usually implies a fresh start or clone. Let's do empty for now, easier to understand.
+    const targetEvents = updatedSubPlans[targetPlanId]?.events || [];
+
+    setEditData({
+      ...editData,
+      subPlans: updatedSubPlans,
+      activePlanId: targetPlanId,
+      events: targetEvents // The view always renders 'events'
+    });
+
+    // Reset editing state to avoid index out of bounds
+    setEditingEventIndex(null);
+  };
+
+  const PLANS = ['A', 'B', 'C'];
+  // ------------------------
+
   const handleSaveText = () => {
     const sortedEvents = [...editData.events].sort((a, b) => a.time.localeCompare(b.time));
     const currentDayUpdate = { ...editData, events: sortedEvents };
@@ -216,7 +253,30 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
           <div className="flex items-center gap-4">
             <span className="text-4xl font-serif font-bold text-japan-blue/20 dark:text-sky-400/20 select-none">{day.day}</span>
             <div className="h-8 w-px bg-japan-blue/20 dark:bg-slate-700"></div>
-            <div className="flex flex-col w-full">
+            {/* Plan Tabs */}
+            <div className="flex gap-1 bg-gray-100 dark:bg-slate-800 p-1 rounded-lg self-start">
+              {PLANS.map(plan => {
+                const isActive = currentPlanId === plan;
+                const hasContent = plan === currentPlanId ? editData.events.length > 0 : (editData.subPlans?.[plan]?.events.length || 0) > 0;
+                return (
+                  <button
+                    key={plan}
+                    onClick={() => handleSwitchPlan(plan)}
+                    className={`
+                      px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1
+                      ${isActive
+                        ? 'bg-white dark:bg-slate-700 text-japan-blue dark:text-sky-400 shadow-sm'
+                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-slate-300'}
+                    `}
+                  >
+                    <span>方案 {plan}</span>
+                    {hasContent && <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-japan-blue dark:bg-sky-400' : 'bg-gray-300'}`} />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-2 w-full sm:w-auto">
               <span className="text-xs font-bold tracking-widest text-japan-blue dark:text-sky-400 uppercase">{day.date} • {day.weekday}</span>
               {day.temp && !isEditing && (
                 <div className="flex flex-col gap-2 mt-1 w-full">
