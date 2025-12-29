@@ -429,6 +429,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
                         {/* Ticket Input Section */}
                         <TicketInput
                           url={event.ticketUrl}
+                          links={event.links}
                           imgs={event.ticketImgs}
                           legacyImg={event.ticketImg}
                           currentTotalSizeMB={calculateDataSizeMB(allDays) - calculateDataSizeMB(day) + calculateDataSizeMB(editData)}

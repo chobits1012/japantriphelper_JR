@@ -138,7 +138,14 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
               {links.map((link, index) => (
                 <button
                   key={index}
-                  onClick={() => window.open(link, '_blank')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!/^https?:\/\//i.test(link)) {
+                      alert("無效的連結：請確認網址開頭包含 http:// 或 https://");
+                      return;
+                    }
+                    window.open(link, '_blank');
+                  }}
                   className="inline-flex items-center gap-1.5 px-3 py-1 bg-japan-red text-white text-xs rounded-full shadow-sm hover:bg-japan-red/90 transition-transform active:scale-95"
                 >
                   <ExternalLink size={12} />

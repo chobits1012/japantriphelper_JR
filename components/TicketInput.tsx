@@ -161,9 +161,19 @@ const TicketInput: React.FC<TicketInputProps> = ({ url, links = [], imgs = [], l
                             value={link}
                             onChange={(e) => handleLinkChange(index, e.target.value)}
                             placeholder={index === 0 ? "網址 / 雲端硬碟連結..." : "其他連結..."}
-                            className="flex-1 text-xs bg-transparent outline-none dark:text-white placeholder-gray-400"
+                            className={`flex-1 min-w-0 text-xs bg-transparent outline-none dark:text-white placeholder-gray-400 ${link && !/^https?:\/\//i.test(link) ? 'text-red-500' : ''
+                                }`}
                         />
-                        <button onClick={() => handleRemoveLink(index)} className="text-gray-400 hover:text-red-500">
+                        {link && !/^https?:\/\//i.test(link) && (
+                            <span className="hidden sm:inline text-[9px] text-red-500 font-bold whitespace-nowrap">
+                                需加 http://
+                            </span>
+                        )}
+                        <button
+                            onClick={() => handleRemoveLink(index)}
+                            className="flex-shrink-0 bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 rounded-full p-1.5 transition-colors"
+                            title="刪除"
+                        >
                             <X size={14} />
                         </button>
                     </div>
