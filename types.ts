@@ -28,7 +28,8 @@ export interface ItineraryEvent {
   highlight?: boolean;
   category?: EventCategory;
   mapQuery?: string;
-  ticketUrl?: string; // Website Link
+  ticketUrl?: string; // Website Link (Legacy)
+  links?: string[];   // New: Multiple Website Links
   ticketImg?: string; // Deprecated: Single Image (migration target)
   ticketImgs?: string[]; // New: Multiple Images
 }

@@ -6,6 +6,9 @@ import ConfirmModal from './ConfirmModal';
 import { EXCHANGE_RATE_API_URL, CLOUD_SYNC_CONFIG_KEY } from '../constants';
 import { uploadToCloud, downloadFromCloud, FirebaseConfig } from '../lib/firebaseSync';
 import { calculateDataSizeMB, STORAGE_LIMITS, formatSize } from '../lib/storageCalculator';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 interface TravelToolboxProps {
   isOpen: boolean;
@@ -367,19 +370,44 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownloadFile = () => {
+  const handleDownloadFile = async () => {
     const data = getExportData();
     const jsonString = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+    const fileName = `${tripSettings.name}_行程備份.json`;
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${tripSettings.name}_行程備份.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    if (Capacitor.isNativePlatform()) {
+      try {
+        // Native: Save to Filesystem then Share
+        const result = await Filesystem.writeFile({
+          path: fileName,
+          data: jsonString,
+          directory: Directory.Cache, // Use Cache or Documents
+          encoding: Encoding.UTF8,
+        });
+
+        await Share.share({
+          title: '備份行程',
+          text: `分享行程備份: ${tripSettings.name}`,
+          url: result.uri,
+          dialogTitle: '儲存或分享備份檔',
+        });
+      } catch (e) {
+        console.error('File export failed', e);
+        alert('匯出失敗，請稍後再試');
+      }
+    } else {
+      // Web: Save via Blob
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   };
 
   const processImportData = (data: any) => {
@@ -449,25 +477,38 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // DEBUG: Start
+    // alert("Debug: File Input Changed"); 
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      // alert("Debug: No file selected");
+      return;
+    }
+    // alert(`Debug: File selected: ${file.name} (${file.size} bytes)`);
+
     const reader = new FileReader();
     reader.onload = (e) => {
+      // alert("Debug: Reader onload fired");
       try {
         const result = e.target?.result as string;
+        // alert(`Debug: Content read, length: ${result.length}`);
         const data = JSON.parse(result);
         processImportData(data);
-      } catch (err) {
+      } catch (err: any) {
+        alert("讀取/解析失敗: " + err.message);
         setConfirmModal({
           isOpen: true,
           title: "讀取失敗",
-          message: "檔案格式錯誤或損毀。",
+          message: "檔案格式錯誤或損毀。\n" + err.message,
           isDangerous: false,
           onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
         });
       }
-      reader.readAsText(file);
     };
+    reader.onerror = (e) => {
+      alert("FileReader Error: " + reader.error?.message);
+    };
+    reader.readAsText(file);
   };
 
 
@@ -1254,10 +1295,10 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
               <div className="space-y-3 pb-8">
                 <input
                   type="file"
-                  accept=".json"
+                  accept=".json,application/json"
                   ref={fileInputRef}
                   onChange={handleFileUpload}
-                  className="hidden"
+                  style={{ opacity: 0, position: 'absolute', zIndex: -1, width: 0, height: 0 }}
                 />
 
                 <button

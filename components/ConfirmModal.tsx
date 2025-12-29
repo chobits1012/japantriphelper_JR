@@ -25,7 +25,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all scale-100">
         <div className="p-6 text-center">
           <div className={`mx-auto mb-4 w-12 h-12 rounded-full flex items-center justify-center ${isDangerous ? 'bg-red-100 text-red-500' : 'bg-blue-100 text-japan-blue'}`}>
@@ -47,11 +47,10 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </button>
           <button
             onClick={onConfirm}
-            className={`flex-1 px-4 py-4 text-sm font-bold transition-colors ${
-              isDangerous 
-                ? 'text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20' 
+            className={`flex-1 px-4 py-4 text-sm font-bold transition-colors ${isDangerous
+                ? 'text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
                 : 'text-japan-blue hover:bg-blue-50 dark:text-sky-400 dark:hover:bg-slate-800'
-            }`}
+              }`}
           >
             {confirmText}
           </button>

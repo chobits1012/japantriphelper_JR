@@ -5,6 +5,7 @@ import { calculateDataSizeMB, STORAGE_LIMITS, formatSize } from '../lib/storageC
 
 interface TicketInputProps {
     url?: string;
+    links?: string[]; // New: Multi-link support
     imgs?: string[];
     // Legacy support
     legacyImg?: string;
@@ -12,7 +13,12 @@ interface TicketInputProps {
     onUpdate: (updates: Partial<ItineraryEvent>) => void;
 }
 
-const TicketInput: React.FC<TicketInputProps> = ({ url, imgs = [], legacyImg, currentTotalSizeMB = 0, onUpdate }) => {
+const TicketInput: React.FC<TicketInputProps> = ({ url, links = [], imgs = [], legacyImg, currentTotalSizeMB = 0, onUpdate }) => {
+    // Initialize links state: explicit links > fallback to url > empty array
+    // Ensure at least one empty string if showing input to allow typing
+    const [linkList, setLinkList] = useState<string[]>(
+        links.length > 0 ? links : url ? [url] : []
+    );
     const [showInput, setShowInput] = useState(false);
     const [isCompressing, setIsCompressing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -94,12 +100,34 @@ const TicketInput: React.FC<TicketInputProps> = ({ url, imgs = [], legacyImg, cu
         });
     };
 
-    const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onUpdate({ ticketUrl: e.target.value });
+    const handleLinkChange = (index: number, value: string) => {
+        const newLinks = [...linkList];
+        newLinks[index] = value;
+        setLinkList(newLinks);
+
+        // Sync to parent immediately
+        // Legacy 'ticketUrl' gets the first link for backward compatibility
+        onUpdate({
+            links: newLinks.filter(l => l.trim() !== ''),
+            ticketUrl: newLinks[0] || ''
+        });
+    };
+
+    const handleAddLink = () => {
+        setLinkList([...linkList, '']);
+    };
+
+    const handleRemoveLink = (index: number) => {
+        const newLinks = linkList.filter((_, i) => i !== index);
+        setLinkList(newLinks);
+        onUpdate({
+            links: newLinks.filter(l => l.trim() !== ''),
+            ticketUrl: newLinks[0] || ''
+        });
     };
 
     // If no ticket data, show minimal "Add Ticket" button
-    if (!showInput && !url && currentImgs.length === 0) {
+    if (!showInput && linkList.length === 0 && currentImgs.length === 0) {
         return (
             <button
                 onClick={() => setShowInput(true)}
@@ -116,23 +144,37 @@ const TicketInput: React.FC<TicketInputProps> = ({ url, imgs = [], legacyImg, cu
                 <label className="text-[10px] font-bold text-japan-blue dark:text-sky-400 uppercase flex items-center gap-1">
                     <Ticket size={14} /> 電子票券 (Links & Images)
                 </label>
-                {(!url && currentImgs.length === 0) && (
+                {(linkList.length === 0 && currentImgs.length === 0) && (
                     <button onClick={() => setShowInput(false)} className="text-gray-400 hover:text-red-500">
                         <X size={14} />
                     </button>
                 )}
             </div>
 
-            {/* URL Input */}
-            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md px-2 py-1.5 focus-within:border-japan-blue dark:focus-within:border-sky-500 transition-colors">
-                <LinkIcon size={14} className="text-gray-400 flex-shrink-0" />
-                <input
-                    type="url"
-                    value={url || ''}
-                    onChange={handleUrlChange}
-                    placeholder="貼上票券或訂位網址..."
-                    className="flex-1 text-xs bg-transparent outline-none dark:text-white placeholder-gray-400"
-                />
+            {/* Link Inputs List */}
+            <div className="space-y-2">
+                {linkList.map((link, index) => (
+                    <div key={index} className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md px-2 py-1.5 focus-within:border-japan-blue dark:focus-within:border-sky-500 transition-colors">
+                        <LinkIcon size={14} className="text-gray-400 flex-shrink-0" />
+                        <input
+                            type="url"
+                            value={link}
+                            onChange={(e) => handleLinkChange(index, e.target.value)}
+                            placeholder={index === 0 ? "網址 / 雲端硬碟連結..." : "其他連結..."}
+                            className="flex-1 text-xs bg-transparent outline-none dark:text-white placeholder-gray-400"
+                        />
+                        <button onClick={() => handleRemoveLink(index)} className="text-gray-400 hover:text-red-500">
+                            <X size={14} />
+                        </button>
+                    </div>
+                ))}
+
+                <button
+                    onClick={handleAddLink}
+                    className="w-full py-1 text-[10px] font-bold text-gray-400 hover:text-japan-blue border border-dashed border-gray-300 rounded hover:bg-white hover:border-japan-blue transition-colors flex items-center justify-center gap-1"
+                >
+                    <Plus size={12} /> 新增連結
+                </button>
             </div>
 
             {/* Image Gallery Grid */}

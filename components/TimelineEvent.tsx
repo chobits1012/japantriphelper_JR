@@ -53,7 +53,9 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
   };
 
   const imgs = event.ticketImgs || (event.ticketImg ? [event.ticketImg] : []);
-  const hasTicket = event.ticketUrl || imgs.length > 0;
+  // Consolidate links: use new array if present, otherwise fallback to legacy url
+  const links = event.links && event.links.length > 0 ? event.links : (event.ticketUrl ? [event.ticketUrl] : []);
+  const hasTicket = links.length > 0 || imgs.length > 0;
 
   return (
     <div className={`relative pl-8 pb-8 group ${isLast ? '' : ''}`}>
@@ -132,15 +134,32 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
           {/* Ticket Badge */}
           {hasTicket && (
             <>
-              <button
-                onClick={() => imgs.length > 0 ? setShowTicketModal(true) : window.open(event.ticketUrl, '_blank')}
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-japan-red text-white text-xs rounded-full shadow-sm hover:bg-japan-red/90 transition-transform active:scale-95"
-              >
-                {imgs.length > 0 ? <ImageIcon size={12} /> : <ExternalLink size={12} />}
-                <span className="font-bold">
-                  {imgs.length > 0 ? `查看票券 (${imgs.length})` : '開啟連結'}
-                </span>
-              </button>
+              {/* Render Link Buttons */}
+              {links.map((link, index) => (
+                <button
+                  key={index}
+                  onClick={() => window.open(link, '_blank')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-japan-red text-white text-xs rounded-full shadow-sm hover:bg-japan-red/90 transition-transform active:scale-95"
+                >
+                  <ExternalLink size={12} />
+                  <span className="font-bold">
+                    {links.length > 1 ? `連結 ${index + 1}` : '開啟連結'}
+                  </span>
+                </button>
+              ))}
+
+              {/* Render Image Button */}
+              {imgs.length > 0 && (
+                <button
+                  onClick={() => setShowTicketModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-japan-red text-white text-xs rounded-full shadow-sm hover:bg-japan-red/90 transition-transform active:scale-95"
+                >
+                  <ImageIcon size={12} />
+                  <span className="font-bold">
+                    查看票券 ({imgs.length})
+                  </span>
+                </button>
+              )}
 
               {/* Image Modal */}
               <ImageModal

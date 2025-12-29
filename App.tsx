@@ -178,7 +178,7 @@ const App: React.FC = () => {
         </div>
 
         <div className="mt-16 text-center text-white/40 text-xs font-mono tracking-widest space-y-2 pb-8">
-          <p>TRAVEL ASSISTANT v2.1</p>
+          <p>TRAVEL ASSISTANT v2.2</p>
           <div className="flex flex-col items-center gap-1">
             <p className="text-white/60 font-bold">James Wang</p>
             <a
