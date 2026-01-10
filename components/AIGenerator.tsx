@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { X, Sparkles, Loader2, KeyRound, Send, CalendarRange, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Sparkles, Loader2, KeyRound, Send, CalendarRange, Calendar, Save, Trash2, ExternalLink, HelpCircle, ChevronDown } from 'lucide-react';
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { ItineraryDay } from '../types';
+
+const API_KEY_STORAGE_KEY = 'gemini_api_key_saved';
+const GOOGLE_AI_STUDIO_URL = 'https://aistudio.google.com/app/apikey';
 
 interface AIGeneratorProps {
   isOpen: boolean;
@@ -64,12 +67,30 @@ const cleanJsonString = (str: string) => {
 
 const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, existingDays, startDate, tripName }) => {
   const [apiKey, setApiKey] = useState('');
+  const [saveApiKey, setSaveApiKey] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
 
   const [targetDay, setTargetDay] = useState<string>('all');
   const [targetPlan, setTargetPlan] = useState<string>('B'); // Default to Plan B for safety
+
+  // Load saved API key on component mount
+  useEffect(() => {
+    const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+    if (savedKey) {
+      setApiKey(savedKey);
+      setSaveApiKey(true);
+    }
+  }, []);
+
+  // Handle clearing saved API key
+  const handleClearSavedKey = () => {
+    localStorage.removeItem(API_KEY_STORAGE_KEY);
+    setApiKey('');
+    setSaveApiKey(false);
+  };
 
   if (!isOpen) return null;
 
@@ -155,16 +176,18 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
       });
 
       if (response.text) {
-        try {
-          const cleanedText = cleanJsonString(response.text);
-          const data = JSON.parse(cleanedText) as ItineraryDay[];
-          onGenerate(data, !isSingleDay, targetPlan);
-          onClose();
-        } catch (parseError) {
-          console.error("JSON Parse Error:", parseError);
-          console.log("Raw Text:", response.text);
-          throw new Error("AI 回傳格式錯誤，請再試一次。");
+        const cleanedText = cleanJsonString(response.text);
+        const data = JSON.parse(cleanedText) as ItineraryDay[];
+
+        // Save or remove API key based on user preference
+        if (saveApiKey) {
+          localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
+        } else {
+          localStorage.removeItem(API_KEY_STORAGE_KEY);
         }
+
+        onGenerate(data, !isSingleDay, targetPlan);
+        onClose();
       } else {
         throw new Error('No data returned');
       }
@@ -194,22 +217,92 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
         {/* Body */}
         <div className="p-6 space-y-6 overflow-y-auto">
 
-          {/* API Key Input */}
-          <div className="space-y-2">
+          {/* API Key Section */}
+          <div className="space-y-3">
             <label className="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <KeyRound size={16} />
               Google Gemini API Key
             </label>
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="貼上您的 API Key (AIza...)"
-              className="w-full p-3 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-japan-blue focus:border-transparent outline-none transition-all text-sm font-mono bg-white dark:bg-slate-800 dark:text-white"
-            />
+
+            {/* Quick Link to Get API Key */}
+            <a
+              href={GOOGLE_AI_STUDIO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-2 p-2.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all text-sm"
+            >
+              <ExternalLink size={16} />
+              免費申請 API Key（Google AI Studio）
+            </a>
+
+            {/* API Key Input */}
+            <div className="relative">
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="貼上您的 API Key (AIza...)"
+                className="w-full p-3 pr-10 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-japan-blue focus:border-transparent outline-none transition-all text-sm font-mono bg-white dark:bg-slate-800 dark:text-white"
+              />
+              {saveApiKey && apiKey && (
+                <button
+                  type="button"
+                  onClick={handleClearSavedKey}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-all"
+                  title="清除已儲存的 API Key"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* Save API Key Checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="saveApiKey"
+                checked={saveApiKey}
+                onChange={(e) => setSaveApiKey(e.target.checked)}
+                className="w-4 h-4 accent-japan-blue cursor-pointer"
+              />
+              <label htmlFor="saveApiKey" className="text-xs text-gray-500 dark:text-gray-400 cursor-pointer select-none flex items-center gap-1">
+                <Save size={12} />
+                儲存 API Key 至瀏覽器（下次無需重新輸入）
+              </label>
+            </div>
+
             <p className="text-xs text-gray-400">
-              * Key 僅用於本次生成，不會被儲存。請至 Google AI Studio 免費申請。
+              {saveApiKey
+                ? '✓ API Key 將在生成成功後儲存至您的瀏覽器中。'
+                : '* 請至 Google AI Studio 免費申請 API Key。'}
             </p>
+
+            {/* Collapsible Help Section */}
+            <div className="border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowHelp(!showHelp)}
+                className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all text-sm"
+              >
+                <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300 font-medium">
+                  <HelpCircle size={14} />
+                  不知道如何複製 API Key？
+                </span>
+                <ChevronDown size={16} className={`text-gray-400 transition-transform ${showHelp ? 'rotate-180' : ''}`} />
+              </button>
+              {showHelp && (
+                <div className="p-3 bg-white dark:bg-slate-900 space-y-2">
+                  <p className="text-xs text-gray-600 dark:text-gray-300">
+                    登入 Google AI Studio 後，在表格中找到您的 API Key，點擊下圖紅圈處的複製按鈕：
+                  </p>
+                  <img
+                    src="/api-key-help.png"
+                    alt="API Key 複製位置說明"
+                    className="w-full rounded-lg border border-gray-200 dark:border-slate-700"
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Mode Selection */}
