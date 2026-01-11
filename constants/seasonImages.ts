@@ -3,7 +3,8 @@ import { TripSeason } from '../types';
 export const SEASON_IMAGES: Record<TripSeason, string[]> = {
     spring: [
         "/seasons/spring_01.jpg",
-        "/seasons/spring_02.jpg"
+        "/seasons/spring_02.jpg",
+        "/seasons/spring_03.jpg"
     ],
     summer: [
         "/seasons/summer_01.jpg",
@@ -16,10 +17,9 @@ export const SEASON_IMAGES: Record<TripSeason, string[]> = {
         "/seasons/autumn_03.jpg"
     ],
     winter: [
-        // Waiting for uploads...
-        "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?q=80&w=2070&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1518331327725-d9124bece653?q=80&w=2069&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1517411654406-38374d271954?q=80&w=2070&auto=format&fit=crop"
+        "/seasons/winter_01.jpg",
+        "/seasons/winter_02.jpg",
+        "/seasons/winter_03.jpg"
     ]
 };
 
