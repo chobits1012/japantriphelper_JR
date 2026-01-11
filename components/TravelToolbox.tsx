@@ -35,11 +35,11 @@ const DEFAULT_CATEGORIES = [
 type ExpenseCategoryKey = 'food' | 'shopping' | 'transport' | 'hotel' | 'other';
 
 const EXPENSE_CATEGORIES: Record<string, { label: string; color: string; bg: string }> = {
-  food: { label: '美食', color: '#fb923c', bg: 'bg-orange-400' },
-  shopping: { label: '購物', color: '#c084fc', bg: 'bg-purple-400' },
-  transport: { label: '交通', color: '#9ca3af', bg: 'bg-gray-400' },
-  hotel: { label: '住宿', color: '#818cf8', bg: 'bg-indigo-400' },
-  other: { label: '其他', color: '#60a5fa', bg: 'bg-blue-400' }
+  food: { label: '美食', color: '#f9c5d5', bg: 'bg-[#f9c5d5]' },       // sakura - 櫻花粉
+  shopping: { label: '購物', color: '#a8d5a3', bg: 'bg-[#a8d5a3]' },  // matcha - 抹茶綠
+  transport: { label: '交通', color: '#4a5568', bg: 'bg-[#4a5568]' }, // sumi - 炭灰
+  hotel: { label: '住宿', color: '#e6b422', bg: 'bg-[#e6b422]' },     // kiniro - 金色
+  other: { label: '其他', color: '#9d8ac7', bg: 'bg-[#9d8ac7]' }      // murasaki - 紫藤
 };
 
 const TravelToolbox: React.FC<TravelToolboxProps> = ({
@@ -646,37 +646,67 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
         </div>
 
 
-        {/* Tabs */}
-        <div className="flex border-b border-gray-100 dark:border-slate-800 overflow-x-auto no-scrollbar">
+        {/* Tabs - Refined Design */}
+        <div className="flex border-b border-japan-blue/10 dark:border-slate-700 overflow-x-auto no-scrollbar bg-paper-light/50 dark:bg-slate-900">
           <button
             onClick={() => setActiveTab('expense')}
-            className={`flex-1 min-w-[80px] py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'expense' ? 'text-japan-blue border-b-2 border-japan-blue bg-blue-50/50 dark:bg-slate-800 dark:text-sky-400 dark:border-sky-500' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+            className={`flex-1 min-w-[80px] py-3.5 text-sm font-bold flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'expense'
+              ? 'text-japan-blue-700 dark:text-japan-blue-300'
+              : 'text-ink-lighter hover:text-japan-blue-500 hover:bg-japan-blue/5 dark:text-slate-400 dark:hover:text-japan-blue-400'
+              }`}
           >
             <Coins size={16} /> <span className="hidden sm:inline">記帳</span>
+            {activeTab === 'expense' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-japan-blue-600 to-transparent dark:via-japan-blue-400" />
+            )}
           </button>
           <button
             onClick={() => setActiveTab('currency')}
-            className={`flex-1 min-w-[80px] py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'currency' ? 'text-japan-blue border-b-2 border-japan-blue bg-blue-50/50 dark:bg-slate-800 dark:text-sky-400 dark:border-sky-500' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+            className={`flex-1 min-w-[80px] py-3.5 text-sm font-bold flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'currency'
+              ? 'text-japan-blue-700 dark:text-japan-blue-300'
+              : 'text-ink-lighter hover:text-japan-blue-500 hover:bg-japan-blue/5 dark:text-slate-400 dark:hover:text-japan-blue-400'
+              }`}
           >
             <RefreshCw size={16} /> <span className="hidden sm:inline">匯率</span>
+            {activeTab === 'currency' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-japan-blue-600 to-transparent dark:via-japan-blue-400" />
+            )}
           </button>
           <button
             onClick={() => setActiveTab('checklist')}
-            className={`flex-1 min-w-[80px] py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'checklist' ? 'text-japan-blue border-b-2 border-japan-blue bg-blue-50/50 dark:bg-slate-800 dark:text-sky-400 dark:border-sky-500' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+            className={`flex-1 min-w-[80px] py-3.5 text-sm font-bold flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'checklist'
+              ? 'text-japan-blue-700 dark:text-japan-blue-300'
+              : 'text-ink-lighter hover:text-japan-blue-500 hover:bg-japan-blue/5 dark:text-slate-400 dark:hover:text-japan-blue-400'
+              }`}
           >
             <CheckSquare size={16} /> <span className="hidden sm:inline">清單</span>
+            {activeTab === 'checklist' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-japan-blue-600 to-transparent dark:via-japan-blue-400" />
+            )}
           </button>
           <button
             onClick={() => setActiveTab('cloud')}
-            className={`flex-1 min-w-[80px] py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'cloud' ? 'text-japan-blue border-b-2 border-japan-blue bg-blue-50/50 dark:bg-slate-800 dark:text-sky-400 dark:border-sky-500' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+            className={`flex-1 min-w-[80px] py-3.5 text-sm font-bold flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'cloud'
+              ? 'text-japan-blue-700 dark:text-japan-blue-300'
+              : 'text-ink-lighter hover:text-japan-blue-500 hover:bg-japan-blue/5 dark:text-slate-400 dark:hover:text-japan-blue-400'
+              }`}
           >
             <Cloud size={16} /> <span className="hidden sm:inline">雲端</span>
+            {activeTab === 'cloud' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-japan-blue-600 to-transparent dark:via-japan-blue-400" />
+            )}
           </button>
           <button
             onClick={() => setActiveTab('backup')}
-            className={`flex-1 min-w-[80px] py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'backup' ? 'text-japan-blue border-b-2 border-japan-blue bg-blue-50/50 dark:bg-slate-800 dark:text-sky-400 dark:border-sky-500' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+            className={`flex-1 min-w-[80px] py-3.5 text-sm font-bold flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'backup'
+              ? 'text-japan-blue-700 dark:text-japan-blue-300'
+              : 'text-ink-lighter hover:text-japan-blue-500 hover:bg-japan-blue/5 dark:text-slate-400 dark:hover:text-japan-blue-400'
+              }`}
           >
             <Copy size={16} /> <span className="hidden sm:inline">備份</span>
+            {activeTab === 'backup' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-japan-blue-600 to-transparent dark:via-japan-blue-400" />
+            )}
           </button>
         </div>
 
@@ -687,35 +717,40 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
           {activeTab === 'expense' && (
             <div className="space-y-4 pb-20">
 
-              {/* 1. Budget Settings */}
-              <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Budget</span>
+              {/* 1. Budget Settings - Glassmorphism Card */}
+              <div className="relative overflow-hidden bg-white/90 backdrop-blur-sm dark:bg-slate-900/90 p-5 rounded-2xl border border-japan-blue/10 dark:border-slate-800 shadow-lg shadow-japan-blue/5">
+                {/* Subtle Decorative Background */}
+                <div className="absolute -right-6 -top-6 w-24 h-24 bg-japan-blue/5 rounded-full blur-2xl" />
+
+                <div className="relative z-10">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-bold text-ink-lighter dark:text-slate-400 uppercase tracking-widest">Total Budget</span>
+                    {isEditingBudget ? (
+                      <button onClick={handleSaveBudget} className="text-japan-blue-600 bg-japan-blue-50 dark:bg-japan-blue-900/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-japan-blue-100 dark:hover:bg-japan-blue-900/50 transition-colors">儲存</button>
+                    ) : (
+                      <button onClick={() => setIsEditingBudget(true)} className="text-ink-lighter hover:text-japan-blue-600 dark:text-slate-400 dark:hover:text-japan-blue-400 transition-colors"><Pencil size={14} /></button>
+                    )}
+                  </div>
+
                   {isEditingBudget ? (
-                    <button onClick={handleSaveBudget} className="text-japan-blue bg-blue-50 px-2 py-1 rounded text-xs font-bold dark:bg-slate-800 dark:text-sky-400">儲存</button>
+                    <input
+                      type="number"
+                      value={budgetInput}
+                      onChange={e => setBudgetInput(e.target.value)}
+                      className="w-full text-2xl font-mono font-bold border-b-2 border-japan-blue-600 dark:border-japan-blue-400 outline-none bg-transparent dark:text-white"
+                      autoFocus
+                    />
                   ) : (
-                    <button onClick={() => setIsEditingBudget(true)} className="text-gray-400 hover:text-japan-blue dark:hover:text-sky-400"><Pencil size={14} /></button>
+                    <div className="flex flex-col">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-mono font-bold text-ink dark:text-white">
+                          ¥{(tripSettings.budgetJPY || 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <span className="text-xs text-ink-lighter dark:text-slate-400 font-mono">({toTWD(tripSettings.budgetJPY || 0)})</span>
+                    </div>
                   )}
                 </div>
-
-                {isEditingBudget ? (
-                  <input
-                    type="number"
-                    value={budgetInput}
-                    onChange={e => setBudgetInput(e.target.value)}
-                    className="w-full text-2xl font-mono font-bold border-b-2 border-japan-blue outline-none bg-transparent dark:text-white"
-                    autoFocus
-                  />
-                ) : (
-                  <div className="flex flex-col">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-mono font-bold text-ink dark:text-white">
-                        ¥{(tripSettings.budgetJPY || 0).toLocaleString()}
-                      </span>
-                    </div>
-                    <span className="text-xs text-gray-400 font-mono">({toTWD(tripSettings.budgetJPY || 0)})</span>
-                  </div>
-                )}
               </div>
 
               {/* 2. Visual Chart (Stacked Bar) */}
