@@ -83,6 +83,22 @@ export const useTripManager = () => {
     }
   }, []);
 
+  // Auto-fix: Update legacy/broken Unsplash images to local seasonal images
+  useEffect(() => {
+    setTrips(prev => {
+      let hasChanges = false;
+      const next = prev.map(trip => {
+        // If image is missing or is an old Unsplash URL, update it
+        if (!trip.coverImage || trip.coverImage.includes('images.unsplash.com')) {
+          hasChanges = true;
+          return { ...trip, coverImage: getRandomSeasonImage(trip.season) };
+        }
+        return trip;
+      });
+      return hasChanges ? next : prev;
+    });
+  }, []);
+
   const createTrip = (name: string, startDate: string, days: number, season: TripSeason) => {
     const newId = Math.random().toString(36).substr(2, 9);
 
