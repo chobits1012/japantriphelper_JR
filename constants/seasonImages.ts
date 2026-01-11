@@ -30,10 +30,5 @@ export const SEASON_IMAGES: Record<TripSeason, string[]> = {
 export const getRandomSeasonImage = (season: TripSeason): string => {
     const images = SEASON_IMAGES[season] || SEASON_IMAGES.winter;
     const randomIndex = Math.floor(Math.random() * images.length);
-    const rawUrl = images[randomIndex];
-
-    // Auto-optimize using wsrv.nl (free image proxy)
-    // This resizes images to width 1600px, quality 75%, and converts to WebP
-    // significantly reducing file size from ~10MB to ~100-300KB
-    return `https://wsrv.nl/?url=${encodeURIComponent(rawUrl)}&w=1600&q=75&output=webp`;
+    return images[randomIndex];
 };
