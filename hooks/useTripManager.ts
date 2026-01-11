@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import useLocalStorage from './useLocalStorage';
 import type { TripMetadata, TripSeason, ItineraryDay } from '../types';
 import { ITINERARY_DATA } from '../constants';
+import { getRandomSeasonImage } from '../constants/seasonImages';
 
 const TRIPS_LIST_KEY = 'my-trips-list';
 
@@ -38,7 +39,7 @@ export const useTripManager = () => {
             season: settings.season || 'winter',
             days: itinerary.length || 5,
             lastAccessed: Date.now(),
-            coverImage: getSeasonCover(settings.season || 'winter')
+            coverImage: settings.coverImage || getRandomSeasonImage(settings.season || 'winter')
           });
 
           // Migrate Data
@@ -64,7 +65,7 @@ export const useTripManager = () => {
           season: 'winter',
           days: ITINERARY_DATA.length,
           lastAccessed: Date.now(),
-          coverImage: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?q=80&w=2070"
+          coverImage: getRandomSeasonImage('winter')
         });
 
         // Initialize Default Data
@@ -115,7 +116,7 @@ export const useTripManager = () => {
       season,
       days,
       lastAccessed: Date.now(),
-      coverImage: getSeasonCover(season)
+      coverImage: getRandomSeasonImage(season)
     };
 
     // Save Data
@@ -148,7 +149,7 @@ export const useTripManager = () => {
       season: templateSeason,
       days: newItinerary.length,
       lastAccessed: Date.now(),
-      coverImage: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?q=80&w=2070"
+      coverImage: getRandomSeasonImage(templateSeason)
     };
 
     setTrips(prev => [newTripMeta, ...prev]);
@@ -196,13 +197,3 @@ export const useTripManager = () => {
     reorderTrips
   };
 };
-
-function getSeasonCover(season: TripSeason) {
-  switch (season) {
-    case 'spring': return "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop"; // Cherry Blossoms (Kiyomizu-dera)
-    case 'summer': return "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?q=80&w=2070&auto=format&fit=crop"; // Summer Seaside (Enoshima/Kamakura)
-    case 'autumn': return "https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=2070&auto=format&fit=crop"; // Autumn Leaves (Japan Temple)
-    case 'winter': return "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?q=80&w=2070&auto=format&fit=crop"; // Winter Snow (Kyoto Street)
-    default: return "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop";
-  }
-}
