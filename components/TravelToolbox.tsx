@@ -616,7 +616,8 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
         onConfirm={confirmModal.onConfirm}
         onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
       />
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh]">
+      {/* Fixed height container to prevent jumping */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md h-[85vh] flex flex-col overflow-hidden">
 
 
         {/* Header - Washi Style */}
@@ -753,49 +754,53 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 </div>
               </div>
 
-              {/* 2. Visual Chart (Stacked Bar) */}
-              <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-3">
-                <div className="flex justify-between items-end">
-                  <div>
-                    <p className="text-xs font-bold text-gray-400">已支出</p>
-                    <p className="text-xl font-mono font-bold text-japan-blue dark:text-sky-400">¥{totalJPY.toLocaleString()}</p>
-                    <p className="text-[10px] text-gray-400 font-mono">{toTWD(totalJPY)}</p>
+              {/* 2. Visual Chart - Glassmorphism Card */}
+              <div className="relative overflow-hidden bg-white/90 backdrop-blur-sm dark:bg-slate-900/90 p-5 rounded-2xl border border-japan-blue/10 dark:border-slate-800 shadow-lg shadow-japan-blue/5 space-y-3">
+                {/* Subtle Decorative Background */}
+                <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-kiniro/10 rounded-full blur-2xl" />
+
+                <div className="relative z-10">
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <p className="text-xs font-bold text-ink-lighter dark:text-slate-400">已支出</p>
+                      <p className="text-xl font-mono font-bold text-japan-blue-700 dark:text-japan-blue-300">¥{totalJPY.toLocaleString()}</p>
+                      <p className="text-[10px] text-ink-lighter dark:text-slate-400 font-mono">{toTWD(totalJPY)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-ink-lighter dark:text-slate-400">剩餘</p>
+                      <p className={`text-xl font-mono font-bold ${remaining < 0 ? 'text-japan-red-500 dark:text-japan-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                        ¥{remaining.toLocaleString()}
+                      </p>
+                      <p className="text-[10px] text-ink-lighter dark:text-slate-400 font-mono">{toTWD(remaining)}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs font-bold text-gray-400">剩餘</p>
-                    <p className={`text-xl font-mono font-bold ${remaining < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-                      ¥{remaining.toLocaleString()}
-                    </p>
-                    <p className="text-[10px] text-gray-400 font-mono">{toTWD(remaining)}</p>
+
+                  {/* Stacked Bar */}
+                  <div className="h-4 w-full bg-paper-dark/50 dark:bg-slate-800 rounded-full overflow-hidden flex">
+                    {totalJPY > 0 && Object.entries(categoryStats).map(([cat, amount]) => {
+                      if (amount === 0) return null;
+                      const pct = ((amount as number) / totalJPY) * 100;
+                      const colorClass = EXPENSE_CATEGORIES[cat]?.bg || 'bg-gray-400';
+                      return (
+                        <div key={cat} style={{ width: `${pct}%` }} className={`h-full ${colorClass}`} title={`${cat}: ¥${amount}`} />
+                      );
+                    })}
                   </div>
-                </div>
 
-                {/* Stacked Bar */}
-                <div className="h-4 w-full bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
-                  {totalJPY > 0 && Object.entries(categoryStats).map(([cat, amount]) => {
-                    if (amount === 0) return null;
-                    const pct = ((amount as number) / totalJPY) * 100;
-
-                    const colorClass = EXPENSE_CATEGORIES[cat]?.bg || 'bg-gray-400';
-                    return (
-                      <div key={cat} style={{ width: `${pct}%` }} className={`h-full ${colorClass}`} title={`${cat}: ¥${amount}`} />
-                    );
-                  })}
-                </div>
-
-                {/* Breakdown Legend */}
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {Object.entries(categoryStats).map(([cat, amount]) => {
-                    if (amount === 0) return null;
-                    const conf = EXPENSE_CATEGORIES[cat] || { label: cat, bg: 'bg-gray-400', color: '#9ca3af' };
-                    return (
-                      <div key={cat} className="flex items-center gap-1.5 text-xs bg-gray-50 dark:bg-slate-800 px-2 py-1 rounded border border-gray-100 dark:border-slate-700">
-                        <div className={`w-2 h-2 rounded-full ${conf.bg}`} />
-                        <span className="text-gray-600 dark:text-slate-300 font-bold">{conf.label}</span>
-                        <span className="font-mono text-gray-400">¥{amount.toLocaleString()}</span>
-                      </div>
-                    );
-                  })}
+                  {/* Breakdown Legend */}
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {Object.entries(categoryStats).map(([cat, amount]) => {
+                      if (amount === 0) return null;
+                      const conf = EXPENSE_CATEGORIES[cat] || { label: cat, bg: 'bg-gray-400', color: '#9ca3af' };
+                      return (
+                        <div key={cat} className="flex items-center gap-1.5 text-xs bg-paper-light/80 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-japan-blue/5 dark:border-slate-700">
+                          <div className={`w-2.5 h-2.5 rounded-full ${conf.bg}`} />
+                          <span className="text-ink dark:text-slate-300 font-bold">{conf.label}</span>
+                          <span className="font-mono text-ink-lighter dark:text-slate-400">¥{amount.toLocaleString()}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
@@ -845,9 +850,11 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                   </select>
                   <button
                     onClick={handleAddExpense}
-                    className="bg-japan-blue text-white w-10 h-10 rounded-lg flex items-center justify-center hover:bg-japan-blue/90 shadow-sm flex-shrink-0 dark:bg-sky-600 dark:hover:bg-sky-500"
+                    className="relative overflow-hidden group bg-gradient-to-r from-japan-blue-600 to-japan-blue-700 hover:from-japan-blue-700 hover:to-japan-blue-800 dark:from-japan-blue-500 dark:to-japan-blue-600 dark:hover:from-japan-blue-600 dark:hover:to-japan-blue-700 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 flex-shrink-0"
                   >
-                    <Plus size={20} />
+                    {/* Subtle shine effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                    <Plus size={22} className="relative z-10" />
                   </button>
                 </div>
               </div>
