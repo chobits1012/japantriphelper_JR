@@ -618,16 +618,33 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
       />
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh]">
 
-        {/* Header */}
-        <div className="bg-gray-900 p-4 flex items-center justify-between text-white">
-          <h3 className="font-serif font-bold text-lg tracking-wide flex items-center gap-2">
-            <Wallet size={20} className="text-yellow-400" />
-            旅遊工具箱
-          </h3>
-          <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition-colors">
-            <X size={20} />
-          </button>
+
+        {/* Header - Washi Style */}
+        <div className="relative bg-gradient-to-br from-paper-light to-paper bg-paper border-b-2 border-japan-blue/20 px-6 py-5 overflow-hidden">
+          {/* Subtle Decorative Background */}
+          <div className="absolute -right-12 -top-12 w-40 h-40 bg-japan-blue/5 rounded-full blur-3xl" />
+          <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-kiniro/10 rounded-full blur-2xl" />
+
+          {/* Content */}
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <h3 className="font-serif text-xl text-japan-blue-700 dark:text-japan-blue-300 tracking-wide flex items-center gap-2.5">
+                <Wallet size={22} className="text-kiniro" />
+                旅遊工具箱
+              </h3>
+              <p className="text-ink-lighter dark:text-ink-light text-xs mt-0.5 font-sans tracking-wider">
+                Travel Essentials
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="hover:bg-japan-blue/10 dark:hover:bg-japan-blue-700/20 p-2 rounded-full transition-colors text-ink-light hover:text-japan-blue-600 dark:text-ink-lighter dark:hover:text-japan-blue-400"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
+
 
         {/* Tabs */}
         <div className="flex border-b border-gray-100 dark:border-slate-800 overflow-x-auto no-scrollbar">
