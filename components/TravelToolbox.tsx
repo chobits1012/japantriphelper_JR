@@ -817,37 +817,44 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 )}
               </div>
 
-              {/* 4. Add Expense Input (Wrapped for Mobile) */}
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm flex flex-wrap gap-2 items-end">
-                <div className="flex-1 min-w-[140px]">
+              {/* 4. Add Expense Input - Enhanced Card */}
+              <div className="relative overflow-hidden bg-white/90 backdrop-blur-sm dark:bg-slate-900/90 p-4 rounded-2xl border border-japan-blue/10 dark:border-slate-800 shadow-lg shadow-japan-blue/5 flex flex-wrap gap-3 items-end">
+                {/* Subtle decorative element */}
+                <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-japan-blue/5 rounded-full blur-xl" />
+                <div className="flex-1 min-w-[140px] relative z-10">
+                  <label className="text-[10px] font-bold text-ink-lighter dark:text-slate-400 uppercase tracking-wider block mb-1.5">項目名稱</label>
                   <input
                     type="text"
-                    placeholder="項目 (如: 拉麵)"
+                    placeholder="例如：一蘭拉麵"
                     value={newExpTitle}
                     onChange={e => setNewExpTitle(e.target.value)}
-                    className="w-full text-sm font-bold border-b border-gray-200 dark:border-slate-700 focus:border-japan-blue dark:focus:border-sky-500 outline-none py-1 mb-2 bg-transparent dark:text-white placeholder-gray-400"
+                    className="w-full text-sm font-bold border-b-2 border-japan-blue/20 dark:border-slate-700 focus:border-japan-blue-600 dark:focus:border-japan-blue-400 outline-none py-2 mb-3 bg-transparent dark:text-white placeholder-ink-lighter/40 dark:placeholder-slate-500 transition-colors"
                   />
+                  <label className="text-[10px] font-bold text-ink-lighter dark:text-slate-400 uppercase tracking-wider block mb-1.5">金額 (日圓)</label>
                   <input
                     type="number"
-                    placeholder="金額 (JPY)"
+                    placeholder="1000"
                     value={newExpAmount}
                     onChange={e => setNewExpAmount(e.target.value)}
-                    className="w-full text-sm font-mono border-b border-gray-200 dark:border-slate-700 focus:border-japan-blue dark:focus:border-sky-500 outline-none py-1 bg-transparent dark:text-white placeholder-gray-400"
+                    className="w-full text-base font-mono font-bold border-b-2 border-japan-blue/20 dark:border-slate-700 focus:border-kiniro dark:focus:border-kiniro outline-none py-2 bg-transparent dark:text-white placeholder-ink-lighter/40 dark:placeholder-slate-500 transition-colors"
                   />
                 </div>
 
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <select
-                    value={newExpCat}
-                    onChange={(e: any) => setNewExpCat(e.target.value)}
-                    className="flex-1 text-xs bg-gray-50 dark:bg-slate-800 dark:text-white rounded px-2 py-2 border-none outline-none h-10"
-                  >
-                    <option value="food">美食</option>
-                    <option value="shopping">購物</option>
-                    <option value="transport">交通</option>
-                    <option value="hotel">住宿</option>
-                    <option value="other">其他</option>
-                  </select>
+                <div className="flex gap-3 w-full sm:w-auto relative z-10">
+                  <div className="flex-1">
+                    <label className="text-[10px] font-bold text-ink-lighter dark:text-slate-400 uppercase tracking-wider block mb-1.5">類別</label>
+                    <select
+                      value={newExpCat}
+                      onChange={(e: any) => setNewExpCat(e.target.value)}
+                      className="w-full text-sm font-bold bg-paper-light dark:bg-slate-800 dark:text-white rounded-lg px-3 py-3 border border-japan-blue/10 dark:border-slate-700 outline-none focus:border-japan-blue-600 dark:focus:border-japan-blue-400 transition-colors cursor-pointer"
+                    >
+                      <option value="food">🌸 美食</option>
+                      <option value="shopping">🍵 購物</option>
+                      <option value="transport">⚫ 交通</option>
+                      <option value="hotel">✨ 住宿</option>
+                      <option value="other">🌸 其他</option>
+                    </select>
+                  </div>
                   <button
                     onClick={handleAddExpense}
                     className="relative overflow-hidden group bg-gradient-to-r from-japan-blue-600 to-japan-blue-700 hover:from-japan-blue-700 hover:to-japan-blue-800 dark:from-japan-blue-500 dark:to-japan-blue-600 dark:hover:from-japan-blue-600 dark:hover:to-japan-blue-700 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 flex-shrink-0"
@@ -859,36 +866,66 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 </div>
               </div>
 
-              {/* 5. Expense List */}
-              <div className="space-y-2">
+              {/* 5. Expense List - Enhanced */}
+              <div className="space-y-3">
                 {expenses.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400 text-sm">還沒有記帳紀錄</div>
-                ) : (
-                  expenses.map(item => (
-                    <div key={item.id} className="flex items-center justify-between bg-white dark:bg-slate-900 p-3 rounded-lg border border-gray-100 dark:border-slate-800 shadow-sm animate-in slide-in-from-bottom-2">
-                      <div className="flex items-center gap-3">
-                        <div className={`
-                           w-8 h-8 rounded-full flex items-center justify-center text-xs text-white font-bold flex-shrink-0
-                           ${item.category === 'food' ? 'bg-orange-400' :
-                            item.category === 'shopping' ? 'bg-purple-400' :
-                              item.category === 'transport' ? 'bg-gray-400' :
-                                item.category === 'hotel' ? 'bg-indigo-400' : 'bg-blue-400'}
-                        `}>
-                          {item.category[0].toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-bold text-ink dark:text-white text-sm truncate">{item.title}</p>
-                          <p className="text-[10px] text-gray-400">{item.date} • {item.category}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="font-mono font-bold text-japan-blue dark:text-sky-400">¥{item.amountJPY.toLocaleString()}</span>
-                        <button onClick={() => handleDeleteExpense(item.id)} className="text-gray-300 hover:text-red-400">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-japan-blue/5 flex items-center justify-center">
+                      <Coins size={28} className="text-ink-lighter/30" />
                     </div>
-                  ))
+                    <p className="text-ink-lighter dark:text-slate-400 text-sm font-serif">還沒有記帳紀錄</p>
+                    <p className="text-ink-lighter/60 dark:text-slate-500 text-xs mt-1">開始記錄您的旅遊花費</p>
+                  </div>
+                ) : (
+                  expenses.map((item, index) => {
+                    const categoryConf = EXPENSE_CATEGORIES[item.category] || EXPENSE_CATEGORIES['other'];
+                    return (
+                      <div
+                        key={item.id}
+                        className="relative overflow-hidden flex items-center justify-between bg-white/80 backdrop-blur-sm dark:bg-slate-900/80 p-4 rounded-xl border border-japan-blue/10 dark:border-slate-800 shadow-md hover:shadow-lg transition-all duration-300 animate-in slide-in-from-bottom-2"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        {/* Subtle decorative background */}
+                        <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full blur-2xl opacity-30" style={{ backgroundColor: categoryConf.color }} />
+
+                        <div className="flex items-center gap-3.5 flex-1 min-w-0 relative z-10">
+                          {/* Category Badge - Enhanced */}
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0 ${categoryConf.bg} bg-opacity-90`}>
+                            <span className="text-white drop-shadow">
+                              {item.category === 'food' ? '🌸' :
+                                item.category === 'shopping' ? '🍵' :
+                                  item.category === 'transport' ? '🚇' :
+                                    item.category === 'hotel' ? '✨' : '🌸'}
+                            </span>
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold text-ink dark:text-white text-base truncate leading-tight">{item.title}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-[10px] text-ink-lighter dark:text-slate-400 font-medium">{item.date}</span>
+                              <span className="text-ink-lighter/40">•</span>
+                              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: categoryConf.color }}>
+                                {categoryConf.label}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 flex-shrink-0 relative z-10">
+                          <div className="text-right">
+                            <span className="font-mono font-bold text-lg text-japan-blue-700 dark:text-japan-blue-300">¥{item.amountJPY.toLocaleString()}</span>
+                            <p className="text-[9px] text-ink-lighter dark:text-slate-400 font-mono mt-0.5">{toTWD(item.amountJPY)}</p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteExpense(item.id)}
+                            className="p-2 rounded-lg text-ink-lighter/40 hover:text-japan-red-500 hover:bg-japan-red-50 dark:hover:bg-japan-red-900/20 transition-colors"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </div>
