@@ -321,40 +321,54 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
               </div>
             </div>
           </div>
-          {/* Plan Tabs (Moved Below Header) */}
-          <div className="mt-4 flex items-center gap-1">
-            <div className="flex gap-1 bg-gray-100 dark:bg-slate-800 p-1 rounded-lg">
-              {PLANS.map(plan => {
-                const isActive = currentPlanId === plan;
-                const hasContent = plan === currentPlanId ? editData.events.length > 0 : (editData.subPlans?.[plan]?.events.length || 0) > 0;
-                return (
-                  <button
-                    key={plan}
-                    onClick={() => handleSwitchPlan(plan)}
-                    className={`
-                       px-4 py-2.5 min-h-[44px] min-w-[44px] rounded-md text-xs font-bold transition-[background-color,color,transform] flex items-center justify-center gap-1
-                       ${isActive
-                        ? 'bg-white dark:bg-slate-700 text-japan-blue dark:text-sky-400 shadow-sm'
-                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-slate-300'}
-                     `}
-                  >
-                    <span>{plan}</span>
-                    {hasContent && <div className={`w-1 h-1 rounded-full ${isActive ? 'bg-japan-blue dark:bg-sky-400' : 'bg-gray-300'}`} />}
-                  </button>
-                );
-              })}
-              {/* Clear Plan Button */}
+          {/* Plan Selector - Compact Dropdown */}
+          <div className="mt-4 flex items-center gap-2">
+            <div className="relative inline-flex items-center gap-2">
+              <select
+                value={currentPlanId}
+                onChange={(e) => handleSwitchPlan(e.target.value)}
+                className="
+                  pl-3 pr-8 py-2 min-h-[44px]
+                  text-xs font-medium text-gray-700 dark:text-gray-300
+                  bg-white dark:bg-slate-800
+                  border border-gray-200 dark:border-slate-700
+                  rounded-lg
+                  cursor-pointer
+                  appearance-none
+                  hover:border-japan-blue dark:hover:border-sky-500
+                  focus:outline-none focus:ring-2 focus:ring-japan-blue/20 dark:focus:ring-sky-500/20
+                  transition-colors
+                "
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: 'right 0.5rem center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '1.5em 1.5em',
+                }}
+              >
+                {PLANS.map(plan => {
+                  const hasContent = plan === currentPlanId
+                    ? editData.events.length > 0
+                    : (editData.subPlans?.[plan]?.events.length || 0) > 0;
+                  return (
+                    <option key={plan} value={plan}>
+                      方案 {plan}{hasContent ? ' ●' : ''}
+                    </option>
+                  );
+                })}
+              </select>
+
+              {/* Clear Plan Button - Only show when current plan has content */}
               {editData.events.length > 0 && (
                 <button
                   onClick={handleClearPlan}
-                  className="p-2.5 min-h-[44px] min-w-[44px] ml-0.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center justify-center"
+                  className="p-2 min-h-[44px] min-w-[44px] rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center justify-center"
                   title={`清空方案 ${currentPlanId}`}
                 >
-                  <Trash2 size={14} />
+                  <Eraser size={16} />
                 </button>
               )}
             </div>
-            <span className="text-[10px] text-gray-300 font-bold ml-1">方案</span>
           </div>
         </div>
 
@@ -410,15 +424,37 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
                             <button onClick={() => requestRemoveEvent(index)} className="text-gray-400 hover:text-red-500 p-2" title="刪除"><Trash2 size={24} /></button>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <div className="w-1/3">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <div className="w-full sm:w-[120px] sm:flex-shrink-0">
                             <label className="text-[10px] font-bold text-gray-400 block mb-1">時間 (24h)</label>
-                            <input type="time" value={event.time} onChange={e => handleEventChange(index, 'time', e.target.value)} className="w-full p-3 text-base font-bold border rounded-lg bg-gray-50 dark:bg-slate-900 dark:text-white dark:border-slate-600 focus:outline-none focus:border-japan-blue" />
+                            <input
+                              type="time"
+                              value={event.time}
+                              onChange={e => handleEventChange(index, 'time', e.target.value)}
+                              onFocus={(e) => {
+                                setTimeout(() => {
+                                  e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }, 300);
+                              }}
+                              inputMode="numeric"
+                              autoComplete="off"
+                              className="w-full p-3 text-base font-bold border rounded-lg bg-gray-50 dark:bg-slate-900 dark:text-white dark:border-slate-600 focus:outline-none focus:border-japan-blue"
+                            />
                           </div>
-                          <div className="w-2/3">
+                          <div className="w-full sm:flex-1 sm:min-w-0">
                             <label className="text-[10px] font-bold text-gray-400 block mb-1">類別</label>
-                            <select value={event.category || 'sightseeing'} onChange={e => handleEventChange(index, 'category', e.target.value)} className="w-full p-3 text-base border rounded-lg bg-gray-50 dark:bg-slate-900 dark:text-white dark:border-slate-600 focus:outline-none focus:border-japan-blue appearance-none">
-                              <option value="sightseeing">景點</option><option value="food">美食</option><option value="shopping">購物</option><option value="transport">交通</option><option value="hotel">住宿</option><option value="flight">航班</option><option value="activity">體驗</option>
+                            <select
+                              value={event.category || 'sightseeing'}
+                              onChange={e => handleEventChange(index, 'category', e.target.value)}
+                              className="w-full p-3 pr-10 text-base border rounded-lg bg-gray-50 dark:bg-slate-900 dark:text-white dark:border-slate-600 focus:outline-none focus:border-japan-blue appearance-none"
+                            >
+                              <option value="sightseeing">景點</option>
+                              <option value="food">美食</option>
+                              <option value="shopping">購物</option>
+                              <option value="transport">交通</option>
+                              <option value="hotel">住宿</option>
+                              <option value="flight">航班</option>
+                              <option value="activity">體驗</option>
                             </select>
                           </div>
                         </div>
