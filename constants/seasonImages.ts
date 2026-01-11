@@ -2,28 +2,24 @@ import { TripSeason } from '../types';
 
 export const SEASON_IMAGES: Record<TripSeason, string[]> = {
     spring: [
-        // Custom User Images
-        "https://github.com/user-attachments/assets/1c95dc05-f06e-4091-acd2-3317bb6287b4",
-        "https://github.com/user-attachments/assets/19fdac90-bbf3-44cf-9227-03ab227b488c",
-        "https://github.com/user-attachments/assets/a366178a-4366-4e06-94af-74650e442b4b"
+        "/seasons/spring_01.jpg",
+        "/seasons/spring_02.jpg"
     ],
     summer: [
-        // Custom User Images
-        "https://github.com/user-attachments/assets/edfb8d26-e895-4958-beb0-04e0b23b102e",
-        "https://github.com/user-attachments/assets/cd58ae44-0dca-4619-ad92-7156993ed042",
-        "https://github.com/user-attachments/assets/a321e5e5-3c89-43ad-9866-58ab528015ae"
+        "/seasons/summer_01.jpg",
+        "/seasons/summer_02.jpg",
+        "/seasons/summer_03.jpg"
     ],
     autumn: [
-        // Custom User Images
-        "https://github.com/user-attachments/assets/54060fe5-d344-41f6-9f64-eb5b0dae962d",
-        "https://github.com/user-attachments/assets/18fb5f96-57e8-444d-8704-8d79f0b70803",
-        "https://github.com/user-attachments/assets/3205580e-b7ca-4ed9-892d-683cd46ad745"
+        "/seasons/autumn_01.jpg",
+        "/seasons/autumn_02.jpg",
+        "/seasons/autumn_03.jpg"
     ],
     winter: [
-        // Custom User Images
-        "https://github.com/user-attachments/assets/ab0690b5-8faa-47a7-8e1f-bdd0058d04f6",
-        "https://github.com/user-attachments/assets/2848aed7-fbf7-446c-b874-6d399d99afb7",
-        "https://github.com/user-attachments/assets/ea7dfdd0-21d2-4f1d-833a-baf52647de40"
+        // Waiting for uploads...
+        "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?q=80&w=2070&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1518331327725-d9124bece653?q=80&w=2069&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1517411654406-38374d271954?q=80&w=2070&auto=format&fit=crop"
     ]
 };
 
