@@ -98,7 +98,7 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
             {/* Copy Button */}
             <button
               onClick={handleCopy}
-              className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400 hover:text-japan-blue transition-colors duration-300 dark:hover:bg-slate-800 dark:text-slate-500 dark:hover:text-sky-400"
+              className="p-2.5 min-w-[44px] min-h-[44px] hover:bg-gray-100 rounded-full text-gray-400 hover:text-japan-blue transition-[background-color,color] duration-300 dark:hover:bg-slate-800 dark:text-slate-500 dark:hover:text-sky-400 flex items-center justify-center"
               title="複製地點/標題"
             >
               {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
@@ -108,7 +108,7 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
             {(event.mapQuery || event.category === 'sightseeing' || event.category === 'food' || event.category === 'hotel') && (
               <button
                 onClick={handleMapClick}
-                className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400 hover:text-japan-blue transition-colors duration-300 dark:hover:bg-slate-800 dark:text-slate-500 dark:hover:text-sky-400"
+                className="p-2.5 min-w-[44px] min-h-[44px] hover:bg-gray-100 rounded-full text-gray-400 hover:text-japan-blue transition-[background-color,color] duration-300 dark:hover:bg-slate-800 dark:text-slate-500 dark:hover:text-sky-400 flex items-center justify-center"
                 title="在 Google 地圖中查看"
               >
                 <ExternalLink size={16} />
@@ -146,7 +146,7 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
                     }
                     window.open(link, '_blank');
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-japan-red text-white text-xs rounded-full shadow-sm hover:bg-japan-red/90 transition-transform active:scale-95"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] bg-japan-red text-white text-xs rounded-full shadow-sm hover:bg-japan-red/90 transition-[background-color,transform] active:scale-95"
                 >
                   <ExternalLink size={12} />
                   <span className="font-bold">
@@ -159,7 +159,7 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({ event, isLast }) => {
               {imgs.length > 0 && (
                 <button
                   onClick={() => setShowTicketModal(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-japan-red text-white text-xs rounded-full shadow-sm hover:bg-japan-red/90 transition-transform active:scale-95"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] bg-japan-red text-white text-xs rounded-full shadow-sm hover:bg-japan-red/90 transition-[background-color,transform] active:scale-95"
                 >
                   <ImageIcon size={12} />
                   <span className="font-bold">

@@ -28,7 +28,7 @@ export const TripCard = forwardRef<HTMLDivElement, TripCardProps>(({
             style={style}
             // attributes and listeners REMOVED from here to prevent whole-card dragging
             className={`
-                group relative bg-white/90 backdrop-blur-md rounded-2xl overflow-hidden cursor-pointer shadow-lg transition-all duration-300 border border-white/40 mb-6
+                group relative bg-white/90 backdrop-blur-md rounded-2xl overflow-hidden cursor-pointer shadow-lg transition-[transform,box-shadow] duration-300 border border-white/40 mb-6
                 ${isOverlay ? 'scale-105 shadow-2xl rotate-2 ring-4 ring-japan-blue/50 z-50' : 'hover:shadow-2xl hover:scale-[1.01]'}
             `}
         >

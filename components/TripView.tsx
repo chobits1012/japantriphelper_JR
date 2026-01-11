@@ -370,10 +370,10 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
           className={`relative z-10 flex flex-col transition-all duration-1000 ease-[cubic-bezier(0.25,0.8,0.25,1)] flex-shrink-0 pt-[env(safe-area-inset-top)] ${isHome ? 'w-full bg-transparent' : 'w-[80px] lg:w-[380px] bg-white/90 backdrop-blur-md border-r border-gray-200/60 dark:bg-slate-900/90 dark:border-slate-700/60'}`}
         >
 
-          <div className={`transition-all duration-1000 flex-shrink-0 relative ${isHome ? 'h-[25vh] flex flex-col justify-end items-center pb-8 text-white text-shadow-lg' : 'h-0 overflow-hidden opacity-0'}`}>
+          <div className={`transition-[height,opacity] duration-1000 flex-shrink-0 relative ${isHome ? 'h-[25vh] flex flex-col justify-end items-center pb-8 text-white text-shadow-lg' : 'h-0 overflow-hidden opacity-0'}`}>
             {/* TOP NAVIGATION BAR */}
             <div className="absolute top-4 left-4 md:top-8 md:left-8 z-50 flex justify-between w-[calc(100%-2rem)] md:w-[calc(100%-4rem)]">
-              <button onClick={onBack} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-bold transition-all">
+              <button onClick={onBack} className="flex items-center gap-2 px-3 py-1.5 min-h-[44px] rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-bold transition-[background-color,transform]">
                 <ArrowLeft size={16} /> 我的旅程
               </button>
 
@@ -381,7 +381,7 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
                 {/* COPY TEXT BUTTON */}
                 <button
                   onClick={handleCopyText}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-bold transition-all group"
+                  className="flex items-center gap-2 px-3 py-1.5 min-h-[44px] rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-bold transition-[background-color,opacity] group"
                   title="複製純文字行程"
                 >
                   <span className="hidden md:inline text-xs opacity-80 group-hover:opacity-100">
@@ -393,7 +393,7 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
                 {/* DELETE BUTTON */}
                 <button
                   onClick={requestDeleteTrip}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/20 hover:bg-red-500/40 backdrop-blur-md border border-red-500/30 text-white text-sm font-bold transition-all group"
+                  className="flex items-center gap-2 px-3 py-1.5 min-h-[44px] rounded-full bg-red-500/20 hover:bg-red-500/40 backdrop-blur-md border border-red-500/30 text-white text-sm font-bold transition-[background-color] group"
                   title="刪除整趟旅程"
                 >
                   <span className="hidden md:inline text-xs opacity-80 group-hover:opacity-100">刪除旅程</span>
@@ -453,7 +453,7 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
             <div className="mt-4 w-16 h-1 bg-japan-red shadow-lg rounded-full"></div>
           </div>
 
-          <div onClick={handleHome} className={`cursor-pointer p-6 text-center transition-all duration-1000 hover:bg-gray-50 dark:hover:bg-slate-800 ${!isHome ? 'hidden lg:block opacity-100' : 'hidden opacity-0'}`}>
+          <div onClick={handleHome} className={`cursor-pointer p-6 text-center transition-[background-color,opacity] duration-1000 hover:bg-gray-50 dark:hover:bg-slate-800 ${!isHome ? 'hidden lg:block opacity-100' : 'hidden opacity-0'}`}>
             <div className="flex items-center justify-center gap-2 mb-1 text-japan-blue/80 dark:text-sky-400">
               {getSeasonIcon(tripSettings.season, 16)}
               <span className="text-xs font-bold tracking-[0.2em] uppercase">{tripSettings.startDate.split('-')[0]}</span>
@@ -489,7 +489,7 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
                 <button
                   onClick={handleAddDay}
                   className={`
-                    w-full mt-4 py-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 hover:border-japan-blue hover:text-japan-blue hover:bg-white/50 transition-all flex items-center justify-center gap-2 font-bold mb-8 dark:border-slate-600 dark:text-slate-500 dark:hover:border-sky-400 dark:hover:text-sky-400 dark:hover:bg-slate-800
+                    w-full mt-4 py-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 hover:border-japan-blue hover:text-japan-blue hover:bg-white/50 transition-[border-color,color,background-color] flex items-center justify-center gap-2 font-bold mb-8 dark:border-slate-600 dark:text-slate-500 dark:hover:border-sky-400 dark:hover:text-sky-400 dark:hover:bg-slate-800
                     ${!isHome ? 'hidden lg:flex' : ''}
                   `}
                 >
@@ -529,21 +529,21 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
             `}
             style={{ bottom: isHome ? 'max(2rem, env(safe-area-inset-bottom))' : 'max(2rem, env(safe-area-inset-bottom))' }}
           >
-            <button onClick={toggleDarkMode} title={isDarkMode ? "切換亮色模式" : "切換深色模式"} className={`p-2 rounded-full shadow-lg transition-all duration-500 ${isHome ? 'bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white/70 hover:text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-500 hover:text-gray-700 dark:bg-slate-800 dark:text-yellow-400 dark:hover:bg-slate-700'}`}>
+            <button onClick={toggleDarkMode} title={isDarkMode ? "切換亮色模式" : "切換深色模式"} className={`p-3 min-w-[44px] min-h-[44px] rounded-full shadow-lg transition-[background-color,color] duration-500 flex items-center justify-center ${isHome ? 'bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white/70 hover:text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-500 hover:text-gray-700 dark:bg-slate-800 dark:text-yellow-400 dark:hover:bg-slate-700'}`}>
               {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
-            <button onClick={requestReset} title="重置本旅程" className={`p-2 rounded-full shadow-lg transition-all duration-500 ${isHome ? 'bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white/70 hover:text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-500 hover:text-gray-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'}`}>
+            <button onClick={requestReset} title="重置本旅程" className={`p-3 min-w-[44px] min-h-[44px] rounded-full shadow-lg transition-[background-color,color] duration-500 flex items-center justify-center ${isHome ? 'bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white/70 hover:text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-500 hover:text-gray-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'}`}>
               <RotateCcw size={16} />
             </button>
 
             {/* DELETE BUTTON REMOVED FROM HERE */}
 
-            <button onClick={() => setIsToolboxOpen(true)} title="旅遊工具箱" className={`p-2 rounded-full shadow-lg transition-all duration-500 text-white ${isHome ? 'bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30' : 'bg-orange-500 hover:bg-orange-600'}`}>
+            <button onClick={() => setIsToolboxOpen(true)} title="旅遊工具箱" className={`p-3 min-w-[44px] min-h-[44px] rounded-full shadow-lg transition-[background-color] duration-500 text-white flex items-center justify-center ${isHome ? 'bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30' : 'bg-orange-500 hover:bg-orange-600'}`}>
               <Briefcase size={18} />
             </button>
 
-            <button onClick={() => setIsAIModalOpen(true)} className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-lg transition-all duration-500 font-bold group ${isHome ? 'bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white' : 'bg-japan-blue hover:bg-japan-blue/90 text-white dark:bg-sky-600 dark:hover:bg-sky-500'}`}>
+            <button onClick={() => setIsAIModalOpen(true)} className={`flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-full shadow-lg transition-[background-color,transform] duration-500 font-bold group ${isHome ? 'bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white' : 'bg-japan-blue hover:bg-japan-blue/90 text-white dark:bg-sky-600 dark:hover:bg-sky-500'}`}>
               <Sparkles size={16} className={isHome ? "group-hover:text-yellow-300 transition-colors" : ""} />
               <span className={`${!isHome ? 'hidden lg:inline' : ''}`}>AI 排程</span>
             </button>

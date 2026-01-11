@@ -48,19 +48,17 @@ export const DayCard: React.FC<DayCardProps> = ({
       ref={innerRef}
       style={style}
       className={`
-        relative transition-all duration-1000 group
-        ${
-          isHome
-            ? 'bg-white/85 backdrop-blur-sm rounded-xl p-4 border border-white/20 mb-3 dark:bg-slate-800/90 dark:border-slate-700'
-            : isSelected
+        relative transition-[transform,background-color,box-shadow] duration-1000 group
+        ${isHome
+          ? 'bg-white/85 backdrop-blur-sm rounded-xl p-4 border border-white/20 mb-3 dark:bg-slate-800/90 dark:border-slate-700'
+          : isSelected
             ? 'bg-japan-blue text-white p-5 pl-6 dark:bg-sky-700'
             : 'hover:bg-gray-50 text-ink p-5 pl-6 border-b border-gray-100 last:border-0 dark:text-slate-100 dark:hover:bg-slate-800 dark:border-slate-800'
         }
         ${isHome && !isOverlay ? 'hover:bg-white hover:shadow-xl hover:scale-[1.01] dark:hover:bg-slate-800' : ''}
-        ${
-          isOverlay
-            ? 'shadow-2xl scale-105 bg-white ring-2 ring-japan-blue rotate-2 cursor-grabbing dark:bg-slate-800 dark:ring-sky-500'
-            : ''
+        ${isOverlay
+          ? 'shadow-2xl scale-105 bg-white ring-2 ring-japan-blue rotate-2 cursor-grabbing dark:bg-slate-800 dark:ring-sky-500'
+          : ''
         }
         ${!isHome && 'h-[80px] flex justify-center items-center lg:block lg:h-auto'}
       `}
@@ -149,21 +147,18 @@ export const DayCard: React.FC<DayCardProps> = ({
             )}
 
             <div
-              className={`flex flex-col items-center justify-center transition-all ${
-                !isHome ? 'lg:mr-4' : 'mr-5'
-              } ${!isSelected && !isHome ? 'text-gray-400 dark:text-slate-500' : ''}`}
+              className={`flex flex-col items-center justify-center transition-all ${!isHome ? 'lg:mr-4' : 'mr-5'
+                } ${!isSelected && !isHome ? 'text-gray-400 dark:text-slate-500' : ''}`}
             >
               <span
-                className={`font-serif font-bold leading-none ${
-                  isSelected ? 'text-lg lg:text-2xl' : 'text-2xl'
-                }`}
+                className={`font-serif font-bold leading-none ${isSelected ? 'text-lg lg:text-2xl' : 'text-2xl'
+                  }`}
               >
                 {day.date.split('/')[1]}
               </span>
               <span
-                className={`text-[10px] uppercase mt-1 ${
-                  isSelected ? 'text-white/80' : 'text-gray-400 dark:text-slate-500'
-                }`}
+                className={`text-[10px] uppercase mt-1 ${isSelected ? 'text-white/80' : 'text-gray-400 dark:text-slate-500'
+                  }`}
               >
                 {day.weekday}
               </span>
@@ -172,9 +167,8 @@ export const DayCard: React.FC<DayCardProps> = ({
             <div className="hidden lg:block flex-1 min-w-0 pr-2">
               <div className="flex justify-between items-center mb-1">
                 <h3
-                  className={`font-bold text-lg font-serif truncate ${
-                    isSelected ? 'text-white' : 'text-ink dark:text-slate-200'
-                  }`}
+                  className={`font-bold text-lg font-serif truncate ${isSelected ? 'text-white' : 'text-ink dark:text-slate-200'
+                    }`}
                 >
                   {day.title}
                 </h3>
@@ -194,9 +188,8 @@ export const DayCard: React.FC<DayCardProps> = ({
               </div>
 
               <p
-                className={`text-sm truncate ${
-                  isSelected ? 'text-white/70' : 'text-gray-500 dark:text-slate-400'
-                }`}
+                className={`text-sm truncate ${isSelected ? 'text-white/70' : 'text-gray-500 dark:text-slate-400'
+                  }`}
               >
                 {day.desc}
               </p>

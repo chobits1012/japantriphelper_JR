@@ -229,7 +229,7 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
               href={GOOGLE_AI_STUDIO_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2 p-2.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all text-sm"
+              className="w-full flex items-center justify-center gap-2 p-2.5 min-h-[44px] bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-[background-image,transform] text-sm"
             >
               <ExternalLink size={16} />
               免費申請 API Key（Google AI Studio）
@@ -248,7 +248,7 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
                 <button
                   type="button"
                   onClick={handleClearSavedKey}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-all"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-[color,background-color]"
                   title="清除已儲存的 API Key"
                 >
                   <Trash2 size={16} />
@@ -282,7 +282,7 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
               <button
                 type="button"
                 onClick={() => setShowHelp(!showHelp)}
-                className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all text-sm"
+                className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-[background-color] text-sm"
               >
                 <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300 font-medium">
                   <HelpCircle size={14} />
@@ -314,7 +314,7 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <button
                 onClick={() => setTargetDay('all')}
-                className={`p-3 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition-all ${targetDay === 'all' ? 'bg-japan-blue text-white border-japan-blue' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
+                className={`p-3 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition-[background-color,border-color,color] min-h-[48px] ${targetDay === 'all' ? 'bg-japan-blue text-white border-japan-blue' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
               >
                 <CalendarRange size={16} />
                 整趟旅程 ({existingDays.length} 天)
@@ -323,7 +323,7 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
                 <select
                   value={targetDay}
                   onChange={(e) => setTargetDay(e.target.value)}
-                  className={`flex-1 p-3 rounded-lg border text-sm font-bold outline-none transition-all ${targetDay !== 'all' ? 'bg-japan-blue text-white border-japan-blue' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
+                  className={`flex-1 p-3 rounded-lg border text-sm font-bold outline-none transition-[background-color,border-color,color] min-h-[48px] ${targetDay !== 'all' ? 'bg-japan-blue text-white border-japan-blue' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
                 >
                   <option value="all" className="text-gray-800 bg-white">單日修改 (請選擇)...</option>
                   {existingDays.map(day => (
@@ -380,7 +380,7 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
             onClick={handleGenerate}
             disabled={loading}
             className={`
-              flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-white shadow-lg transition-all
+              flex items-center gap-2 px-6 py-3 min-h-[48px] rounded-lg font-bold text-white shadow-lg transition-[background-color,transform]
               ${loading ? 'bg-gray-400 cursor-wait' : 'bg-japan-blue hover:bg-japan-blue/90 hover:scale-105'}
             `}
           >

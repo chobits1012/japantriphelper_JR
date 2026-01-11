@@ -323,7 +323,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
           </div>
           {/* Plan Tabs (Moved Below Header) */}
           <div className="mt-4 flex items-center gap-1">
-            <div className="flex gap-1 bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg">
+            <div className="flex gap-1 bg-gray-100 dark:bg-slate-800 p-1 rounded-lg">
               {PLANS.map(plan => {
                 const isActive = currentPlanId === plan;
                 const hasContent = plan === currentPlanId ? editData.events.length > 0 : (editData.subPlans?.[plan]?.events.length || 0) > 0;
@@ -332,7 +332,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
                     key={plan}
                     onClick={() => handleSwitchPlan(plan)}
                     className={`
-                       px-3 py-0.5 rounded-md text-[10px] font-bold transition-all flex items-center gap-1
+                       px-4 py-2.5 min-h-[44px] min-w-[44px] rounded-md text-xs font-bold transition-[background-color,color,transform] flex items-center justify-center gap-1
                        ${isActive
                         ? 'bg-white dark:bg-slate-700 text-japan-blue dark:text-sky-400 shadow-sm'
                         : 'text-gray-400 hover:text-gray-600 dark:hover:text-slate-300'}
@@ -347,10 +347,10 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
               {editData.events.length > 0 && (
                 <button
                   onClick={handleClearPlan}
-                  className="px-1.5 ml-0.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  className="p-2.5 min-h-[44px] min-w-[44px] ml-0.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center justify-center"
                   title={`清空方案 ${currentPlanId}`}
                 >
-                  <Trash2 size={12} />
+                  <Trash2 size={14} />
                 </button>
               )}
             </div>
@@ -422,9 +422,9 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
                             </select>
                           </div>
                         </div>
-                        <div><label className="text-[10px] font-bold text-gray-400 block mb-1">標題</label><input type="text" value={event.title} onChange={e => handleEventChange(index, 'title', e.target.value)} className="w-full p-3 font-bold border rounded-lg bg-gray-50 dark:bg-slate-900 dark:text-white dark:border-slate-600 focus:outline-none focus:border-japan-blue text-base" /></div>
-                        <div><label className="text-[10px] font-bold text-gray-400 block mb-1">地圖關鍵字</label><div className="flex items-center gap-2 border rounded-lg bg-gray-50 dark:bg-slate-900 dark:border-slate-600 px-3 py-1"><MapPin size={16} className="text-gray-400 flex-shrink-0" /><input type="text" value={event.mapQuery || ''} onChange={e => handleEventChange(index, 'mapQuery', e.target.value)} className="w-full p-2 text-base bg-transparent dark:text-white focus:outline-none" placeholder="例如: 清水寺" /></div></div>
-                        <div><label className="text-[10px] font-bold text-gray-400 block mb-1">備註</label><textarea value={event.desc} onChange={e => handleEventChange(index, 'desc', e.target.value)} className="w-full p-3 text-base border rounded-lg h-24 resize-none bg-gray-50 dark:bg-slate-900 dark:text-white dark:border-slate-600 focus:outline-none focus:border-japan-blue" /></div>
+                        <div><label className="text-[10px] font-bold text-gray-400 block mb-1">標題</label><input type="text" value={event.title} onChange={e => handleEventChange(index, 'title', e.target.value)} onFocus={(e) => { setTimeout(() => { e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); }} autoComplete="off" className="w-full p-3 font-bold border rounded-lg bg-gray-50 dark:bg-slate-900 dark:text-white dark:border-slate-600 focus:outline-none focus:border-japan-blue text-base" /></div>
+                        <div><label className="text-[10px] font-bold text-gray-400 block mb-1">地圖關鍵字</label><div className="flex items-center gap-2 border rounded-lg bg-gray-50 dark:bg-slate-900 dark:border-slate-600 px-3 py-1"><MapPin size={16} className="text-gray-400 flex-shrink-0" /><input type="text" value={event.mapQuery || ''} onChange={e => handleEventChange(index, 'mapQuery', e.target.value)} onFocus={(e) => { setTimeout(() => { e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); }} inputMode="search" autoComplete="off" className="w-full p-2 text-base bg-transparent dark:text-white focus:outline-none" placeholder="例如: 清水寺" /></div></div>
+                        <div><label className="text-[10px] font-bold text-gray-400 block mb-1">備註</label><textarea value={event.desc} onChange={e => handleEventChange(index, 'desc', e.target.value)} onFocus={(e) => { setTimeout(() => { e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); }} className="w-full p-3 text-base border rounded-lg h-24 resize-none bg-gray-50 dark:bg-slate-900 dark:text-white dark:border-slate-600 focus:outline-none focus:border-japan-blue" /></div>
 
                         {/* Ticket Input Section */}
                         <TicketInput
@@ -443,7 +443,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
                     );
                   } else {
                     return (
-                      <div key={index} onClick={() => setEditingEventIndex(index)} className="flex items-center gap-3 bg-gray-50 hover:bg-white hover:shadow-md border border-gray-100 p-4 rounded-xl cursor-pointer transition-all group dark:bg-slate-800/50 dark:border-slate-700 dark:hover:bg-slate-800">
+                      <div key={index} onClick={() => setEditingEventIndex(index)} className="flex items-center gap-3 bg-gray-50 hover:bg-white hover:shadow-md border border-gray-100 p-4 rounded-xl cursor-pointer transition-[background-color,box-shadow] group dark:bg-slate-800/50 dark:border-slate-700 dark:hover:bg-slate-800 min-h-[60px]">
                         <div className="text-sm font-bold text-gray-400 w-12 flex-shrink-0 dark:text-slate-500">{event.time}</div>
                         <div className="flex-1 min-w-0"><h4 className="font-bold text-base text-ink truncate dark:text-slate-200">{event.title}</h4><p className="text-xs text-gray-500 truncate dark:text-slate-400">{event.desc}</p></div>
                         <div className="text-gray-300 group-hover:text-japan-blue dark:group-hover:text-sky-400 transition-colors p-2"><Pencil size={18} /></div>
@@ -498,9 +498,9 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
                   </div>
                 )}
                 {day.events.filter(e => e.mapQuery).length >= 2 && (
-                  <button onClick={handleViewRoute} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-600 hover:text-japan-blue hover:border-japan-blue/30 transition-all shadow-sm group dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:text-sky-400 dark:hover:border-sky-500/30"><MapIcon size={14} className="group-hover:scale-110 transition-transform text-japan-blue dark:text-sky-400" /><span>查看路線</span></button>
+                  <button onClick={handleViewRoute} className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-600 hover:text-japan-blue hover:border-japan-blue/30 transition-[color,border-color] shadow-sm group dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:text-sky-400 dark:hover:border-sky-500/30"><MapIcon size={14} className="group-hover:scale-110 transition-transform text-japan-blue dark:text-sky-400" /><span>查看路線</span></button>
                 )}
-                <button onClick={handleJorudanSearch} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-600 hover:text-green-600 hover:border-green-200 transition-all shadow-sm group dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:text-green-400 dark:hover:border-green-500/30"><Search size={14} className="group-hover:scale-110 transition-transform text-green-500 dark:text-green-400" /><span>乘換案內</span></button>
+                <button onClick={handleJorudanSearch} className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-600 hover:text-green-600 hover:border-green-200 transition-[color,border-color] shadow-sm group dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:text-green-400 dark:hover:border-green-500/30"><Search size={14} className="group-hover:scale-110 transition-transform text-green-500 dark:text-green-400" /><span>乘換案內</span></button>
               </div>
             )}
             <div className="max-w-3xl mx-auto pl-2 md:pl-4 mb-12">
@@ -527,9 +527,9 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-4 pb-8 z-20 flex justify-between items-center safe-area-bottom dark:bg-slate-900/90 dark:border-slate-800">
-        <button onClick={onPrev} disabled={!hasPrev || isEditing} className={`flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-lg transition-all ${hasPrev && !isEditing ? 'text-japan-blue hover:bg-japan-blue/5 dark:text-sky-400 dark:hover:bg-slate-800' : 'text-gray-300 cursor-not-allowed dark:text-slate-700'}`}><ChevronLeft size={16} /><span className="hidden md:inline">上一天</span></button>
+        <button onClick={onPrev} disabled={!hasPrev || isEditing} className={`flex items-center gap-2 text-sm font-bold px-4 py-2.5 min-h-[44px] rounded-lg transition-[background-color,color] ${hasPrev && !isEditing ? 'text-japan-blue hover:bg-japan-blue/5 dark:text-sky-400 dark:hover:bg-slate-800' : 'text-gray-300 cursor-not-allowed dark:text-slate-700'}`}><ChevronLeft size={16} /><span className="hidden md:inline">上一天</span></button>
         <span className="text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap dark:text-slate-500">{day.day}</span>
-        <button onClick={onNext} disabled={!hasNext || isEditing} className={`flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-lg transition-all ${hasNext && !isEditing ? 'text-japan-blue hover:bg-japan-blue/5 dark:text-sky-400 dark:hover:bg-slate-800' : 'text-gray-300 cursor-not-allowed dark:text-slate-700'}`}><span className="hidden md:inline">下一天</span><ChevronRight size={16} /></button>
+        <button onClick={onNext} disabled={!hasNext || isEditing} className={`flex items-center gap-2 text-sm font-bold px-4 py-2.5 min-h-[44px] rounded-lg transition-[background-color,color] ${hasNext && !isEditing ? 'text-japan-blue hover:bg-japan-blue/5 dark:text-sky-400 dark:hover:bg-slate-800' : 'text-gray-300 cursor-not-allowed dark:text-slate-700'}`}><span className="hidden md:inline">下一天</span><ChevronRight size={16} /></button>
       </div>
     </div >
   );
