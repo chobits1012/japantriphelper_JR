@@ -12,6 +12,8 @@ import { Share } from '@capacitor/share';
 import { useCurrency } from '../hooks/useCurrency';
 import { useExpenses } from '../hooks/useExpenses';
 import { useChecklist } from '../hooks/useChecklist';
+import { useBackup } from '../hooks/useBackup';
+import { useCloudSync } from '../hooks/useCloudSync';
 
 interface TravelToolboxProps {
   isOpen: boolean;
@@ -54,20 +56,6 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'currency' | 'expense' | 'checklist' | 'backup' | 'cloud'>('expense');
 
-  // --- Confirm Modal State ---
-  const [confirmModal, setConfirmModal] = useState<{
-    isOpen: boolean;
-    title: string;
-    message: string;
-    isDangerous?: boolean;
-    onConfirm: () => void;
-  }>({
-    isOpen: false,
-    title: '',
-    message: '',
-    onConfirm: () => { },
-  });
-
 
 
 
@@ -88,11 +76,6 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
   } = expenseHook;
 
 
-  // --- Backup State ---
-  const [importCode, setImportCode] = useState('');
-  const [copied, setCopied] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const checklistHook = useChecklist(checklist, onUpdateChecklist);
   const {
     newCategoryName, setNewCategoryName,
@@ -107,282 +90,165 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
     handleToggleItem, handleDeleteItem
   } = checklistHook;
 
+  const backupHook = useBackup(
+    tripSettings,
+    itineraryData,
+    expenses,
+    checklist,
+    onUpdateTripSettings,
+    onUpdateItinerary,
+    onUpdateExpenses,
+    onUpdateChecklist
+  );
+  const {
+    importCode, setImportCode,
+    copied,
+    fileInputRef,
+    getExportData,
+    handleCopyCode, handleDownloadFile, handleImportCode, handleFileUpload,
+    triggerFileUpload, executeImport
+  } = backupHook;
+
+  const cloudSyncHook = useCloudSync(getExportData);
+  const {
+    firebaseConfig,
+    configInput, setConfigInput,
+    cloudId,
+    cloudIdInput, setCloudIdInput,
+    isSyncing, syncStage, showConfigEdit, setShowConfigEdit, syncError,
+    handleSaveConfig, handleResetConfig, handleUploadCloud, handleUpdateCloud, handleDownloadCloud
+  } = cloudSyncHook;
 
 
-  // --- Cloud Sync State ---
-  const [firebaseConfig, setFirebaseConfig] = useState<FirebaseConfig | null>(() => {
-    const saved = localStorage.getItem(CLOUD_SYNC_CONFIG_KEY);
-    return saved ? JSON.parse(saved) : null;
+
+
+
+  // Confirm modal state  
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    isDangerous?: boolean;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => { },
   });
-  const [configInput, setConfigInput] = useState<string>(() => {
-    const saved = localStorage.getItem(CLOUD_SYNC_CONFIG_KEY);
-    return saved ? JSON.stringify(JSON.parse(saved), null, 2) : '';
-  });
-  const [cloudId, setCloudId] = useState('');
-  const [cloudIdInput, setCloudIdInput] = useState('');
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncStage, setSyncStage] = useState<string>('');
-  const [showConfigEdit, setShowConfigEdit] = useState(false);
-  const [syncError, setSyncError] = useState<string | null>(null);
 
-
-
-  // --- BACKUP & SHARE LOGIC ---
-
-  const getExportData = () => {
-    return {
-      tripSettings,
-      itineraryData,
-      expenses,
-      checklist,
-      version: 2,
-      timestamp: new Date().toISOString()
-    };
+  // Wrapper functions for import/download confirmation
+  const handleImportWithConfirm = () => {
+    handleImportCode((data) => {
+      setConfirmModal({
+        isOpen: true,
+        title: "確認匯入",
+        message: `⚠️ 確定要匯入行程「${data.tripSettings.name}」嗎？\\n\\n您目前手機上的所有資料將會被覆蓋！`,
+        isDangerous: true,
+        onConfirm: () => {
+          executeImport(data);
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+          setTimeout(() => {
+            setConfirmModal({
+              isOpen: true,
+              title: "匯入成功",
+              message: "您的行程資料已成功匯入！",
+              isDangerous: false,
+              onConfirm: () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                setImportCode('');
+                onClose();
+              }
+            });
+          }, 100);
+        }
+      });
+    });
   };
 
-  const handleCopyCode = () => {
-    const data = getExportData();
-    const jsonString = JSON.stringify(data);
-    const compressed = LZString.compressToEncodedURIComponent(jsonString);
-
-    navigator.clipboard.writeText(compressed);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleDownloadWithConfirm = () => {
+    handleDownloadCloud((data) => {
+      setConfirmModal({
+        isOpen: true,
+        title: "確認匯入",
+        message: `⚠️ 確定要匯入雲端行程「${data.tripSettings.name}」嗎？\\n\\n您目前手機上的所有資料將會被覆蓋！`,
+        isDangerous: true,
+        onConfirm: () => {
+          executeImport(data);
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+          setTimeout(() => {
+            setConfirmModal({
+              isOpen: true,
+              title: "下載成功",
+              message: "雲端資料已成功下載！",
+              isDangerous: false,
+              onConfirm: () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                onClose();
+              }
+            });
+          }, 100);
+        }
+      });
+    });
   };
 
-  const handleDownloadFile = async () => {
-    const data = getExportData();
-    const jsonString = JSON.stringify(data, null, 2);
-    const fileName = `${tripSettings.name}_行程備份.json`;
-
-    if (Capacitor.isNativePlatform()) {
-      try {
-        // Native: Save to Filesystem then Share
-        const result = await Filesystem.writeFile({
-          path: fileName,
-          data: jsonString,
-          directory: Directory.Cache, // Use Cache or Documents
-          encoding: Encoding.UTF8,
-        });
-
-        await Share.share({
-          title: '備份行程',
-          text: `分享行程備份: ${tripSettings.name}`,
-          url: result.uri,
-          dialogTitle: '儲存或分享備份檔',
-        });
-      } catch (e) {
-        console.error('File export failed', e);
-        alert('匯出失敗，請稍後再試');
-      }
-    } else {
-      // Web: Save via Blob
-      const blob = new Blob([jsonString], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }
+  const handleFileUploadWithConfirm = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileUpload(event, (data) => {
+      setConfirmModal({
+        isOpen: true,
+        title: "確認匯入",
+        message: `⚠️ 確定要匯入行程「${data.tripSettings.name}」嗎？\\n\\n您目前手機上的所有資料將會被覆蓋！`,
+        isDangerous: true,
+        onConfirm: () => {
+          executeImport(data);
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+          setTimeout(() => {
+            setConfirmModal({
+              isOpen: true,
+              title: "匯入成功",
+              message: "您的行程資料已成功匯入！",
+              isDangerous: false,
+              onConfirm: () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                setImportCode('');
+                onClose();
+              }
+            });
+          }, 100);
+        }
+      });
+    });
   };
 
-  const processImportData = (data: any) => {
-    if (!data.itineraryData || !data.tripSettings) {
-      throw new Error("無效的行程資料格式");
-    }
-
+  const handleResetChecklistWithConfirm = () => {
     setConfirmModal({
       isOpen: true,
-      title: "確認匯入",
-      message: `⚠️ 確定要匯入行程「${data.tripSettings.name}」嗎？\n\n您目前手機上的所有資料將會被覆蓋！`,
+      title: "重置清單",
+      message: "確定要重置檢查清單嗎？這將會恢復為預設項目並清除自訂項目。",
       isDangerous: true,
       onConfirm: () => {
-        onUpdateTripSettings(data.tripSettings);
-        onUpdateItinerary(data.itineraryData);
-        if (data.expenses) onUpdateExpenses(data.expenses);
-
-        if (data.checklist) {
-          const cl = data.checklist;
-          if (Array.isArray(cl) && cl.length > 0 && 'text' in cl[0]) {
-            onUpdateChecklist([{
-              id: 'imported-legacy', title: '匯入的清單', items: cl, isCollapsed: false
-            }]);
-          } else {
-            onUpdateChecklist(cl);
-          }
-        }
-
+        handleResetChecklist();
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
-        // Show success message (reusing modal as info)
-        setTimeout(() => {
-          setConfirmModal({
-            isOpen: true,
-            title: "匯入成功",
-            message: "您的行程資料已成功匯入！",
-            isDangerous: false,
-            onConfirm: () => {
-              setConfirmModal(prev => ({ ...prev, isOpen: false }));
-              setImportCode('');
-              onClose();
-            }
-          });
-        }, 100);
       }
     });
   };
 
-  const handleImportCode = () => {
-    try {
-      if (!importCode.trim()) return;
-      let jsonString = importCode.trim();
-      if (!jsonString.startsWith('{')) {
-        const decompressed = LZString.decompressFromEncodedURIComponent(jsonString);
-        if (decompressed) jsonString = decompressed;
+  const handleDeleteCategoryWithConfirm = (catId: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "刪除分類",
+      message: "確定要刪除這個分類嗎？",
+      isDangerous: true,
+      onConfirm: () => {
+        handleDeleteCategory(catId);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
       }
-      const data = JSON.parse(jsonString);
-      processImportData(data);
-    } catch (e) {
-      setConfirmModal({
-        isOpen: true,
-        title: "匯入失敗",
-        message: "無效的代碼或格式錯誤。",
-        isDangerous: false,
-        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
-      });
-    }
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // DEBUG: Start
-    // alert("Debug: File Input Changed"); 
-    const file = event.target.files?.[0];
-    if (!file) {
-      // alert("Debug: No file selected");
-      return;
-    }
-    // alert(`Debug: File selected: ${file.name} (${file.size} bytes)`);
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      // alert("Debug: Reader onload fired");
-      try {
-        const result = e.target?.result as string;
-        // alert(`Debug: Content read, length: ${result.length}`);
-        const data = JSON.parse(result);
-        processImportData(data);
-      } catch (err: any) {
-        alert("讀取/解析失敗: " + err.message);
-        setConfirmModal({
-          isOpen: true,
-          title: "讀取失敗",
-          message: "檔案格式錯誤或損毀。\n" + err.message,
-          isDangerous: false,
-          onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
-        });
-      }
-    };
-    reader.onerror = (e) => {
-      alert("FileReader Error: " + reader.error?.message);
-    };
-    reader.readAsText(file);
+    });
   };
 
 
-  const handleSaveConfig = () => {
-    try {
-      const config = JSON.parse(configInput);
-      setFirebaseConfig(config);
-      localStorage.setItem(CLOUD_SYNC_CONFIG_KEY, JSON.stringify(config));
-      setShowConfigEdit(false);
-      setSyncError(null);
-    } catch (e) {
-      alert("Firebase Config 格式錯誤，請貼上正確的 JSON 格式。");
-    }
-  };
 
-  const handleResetConfig = () => {
-    setFirebaseConfig(null);
-    setConfigInput('');
-    localStorage.removeItem(CLOUD_SYNC_CONFIG_KEY);
-    setShowConfigEdit(true);
-    setSyncError(null);
-  };
-
-  const handleUploadCloud = async () => {
-    if (!firebaseConfig) {
-      setShowConfigEdit(true);
-      return;
-    }
-    setIsSyncing(true);
-    setSyncStage('準備中...');
-    setSyncError(null);
-    try {
-      const data = getExportData();
-      const id = await uploadToCloud(firebaseConfig, data, (stage) => setSyncStage(stage));
-      setCloudId(id);
-    } catch (e: any) {
-      let msg = e.message;
-      if (msg.includes('auth/api-key-not-valid')) {
-        msg = "Firebase API Key 無效。請檢查：1. 是否已在 Firebase Console 啟用『匿名登入』並儲存？ 2. JSON 是否正確？";
-      } else if (msg.includes('Missing or insufficient permissions')) {
-        msg = "資料庫權限不足。請檢查 Firebase Console 的 Firestore Rules，是否已改為『測試模式』或允許寫入。";
-      }
-      setSyncError(msg);
-      alert("上傳失敗: " + msg);
-    } finally {
-      setIsSyncing(false);
-      setSyncStage('');
-    }
-  };
-
-  const handleUpdateCloud = async () => {
-    if (!firebaseConfig || !cloudId) return;
-    setIsSyncing(true);
-    setSyncStage('更新中...');
-    setSyncError(null);
-    try {
-      const data = getExportData();
-      // Pass existing cloudId to update it
-      await uploadToCloud(firebaseConfig, data, (stage) => setSyncStage(stage), cloudId);
-      alert("更新成功！您的雲端資料已同步。");
-    } catch (e: any) {
-      setSyncError(e.message);
-      alert("更新失敗: " + e.message);
-    } finally {
-      setIsSyncing(false);
-      setSyncStage('');
-    }
-  };
-
-  const handleDownloadCloud = async () => {
-    if (!firebaseConfig) {
-      setShowConfigEdit(true);
-      return;
-    }
-    if (!cloudIdInput.trim()) return;
-    setIsSyncing(true);
-    setSyncStage('準備中...');
-    setSyncError(null);
-    try {
-      const data = await downloadFromCloud(firebaseConfig, cloudIdInput.trim(), (stage) => setSyncStage(stage));
-      processImportData(data);
-    } catch (e: any) {
-      setSyncError(e.message);
-      alert("下載失敗: " + e.message);
-    } finally {
-      setIsSyncing(false);
-      setSyncStage('');
-    }
-  };
-
-
-  const triggerFileUpload = () => {
-    fileInputRef.current?.click();
-  };
 
   if (!isOpen) return null;
 
