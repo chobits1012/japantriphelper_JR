@@ -15,6 +15,8 @@ import ConfirmModal from './ConfirmModal';
 import { SortableDayCard } from './SortableDayCard';
 import { DayCard } from './DayCard';
 import { useTripActions } from '../hooks/useTripActions';
+import { useTitleEditor } from '../hooks/useTitleEditor';
+import { useClipboard } from '../hooks/useClipboard';
 
 interface TripViewProps {
   tripId: string;
@@ -70,12 +72,26 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
   // 5. Dark Mode State
   const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>(DARK_MODE_KEY, false);
 
-  // 6. Title Edit State
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [tempTitle, setTempTitle] = useState('');
+  // 6. Title Editor Hook
+  const {
+    isEditingTitle,
+    tempTitle,
+    setTempTitle,
+    handleSaveTitle,
+    handleCancelEdit,
+    startEditing
+  } = useTitleEditor({
+    tripSettings,
+    setTripSettings,
+    tripId,
+    updateTripMeta
+  });
 
-  // 7. Clipboard State
-  const [isCopied, setIsCopied] = useState(false);
+  // 7. Clipboard Hook
+  const { isCopied, handleCopyText } = useClipboard({
+    tripSettings,
+    itineraryData
+  });
 
   // 8. Trip Actions Hook (confirm dialogs, add/delete day, AI generation)
   const {
@@ -113,13 +129,6 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
     }
   }, [isDarkMode]);
 
-  // Sync title to edit state when not editing
-  useEffect(() => {
-    if (!isEditingTitle) {
-      setTempTitle(tripSettings.name);
-    }
-  }, [tripSettings.name, isEditingTitle]);
-
   // Drag Handlers
   const handleDragStart = (event: DragStartEvent) => {
     setActiveDragId(event.active.id as string);
@@ -140,36 +149,8 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
     setIsDarkMode(prev => !prev);
   };
 
-  const handleSaveTitle = () => {
-    if (tempTitle.trim()) {
-      setTripSettings(prev => ({ ...prev, name: tempTitle }));
-      updateTripMeta(tripId, { name: tempTitle });
-    }
-    setIsEditingTitle(false);
-  };
-
-  // --- Copy Text Logic ---
-  const handleCopyText = () => {
-    let text = `【${tripSettings.name}】\n日期：${tripSettings.startDate} 出發\n\n`;
-
-    itineraryData.forEach(day => {
-      text += `📅 ${day.day} (${day.date} ${day.weekday}) - ${day.title}\n`;
-      text += `📍 ${day.desc}\n`;
-      if (day.accommodation) text += `🏨 住宿：${day.accommodation.name}\n`;
-
-      day.events.forEach(event => {
-        text += `   - ${event.time} ${event.title}`;
-        if (event.desc) text += ` : ${event.desc}`;
-        text += '\n';
-      });
-      text += '\n------------------\n\n';
-    });
-
-    navigator.clipboard.writeText(text).then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    });
-  };
+  // Note: handleSaveTitle, handleCancelEdit, startEditing provided by useTitleEditor hook
+  // Note: isCopied, handleCopyText provided by useClipboard hook
 
   const selectedDay = selectedDayIndex !== null ? itineraryData[selectedDayIndex] : null;
   const activeDragItem = activeDragId ? itineraryData.find(d => d.id === activeDragId) : null;
@@ -307,7 +288,7 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
                   <button onClick={handleSaveTitle} className="p-2 rounded-full bg-white/20 hover:bg-white/40 text-green-400 transition-colors">
                     <Check size={20} />
                   </button>
-                  <button onClick={() => setIsEditingTitle(false)} className="p-2 rounded-full bg-white/20 hover:bg-white/40 text-white transition-colors">
+                  <button onClick={handleCancelEdit} className="p-2 rounded-full bg-white/20 hover:bg-white/40 text-white transition-colors">
                     <X size={20} />
                   </button>
                 </div>
@@ -325,7 +306,7 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
                 {/* Right Button (Same width as spacer effectively, keeping title centered) */}
                 <div className="flex-1 flex justify-start pl-4">
                   <button
-                    onClick={() => { setTempTitle(tripSettings.name); setIsEditingTitle(true); }}
+                    onClick={startEditing}
                     className="opacity-0 group-hover/title:opacity-100 transition-opacity p-2 rounded-full hover:bg-white/20 text-white/80"
                   >
                     <Pencil size={20} />
