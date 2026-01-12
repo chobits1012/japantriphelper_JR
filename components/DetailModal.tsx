@@ -12,6 +12,7 @@ import TicketInput from './TicketInput';
 import { calculateDataSizeMB } from '../lib/storageCalculator';
 import { useWeatherData } from '../hooks/useWeatherData';
 import { useDetailEditing } from '../hooks/useDetailEditing';
+import { useEventTimeline } from '../hooks/useEventTimeline';
 
 interface DetailPanelProps {
   day: ItineraryDay;
@@ -56,8 +57,6 @@ const getLocationQuery = (loc: string) => {
 };
 
 const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdate, onHome, onNext, onPrev, hasPrev, hasNext, className }) => {
-  const [editingEventIndex, setEditingEventIndex] = useState<number | null>(null);
-
   // Confirm Modal State
   const [confirmState, setConfirmState] = useState<{ isOpen: boolean; type: 'deleteEvent' | 'removePass' | null; payload?: any; }>({ isOpen: false, type: null });
 
@@ -65,6 +64,12 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
   const { liveWeather, forecast, loadingWeather, weatherError } = useWeatherData(day.location);
   const editingHook = useDetailEditing(day, onUpdate);
   const { isEditing, editData, setEditData, startEdit, cancelEdit, saveEdit, updateEditData } = editingHook;
+
+  const eventHook = useEventTimeline(editData, setEditData, onUpdate);
+  const {
+    editingEventIndex, setEditingEventIndex,
+    handleEventChange, handleAddEvent, handleQuickAdd, handleRemoveEvent
+  } = eventHook;
 
   useEffect(() => {
     setEditingEventIndex(null);
@@ -169,31 +174,6 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
 
   const handleJorudanSearch = () => { window.open('https://world.jorudan.co.jp/mln/zh-tw/', '_blank'); };
   const handleCancel = () => { cancelEdit(); setEditingEventIndex(null); };
-
-  const handleEventChange = (index: number, field: keyof ItineraryEvent, value: any) => {
-    const newEvents = [...editData.events];
-    newEvents[index] = { ...newEvents[index], [field]: value };
-    setEditData({ ...editData, events: newEvents });
-  };
-
-  const handleAddEvent = () => {
-    const newEvent: ItineraryEvent = { time: '09:00', title: '新行程', desc: '行程描述', category: 'sightseeing' };
-    const newEvents = [...editData.events, newEvent];
-    setEditData({ ...editData, events: newEvents });
-    setEditingEventIndex(newEvents.length - 1);
-  };
-
-  const handleQuickAdd = (template: Partial<ItineraryEvent>) => {
-    const newEvent: ItineraryEvent = {
-      time: template.time || '09:00',
-      title: template.title || '新行程',
-      desc: template.desc || '',
-      category: template.category || 'sightseeing',
-    };
-    const newEvents = [...editData.events, newEvent];
-    setEditData({ ...editData, events: newEvents });
-    setEditingEventIndex(newEvents.length - 1);
-  };
 
   const requestRemoveEvent = (index: number) => { setConfirmState({ isOpen: true, type: 'deleteEvent', payload: index }); };
 
