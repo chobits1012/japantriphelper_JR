@@ -10,6 +10,8 @@ import PassManager from './PassManager';
 import { SeasonBackground } from './SeasonBackground';
 import TicketInput from './TicketInput';
 import { calculateDataSizeMB } from '../lib/storageCalculator';
+import { useWeatherData } from '../hooks/useWeatherData';
+import { useDetailEditing } from '../hooks/useDetailEditing';
 
 interface DetailPanelProps {
   day: ItineraryDay;
@@ -54,19 +56,17 @@ const getLocationQuery = (loc: string) => {
 };
 
 const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdate, onHome, onNext, onPrev, hasPrev, hasNext, className }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<ItineraryDay>(day);
   const [editingEventIndex, setEditingEventIndex] = useState<number | null>(null);
 
   // Confirm Modal State
   const [confirmState, setConfirmState] = useState<{ isOpen: boolean; type: 'deleteEvent' | 'removePass' | null; payload?: any; }>({ isOpen: false, type: null });
 
-  // Use weather hook
+  // Use custom hooks
   const { liveWeather, forecast, loadingWeather, weatherError } = useWeatherData(day.location);
+  const editingHook = useDetailEditing(day, onUpdate);
+  const { isEditing, editData, setEditData, startEdit, cancelEdit, saveEdit, updateEditData } = editingHook;
 
   useEffect(() => {
-    setEditData(day);
-    setIsEditing(false);
     setEditingEventIndex(null);
   }, [day]);
 
@@ -148,11 +148,10 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
 
   const handleSaveText = () => {
     const sortedEvents = [...editData.events].sort((a, b) => a.time.localeCompare(b.time));
-    const currentDayUpdate = { ...editData, events: sortedEvents };
-    onUpdate(currentDayUpdate);
-    setEditData(currentDayUpdate);
-    setIsEditing(false);
+    updateEditData({ events: sortedEvents });
     setEditingEventIndex(null);
+    // Use a timeout to ensure state is updated before saving
+    setTimeout(() => saveEdit(), 0);
   };
 
   const handleViewRoute = () => {
@@ -169,7 +168,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
   };
 
   const handleJorudanSearch = () => { window.open('https://world.jorudan.co.jp/mln/zh-tw/', '_blank'); };
-  const handleCancel = () => { setEditData(day); setIsEditing(false); setEditingEventIndex(null); };
+  const handleCancel = () => { cancelEdit(); setEditingEventIndex(null); };
 
   const handleEventChange = (index: number, field: keyof ItineraryEvent, value: any) => {
     const newEvents = [...editData.events];
@@ -216,7 +215,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
           passDurationDays: undefined,
         });
         onUpdate(updates);
-        setIsEditing(false);
+        cancelEdit();
       }
     }
     setConfirmState({ isOpen: false, type: null });
@@ -252,7 +251,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
             <button onClick={handleCancel} className="p-2 rounded-full bg-white text-gray-500 hover:bg-gray-100 shadow-lg transition-transform hover:scale-105 border border-gray-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700" title="取消"><X size={20} /></button>
           </>
         ) : (
-          <button onClick={() => setIsEditing(true)} className="p-2 rounded-full bg-white text-gray-400 hover:text-japan-blue hover:bg-gray-50 shadow-lg transition-transform hover:scale-105 border border-gray-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:text-sky-400 dark:hover:bg-slate-700" title="編輯行程"><Pencil size={20} /></button>
+          <button onClick={startEdit} className="p-2 rounded-full bg-white text-gray-400 hover:text-japan-blue hover:bg-gray-50 shadow-lg transition-transform hover:scale-105 border border-gray-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:text-sky-400 dark:hover:bg-slate-700" title="編輯行程"><Pencil size={20} /></button>
         )}
         <button onClick={onHome} className="p-2 rounded-full bg-white text-japan-blue hover:bg-gray-50 shadow-lg transition-transform hover:scale-105 border border-gray-100 dark:bg-slate-800 dark:border-slate-700 dark:text-sky-400 dark:hover:bg-slate-700" title="回到首頁"><Home size={20} /></button>
       </div>
@@ -350,7 +349,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
             <PassManager
               day={day}
               allDays={allDays}
-              onUpdate={(updates) => { onUpdate(updates); setIsEditing(false); }}
+              onUpdate={(updates) => { onUpdate(updates); cancelEdit(); }}
               onRequestRemove={() => setConfirmState({ isOpen: true, type: 'removePass' })}
             />
 
