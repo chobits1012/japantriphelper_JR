@@ -9,6 +9,8 @@ import { calculateDataSizeMB, STORAGE_LIMITS, formatSize } from '../lib/storageC
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { useCurrency } from '../hooks/useCurrency';
+import { useExpenses } from '../hooks/useExpenses';
 
 interface TravelToolboxProps {
   isOpen: boolean;
@@ -66,19 +68,24 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
   });
 
 
-  // --- Currency State ---
-  const [rate, setRate] = useState<number>(0.215);
-  const [jpyInput, setJpyInput] = useState<string>('1000');
-  const [twdInput, setTwdInput] = useState<string>('');
-  const [lastUpdated, setLastUpdated] = useState<string>('');
-  const [loadingRate, setLoadingRate] = useState(false);
 
-  // --- Expense State ---
-  const [newExpTitle, setNewExpTitle] = useState('');
-  const [newExpAmount, setNewExpAmount] = useState('');
-  const [newExpCat, setNewExpCat] = useState<string>('food');
-  const [isEditingBudget, setIsEditingBudget] = useState(false);
-  const [budgetInput, setBudgetInput] = useState(tripSettings.budgetJPY?.toString() || '');
+
+  // Use custom hooks
+  const currencyHook = useCurrency(isOpen);
+  const { rate, jpyInput, setJpyInput, twdInput, setTwdInput, lastUpdated, loadingRate, handleJpyChange, handleTwdChange, fetchRate } = currencyHook;
+
+
+  const expenseHook = useExpenses(expenses, onUpdateExpenses, tripSettings, onUpdateTripSettings, rate);
+  const {
+    newExpTitle, setNewExpTitle,
+    newExpAmount, setNewExpAmount,
+    newExpCat, setNewExpCat,
+    isEditingBudget, setIsEditingBudget,
+    budgetInput, setBudgetInput,
+    handleAddExpense, handleDeleteExpense, handleClearExpenses, handleSaveBudget,
+    totalJPY, budget, remaining, percentSpent, toTWD, categoryStats
+  } = expenseHook;
+
 
   // --- Backup State ---
   const [importCode, setImportCode] = useState('');
@@ -125,108 +132,6 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
       onUpdateChecklist(initialList);
     }
   }, []);
-
-  // Fetch Exchange Rate
-  useEffect(() => {
-    if (isOpen) {
-      fetchRate();
-    }
-  }, [isOpen]);
-
-  const fetchRate = async () => {
-    if (activeTab !== 'currency' && rate !== 0.215) return; // Only fetch if needed or if using default
-    setLoadingRate(true);
-    try {
-      const res = await fetch(EXCHANGE_RATE_API_URL);
-      const data = await res.json();
-      const currentRate = data.rates.TWD;
-      setRate(currentRate);
-      setLastUpdated(new Date().toLocaleTimeString());
-      setTwdInput((parseFloat(jpyInput) * currentRate).toFixed(0));
-    } catch (e) {
-      console.error("Failed to fetch rate", e);
-    } finally {
-      setLoadingRate(false);
-    }
-  };
-
-  const handleJpyChange = (val: string) => {
-    setJpyInput(val);
-    if (!isNaN(parseFloat(val))) {
-      setTwdInput((parseFloat(val) * rate).toFixed(0));
-    } else {
-      setTwdInput('');
-    }
-  };
-
-  const handleTwdChange = (val: string) => {
-    setTwdInput(val);
-    if (!isNaN(parseFloat(val))) {
-      setJpyInput((parseFloat(val) / rate).toFixed(0));
-    } else {
-      setJpyInput('');
-    }
-  };
-
-  // --- EXPENSE LOGIC ---
-  const handleAddExpense = () => {
-    if (!newExpTitle || !newExpAmount) return;
-    const newItem: ExpenseItem = {
-      id: Math.random().toString(36).substr(2, 9),
-      title: newExpTitle,
-      amountJPY: parseInt(newExpAmount),
-      category: newExpCat,
-      date: new Date().toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })
-    };
-    onUpdateExpenses([newItem, ...expenses]);
-    setNewExpTitle('');
-    setNewExpAmount('');
-  };
-
-  const handleDeleteExpense = (id: string) => {
-    onUpdateExpenses(expenses.filter(e => e.id !== id));
-  };
-
-  const handleClearExpenses = () => {
-    setConfirmModal({
-      isOpen: true,
-      title: "清空記帳",
-      message: "確定要清空所有記帳紀錄嗎？此動作無法復原。",
-      isDangerous: true,
-      onConfirm: () => {
-        onUpdateExpenses([]);
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
-      }
-    });
-  };
-
-  const handleSaveBudget = () => {
-    const budget = parseInt(budgetInput);
-    if (!isNaN(budget)) {
-      onUpdateTripSettings({ ...tripSettings, budgetJPY: budget });
-    }
-    setIsEditingBudget(false);
-  };
-
-  // Calculate Expense Stats
-  const totalJPY = expenses.reduce((sum, item) => sum + (item.amountJPY || 0), 0);
-  const budget = tripSettings.budgetJPY || 0;
-  const remaining = budget - totalJPY;
-  const percentSpent = budget > 0 ? Math.min((totalJPY / budget) * 100, 100) : 0;
-
-  const toTWD = (jpy: number) => `NT$ ${Math.round(jpy * rate).toLocaleString()}`;
-
-  const categoryStats = useMemo(() => {
-    const stats: Record<string, number> = { food: 0, shopping: 0, transport: 0, hotel: 0, other: 0 };
-    expenses.forEach(item => {
-      // Use fallback 'other' if category is undefined or not in list
-      const cat = EXPENSE_CATEGORIES[item.category] ? item.category : 'other';
-      if (stats[cat] !== undefined) {
-        stats[cat] += (item.amountJPY || 0);
-      }
-    });
-    return stats;
-  }, [expenses]);
 
   // --- CHECKLIST LOGIC ---
 
