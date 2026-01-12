@@ -61,42 +61,13 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
   // Confirm Modal State
   const [confirmState, setConfirmState] = useState<{ isOpen: boolean; type: 'deleteEvent' | 'removePass' | null; payload?: any; }>({ isOpen: false, type: null });
 
-  // Live Weather State
-  const [liveWeather, setLiveWeather] = useState<{ temp: number; code: number } | null>(null);
-  const [forecast, setForecast] = useState<any[]>([]);
-  const [loadingWeather, setLoadingWeather] = useState(false);
+  // Use weather hook
+  const { liveWeather, forecast, loadingWeather, weatherError } = useWeatherData(day.location);
 
   useEffect(() => {
     setEditData(day);
     setIsEditing(false);
     setEditingEventIndex(null);
-    setLiveWeather(null);
-    setForecast([]);
-
-    const fetchWeather = async () => {
-      if (!day.location) return;
-      const queryLocation = getLocationQuery(day.location);
-      setLoadingWeather(true);
-      try {
-        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(queryLocation)}&count=1&language=en&format=json`);
-        const geoData = await geoRes.json();
-        if (!geoData.results || geoData.results.length === 0) return;
-        const { latitude, longitude } = geoData.results[0];
-        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto`);
-        const data = await weatherRes.json();
-        if (data.current) setLiveWeather({ temp: data.current.temperature_2m, code: data.current.weather_code });
-        if (data.daily) {
-          const dailyData = data.daily.time.map((time: string, index: number) => ({
-            date: time.slice(5).replace('-', '/'),
-            code: data.daily.weather_code[index],
-            max: data.daily.temperature_2m_max[index],
-            min: data.daily.temperature_2m_min[index],
-          }));
-          setForecast(dailyData);
-        }
-      } catch (e) { console.error('Weather fetch failed', e); } finally { setLoadingWeather(false); }
-    };
-    fetchWeather();
   }, [day]);
 
   // --- Multi-Plan Logic ---
