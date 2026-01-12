@@ -11,6 +11,7 @@ import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { useCurrency } from '../hooks/useCurrency';
 import { useExpenses } from '../hooks/useExpenses';
+import { useChecklist } from '../hooks/useChecklist';
 
 interface TravelToolboxProps {
   isOpen: boolean;
@@ -92,12 +93,21 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
   const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // --- Checklist State ---
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [showNewCatInput, setShowNewCatInput] = useState(false);
-  const [newItemInputs, setNewItemInputs] = useState<Record<string, string>>({});
-  const [editingCatId, setEditingCatId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState('');
+  const checklistHook = useChecklist(checklist, onUpdateChecklist);
+  const {
+    newCategoryName, setNewCategoryName,
+    showNewCatInput, setShowNewCatInput,
+    newItemInputs, setNewItemInputs,
+    editingCatId, setEditingCatId,
+    editingTitle, setEditingTitle,
+    handleResetChecklist, toggleCategoryCollapse,
+    handleDeleteCategory, handleAddCategory,
+    handleStartEditTitle, handleSaveTitle,
+    handleAddItemInput, handleAddItemSubmit,
+    handleToggleItem, handleDeleteItem
+  } = checklistHook;
+
+
 
   // --- Cloud Sync State ---
   const [firebaseConfig, setFirebaseConfig] = useState<FirebaseConfig | null>(() => {
@@ -115,142 +125,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
   const [showConfigEdit, setShowConfigEdit] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
 
-  // Initialize Checklist if empty
-  useEffect(() => {
-    if (checklist.length === 0) {
-      // Direct init if empty, no confirm needed
-      const initialList: ChecklistCategory[] = DEFAULT_CATEGORIES.map(cat => ({
-        id: Math.random().toString(36).substr(2, 9),
-        title: cat.title,
-        items: cat.items.map(text => ({
-          id: Math.random().toString(36).substr(2, 9),
-          text,
-          checked: false
-        })),
-        isCollapsed: false
-      }));
-      onUpdateChecklist(initialList);
-    }
-  }, []);
 
-  // --- CHECKLIST LOGIC ---
-
-  const handleResetChecklist = () => {
-    setConfirmModal({
-      isOpen: true,
-      title: "重置清單",
-      message: "確定要重置檢查清單嗎？這將會恢復為預設項目並清除自訂項目。",
-      isDangerous: true,
-      onConfirm: () => {
-        const initialList: ChecklistCategory[] = DEFAULT_CATEGORIES.map(cat => ({
-          id: Math.random().toString(36).substr(2, 9),
-          title: cat.title,
-          items: cat.items.map(text => ({
-            id: Math.random().toString(36).substr(2, 9),
-            text,
-            checked: false
-          })),
-          isCollapsed: false
-        }));
-        onUpdateChecklist(initialList);
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
-      }
-    });
-  };
-
-  const toggleCategoryCollapse = (catId: string) => {
-    onUpdateChecklist(checklist.map(cat =>
-      cat.id === catId ? { ...cat, isCollapsed: !cat.isCollapsed } : cat
-    ));
-  };
-
-  const handleDeleteCategory = (catId: string) => {
-    setConfirmModal({
-      isOpen: true,
-      title: "刪除分類",
-      message: "確定要刪除這個分類嗎？",
-      isDangerous: true,
-      onConfirm: () => {
-        onUpdateChecklist(checklist.filter(c => c.id !== catId));
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
-      }
-    });
-  };
-
-  const handleAddCategory = () => {
-    if (!newCategoryName.trim()) return;
-    const newCat: ChecklistCategory = {
-      id: Math.random().toString(36).substr(2, 9),
-      title: newCategoryName,
-      items: [],
-      isCollapsed: false
-    };
-    onUpdateChecklist([...checklist, newCat]);
-    setNewCategoryName('');
-    setShowNewCatInput(false);
-  };
-
-  const handleStartEditTitle = (cat: ChecklistCategory, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditingCatId(cat.id);
-    setEditingTitle(cat.title);
-  };
-
-  const handleSaveTitle = (catId: string) => {
-    if (editingTitle.trim()) {
-      onUpdateChecklist(checklist.map(c => c.id === catId ? { ...c, title: editingTitle } : c));
-    }
-    setEditingCatId(null);
-    setEditingTitle('');
-  };
-
-  const handleAddItemInput = (catId: string, val: string) => {
-    setNewItemInputs(prev => ({ ...prev, [catId]: val }));
-  };
-
-  const handleAddItemSubmit = (catId: string) => {
-    const text = newItemInputs[catId];
-    if (!text || !text.trim()) return;
-
-    onUpdateChecklist(checklist.map(cat => {
-      if (cat.id === catId) {
-        return {
-          ...cat,
-          items: [...cat.items, { id: Math.random().toString(36).substr(2, 9), text: text.trim(), checked: false }]
-        };
-      }
-      return cat;
-    }));
-
-    // Keep focus logic relies on the input remaining rendered
-    setNewItemInputs(prev => ({ ...prev, [catId]: '' }));
-  };
-
-  const handleToggleItem = (catId: string, itemId: string) => {
-    onUpdateChecklist(checklist.map(cat => {
-      if (cat.id === catId) {
-        return {
-          ...cat,
-          items: cat.items.map(item =>
-            item.id === itemId ? { ...item, checked: !item.checked } : item
-          )
-        };
-      }
-      return cat;
-    }));
-  };
-
-  const handleDeleteItem = (catId: string, itemId: string) => {
-    onUpdateChecklist(checklist.map(cat => {
-      if (cat.id === catId) {
-        return {
-          ...cat,
-          items: cat.items.filter(item => item.id !== itemId)
-        };
-      }
-      return cat;
-    }));
-  };
 
   // --- BACKUP & SHARE LOGIC ---
 
