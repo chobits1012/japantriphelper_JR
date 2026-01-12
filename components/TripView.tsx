@@ -14,6 +14,7 @@ import TravelToolbox from './TravelToolbox';
 import ConfirmModal from './ConfirmModal';
 import { SortableDayCard } from './SortableDayCard';
 import { DayCard } from './DayCard';
+import { useTripActions } from '../hooks/useTripActions';
 
 interface TripViewProps {
   tripId: string;
@@ -69,19 +70,34 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
   // 5. Dark Mode State
   const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>(DARK_MODE_KEY, false);
 
-  // 6. Confirm Modal State
-  const [confirmState, setConfirmState] = useState<{
-    isOpen: boolean;
-    type: 'reset' | 'deleteDay' | 'deleteTrip' | null;
-    payload?: string;
-  }>({ isOpen: false, type: null });
-
-  // 7. Title Edit State
+  // 6. Title Edit State
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [tempTitle, setTempTitle] = useState('');
 
-  // 8. Clipboard State
+  // 7. Clipboard State
   const [isCopied, setIsCopied] = useState(false);
+
+  // 8. Trip Actions Hook (confirm dialogs, add/delete day, AI generation)
+  const {
+    confirmState,
+    setConfirmState,
+    handleAddDay,
+    requestDeleteDay,
+    requestReset,
+    requestDeleteTrip,
+    handleConfirmAction,
+    handleAIGenerate
+  } = useTripActions({
+    itineraryData,
+    setItineraryData,
+    addDay,
+    deleteDay,
+    onDeleteTrip,
+    tripSettings,
+    tripId,
+    updateTripMeta,
+    setSelectedDayIndex
+  });
 
   // DnD Sensors
   const sensors = useSensors(
@@ -117,140 +133,8 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
     }
   };
 
-  const handleAddDay = () => {
-    addDay();
-    setTimeout(() => {
-      const listContainer = document.querySelector('.no-scrollbar');
-      if (listContainer) listContainer.scrollTop = listContainer.scrollHeight;
-    }, 100);
-  };
-
-  // --- Confirm Logic ---
-  const requestDeleteDay = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    setConfirmState({ isOpen: true, type: 'deleteDay', payload: id });
-  };
-
-  const requestReset = () => {
-    setConfirmState({ isOpen: true, type: 'reset' });
-  };
-
-  const requestDeleteTrip = () => {
-    setConfirmState({ isOpen: true, type: 'deleteTrip' });
-  }
-
-  const handleConfirmAction = () => {
-    if (confirmState.type === 'deleteDay' && confirmState.payload) {
-      deleteDay(confirmState.payload);
-      if (selectedDayIndex !== null) setSelectedDayIndex(null);
-    }
-    else if (confirmState.type === 'reset') {
-      // UNIFIED SOFT RESET LOGIC
-      // Regardless of trip ID, "Reset" now means "Clear Content, Keep Settings"
-
-      // Create 1 empty day starting from current startDate
-      const dateObj = new Date(tripSettings.startDate);
-      const dateStr = `${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getDate().toString().padStart(2, '0')}`;
-      const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-
-      const emptyDay: ItineraryDay = {
-        id: Math.random().toString(36).substr(2, 9),
-        day: 'Day 1',
-        date: dateStr,
-        weekday: weekday,
-        title: "自由活動",
-        desc: "點擊編輯來規劃行程",
-        pass: false,
-        bg: "https://picsum.photos/id/28/1000/600",
-        location: "Japan",
-        weatherIcon: tripSettings.season === 'winter' ? 'snow' : 'sunny',
-        temp: "--°C",
-        events: []
-      };
-
-      setItineraryData([emptyDay]);
-      // Settings remain unchanged, just update days count in meta
-      updateTripMeta(tripId, { days: 1 });
-
-      setSelectedDayIndex(null);
-    }
-    else if (confirmState.type === 'deleteTrip') {
-      onDeleteTrip();
-    }
-    setConfirmState({ isOpen: false, type: null });
-  };
-
-  const handleAIGenerate = (newGeneratedDays: ItineraryDay[], isFullReplace: boolean, targetPlanId?: string) => {
-    const daysWithIds = newGeneratedDays.map(d => ({ ...d, id: d.id || Math.random().toString(36).substr(2, 9) }));
-
-    if (isFullReplace) {
-      setItineraryData(daysWithIds);
-      updateTripMeta(tripId, { days: daysWithIds.length });
-      setSelectedDayIndex(null);
-    } else {
-      setItineraryData(prevData => {
-        const newDaysMap = new Map(daysWithIds.map(d => [d.day, d]));
-        return prevData.map(day => {
-          const newData = newDaysMap.get(day.day);
-          if (!newData) return day;
-
-          // Multi-Plan Logic
-          const currentActive = day.activePlanId || 'A';
-          const target = targetPlanId || currentActive;
-
-          console.log(`[TripView] AI Update for Day ${day.day}. Current: ${currentActive}, Target: ${target}`);
-          console.log(`[TripView] Pre-Update subPlans:`, day.subPlans);
-
-          if (target === currentActive) {
-            // Case 1: Just update current plan events + shared info
-            return {
-              ...day, // Keep ID and subPlans
-              title: newData.title,
-              desc: newData.desc,
-              bg: newData.bg,
-              weatherIcon: newData.weatherIcon,
-              temp: newData.temp,
-              accommodation: newData.accommodation,
-              events: newData.events // Replace events
-            };
-          } else {
-            // Case 2: Switching Plans (e.g. A -> B)
-            // Save current events to the OLD plan slot (Deep Copy to avoid mutation)
-            const updatedSubPlans = { ...(day.subPlans || {}) };
-
-            // Critical Fix: Use spread to clone the array so we don't save a reference that might be mutated
-            updatedSubPlans[currentActive] = {
-              events: day.events ? JSON.parse(JSON.stringify(day.events)) : [],
-              title: day.title,
-              desc: day.desc
-            };
-
-            console.log(`[TripView] Switching from ${currentActive} to ${target}. Saved ${updatedSubPlans[currentActive].events.length} events to ${currentActive}.`);
-            console.log(`[TripView] New subPlans state:`, updatedSubPlans);
-
-            // Switch to NEW plan
-            return {
-              ...day,
-              title: newData.title,
-              desc: newData.desc,
-              bg: newData.bg,
-              weatherIcon: newData.weatherIcon,
-              temp: newData.temp,
-              accommodation: newData.accommodation,
-              subPlans: updatedSubPlans,
-              activePlanId: target,
-              events: newData.events
-            };
-          }
-        });
-      });
-
-      if (daysWithIds.length === 1) {
-        const dayIndex = itineraryData.findIndex(d => d.day === daysWithIds[0].day);
-        if (dayIndex !== -1) setSelectedDayIndex(dayIndex);
-      }
-    }
-  };
+  // Note: handleAddDay, requestDeleteDay, requestReset, requestDeleteTrip,
+  // handleConfirmAction, handleAIGenerate are now provided by useTripActions hook
 
   const toggleDarkMode = () => {
     setIsDarkMode(prev => !prev);
