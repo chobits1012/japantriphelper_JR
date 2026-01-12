@@ -13,6 +13,7 @@ import { calculateDataSizeMB } from '../lib/storageCalculator';
 import { useWeatherData } from '../hooks/useWeatherData';
 import { useDetailEditing } from '../hooks/useDetailEditing';
 import { useEventTimeline } from '../hooks/useEventTimeline';
+import { useMultiplePlans } from '../hooks/useMultiplePlans';
 
 interface DetailPanelProps {
   day: ItineraryDay;
@@ -71,85 +72,12 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
     handleEventChange, handleAddEvent, handleQuickAdd, handleRemoveEvent
   } = eventHook;
 
+  const plansHook = useMultiplePlans(day, allDays, editData, setEditData, onUpdate, isEditing);
+  const { currentPlanId, PLANS, handleSwitchPlan, handleClearPlan } = plansHook;
+
   useEffect(() => {
     setEditingEventIndex(null);
   }, [day]);
-
-  // --- Multi-Plan Logic ---
-  const currentPlanId = editData.activePlanId || 'A';
-
-  const handleSwitchPlan = (targetPlanId: string) => {
-    if (targetPlanId === currentPlanId) return;
-
-    console.log(`[DetailModal] Switching from ${currentPlanId} to ${targetPlanId}`);
-
-    // 1. Save current events AND title/desc to the "outgoing" plan storage
-    const updatedSubPlans = { ...(editData.subPlans || {}) };
-
-    updatedSubPlans[currentPlanId] = {
-      events: editData.events,
-      title: editData.title,
-      desc: editData.desc
-    };
-
-    // 2. Load target events, title, and desc
-    const targetSubPlan = updatedSubPlans[targetPlanId];
-    const targetEvents = targetSubPlan?.events || [];
-
-    // If target doesn't have a specific title yet, fallback to current day title? 
-    // OR should we default to empty/generic for new plans?
-    // User wants independent titles. If switching to a new plan, maybe keep current (copy) or reset.
-    // Let's copy current title/desc as a starting point if undefined, 
-    // BUT if we want them to be *different*, we should respect what was saved.
-    // Logic: If targetSubPlan exists and has title, use it. 
-    // If not (e.g. first time switching to B), inherit from Day (or A) so it's not blank?
-    // Better UX: Inherit if it's the first time visiting that plan (i.e. empty subPlan).
-
-    const targetTitle = targetSubPlan?.title !== undefined ? targetSubPlan.title : day.title;
-    const targetDesc = targetSubPlan?.desc !== undefined ? targetSubPlan.desc : day.desc;
-
-    console.log(`[DetailModal] Loading ${targetPlanId}: ${targetEvents.length} events, Title: ${targetTitle}`);
-
-    const newData = {
-      ...editData,
-      subPlans: updatedSubPlans,
-      activePlanId: targetPlanId,
-      events: targetEvents,
-      title: targetTitle,
-      desc: targetDesc
-    };
-
-    setEditData(newData);
-
-    // FIX: If in View Mode, persist the change immediately so the UI updates (since View Mode renders from 'day' prop)
-    if (!isEditing) {
-      console.log(`[DetailModal] View Mode Switch: Persisting change to parent immediately.`);
-      onUpdate(newData);
-    }
-
-    // Reset editing state to avoid index out of bounds
-    setEditingEventIndex(null);
-  };
-
-  const handleClearPlan = () => {
-    if (confirm('確定要清空目前方案的所有行程嗎？此動作無法復原。')) {
-      const emptyEvents: ItineraryEvent[] = [];
-      const updatedSubPlans = { ...(editData.subPlans || {}) };
-
-      // Update the storage for current plan
-      updatedSubPlans[currentPlanId] = { events: [] };
-
-      setEditData({
-        ...editData,
-        subPlans: updatedSubPlans,
-        events: emptyEvents
-      });
-      setEditingEventIndex(null);
-    }
-  };
-
-  const PLANS = ['A', 'B', 'C'];
-  // ------------------------
 
   const handleSaveText = () => {
     const sortedEvents = [...editData.events].sort((a, b) => a.time.localeCompare(b.time));
