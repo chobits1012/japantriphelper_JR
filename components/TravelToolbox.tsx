@@ -115,8 +115,8 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
   // Drag state for checklist items - stores {categoryId, itemId}
   const [activeChecklistItemId, setActiveChecklistItemId] = useState<{ categoryId: string, itemId: string } | null>(null);
 
-  // Edit mode state for each category (controls item drag-and-drop)
-  const [categoryEditMode, setCategoryEditMode] = useState<Record<string, boolean>>({});
+  // Active edit mode category (only one can be active at a time)
+  const [activeCategoryEditId, setActiveCategoryEditId] = useState<string | null>(null);
 
   // Drag handlers for checklist
   const handleChecklistDragStart = (event: DragStartEvent) => {
@@ -802,22 +802,33 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                                         <Pencil size={12} />
                                       </button>
                                       <span className="text-xs text-gray-400 font-mono flex-shrink-0">({checkedCount}/{total})</span>
-                                      {/* Edit mode toggle for item reordering */}
+                                      {/* Circular edit mode indicator */}
                                       <button
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          setCategoryEditMode(prev => ({
-                                            ...prev,
-                                            [cat.id]: !prev[cat.id]
-                                          }));
+                                          // Toggle: if already active, turn off; otherwise activate this category
+                                          setActiveCategoryEditId(prev => prev === cat.id ? null : cat.id);
                                         }}
-                                        className={`ml-2 p-1 rounded transition-colors flex-shrink-0 ${categoryEditMode[cat.id]
-                                          ? 'bg-japan-blue text-white dark:bg-sky-500'
-                                          : 'text-gray-300 hover:text-japan-blue hover:bg-blue-50 dark:hover:bg-slate-700'
-                                          }`}
-                                        title={categoryEditMode[cat.id] ? '關閉排序模式' : '開啟排序模式'}
+                                        className="ml-2 p-1.5 flex items-center justify-center flex-shrink-0 group/toggle"
+                                        title={activeCategoryEditId === cat.id ? '關閉排序模式' : '開啟排序模式'}
                                       >
-                                        <GripVertical size={12} />
+                                        <div className={`
+                                          w-3 h-3 rounded-full transition-all duration-300 ease-in-out
+                                          ${activeCategoryEditId === cat.id
+                                            ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/50 dark:from-emerald-500 dark:to-emerald-700 dark:shadow-emerald-400/40'
+                                            : 'bg-gray-300 dark:bg-slate-600 group-hover/toggle:bg-gray-400 dark:group-hover/toggle:bg-slate-500'
+                                          }
+                                          ${activeCategoryEditId === cat.id ? 'scale-110' : 'scale-100 group-hover/toggle:scale-105'}
+                                        `}>
+                                          {/* Inner highlight for depth */}
+                                          <div className={`
+                                            w-full h-full rounded-full
+                                            ${activeCategoryEditId === cat.id
+                                              ? 'bg-gradient-to-br from-white/40 to-transparent'
+                                              : 'bg-gradient-to-br from-white/20 to-transparent'
+                                            }
+                                          `} />
+                                        </div>
                                       </button>
                                     </div>
                                   )}
@@ -847,8 +858,8 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                               {/* Cat Items */}
                               {!cat.isCollapsed && (
                                 <div className="p-3 space-y-2">
-                                  {/* Only enable drag-and-drop when edit mode is active */}
-                                  {categoryEditMode[cat.id] ? (
+                                  {/* Only enable drag-and-drop when this category is in edit mode */}
+                                  {activeCategoryEditId === cat.id ? (
                                     <DndContext
                                       sensors={checklistSensors}
                                       collisionDetection={closestCenter}
