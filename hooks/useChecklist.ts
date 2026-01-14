@@ -21,9 +21,12 @@ export const useChecklist = (
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
     const [editingItemText, setEditingItemText] = useState('');
 
-    // Initialize Checklist if empty
+    // Initialize Checklist if empty or corrupted
     useEffect(() => {
-        if (checklist.length === 0) {
+        const needsInitialization = checklist.length === 0 ||
+            checklist.some(cat => !cat.items || !Array.isArray(cat.items));
+
+        if (needsInitialization) {
             const initialList: ChecklistCategory[] = DEFAULT_CATEGORIES.map(cat => ({
                 id: Math.random().toString(36).substr(2, 9),
                 title: cat.title,
