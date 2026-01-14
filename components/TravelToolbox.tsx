@@ -100,7 +100,12 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
 
   // DnD Sensors for checklist
   const checklistSensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 200,      // Hold for 200ms before drag activates
+        tolerance: 8     // Allow 8px movement during delay period
+      }
+    }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
