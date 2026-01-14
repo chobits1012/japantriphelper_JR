@@ -74,9 +74,9 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
   const [showHelp, setShowHelp] = useState(false);
 
   const [targetDay, setTargetDay] = useState<string>('all');
-  const [targetPlan, setTargetPlan] = useState<string>('B'); // Default to Plan B for safety
+  const [targetPlan, setTargetPlan] = useState<string>('B');
 
-  // Load saved API key on component mount
+  // Load saved API key
   useEffect(() => {
     const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
     if (savedKey) {
@@ -85,7 +85,6 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
     }
   }, []);
 
-  // Handle clearing saved API key
   const handleClearSavedKey = () => {
     localStorage.removeItem(API_KEY_STORAGE_KEY);
     setApiKey('');
@@ -146,7 +145,6 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
            JR PASS Logic: Do NOT set "pass": true automatically. Set "pass": false.
          `;
       } else {
-        // Full Trip Generation Logic
         const totalDays = existingDays.length;
         systemPrompt += `
            CRITICAL INSTRUCTION: Generate the FULL itinerary for ${totalDays} days (Day 1 to Day ${totalDays}).
@@ -159,7 +157,7 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
            Day 2 = 04/02 (Wed)
            ...and so on.
 
-           JR PASS Logic: Do NOT set "pass": true automatically. Set "pass": false for all days. The user will manually configure transport passes using the specific tool.
+           JR PASS Logic: Do NOT set "pass": true automatically. Set "pass": false for all days.
          `;
       }
 
@@ -179,7 +177,6 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
         const cleanedText = cleanJsonString(response.text);
         const data = JSON.parse(cleanedText) as ItineraryDay[];
 
-        // Save or remove API key based on user preference
         if (saveApiKey) {
           localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
         } else {
@@ -200,149 +197,179 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300">
+
+      {/* Container with Glassmorphism */}
+      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[2rem] shadow-2xl w-full max-w-lg flex flex-col overflow-hidden max-h-[90vh] border border-white/20 dark:border-slate-700 ring-1 ring-black/5 relative transition-all duration-300">
+
+        {/* Decorative Background Elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-japan-blue/10 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-400/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none" />
 
         {/* Header */}
-        <div className="bg-japan-blue p-4 flex items-center justify-between text-white">
-          <div className="flex items-center gap-2">
-            <Sparkles size={20} className="text-yellow-300" />
-            <h3 className="font-serif font-bold text-lg tracking-wide">AI 旅遊規劃師</h3>
+        <div className="relative z-10 p-6 pb-2 flex-shrink-0 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-japan-blue to-blue-600 text-white rounded-2xl shadow-lg shadow-japan-blue/30">
+              <Sparkles size={20} className="text-yellow-300 animate-pulse" />
+            </div>
+            <div>
+              <h3 className="font-serif font-bold text-2xl text-ink dark:text-white tracking-wide">
+                AI 旅遊規劃師
+              </h3>
+              <p className="text-[10px] text-ink-lighter dark:text-slate-400 font-bold tracking-[0.2em] uppercase mt-0.5">
+                Powered by Gemini 2.5
+              </p>
+            </div>
           </div>
-          <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition-colors">
-            <X size={20} />
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 hover:text-ink dark:hover:text-white transition-all duration-200 active:scale-90"
+          >
+            <X size={24} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-6 overflow-y-auto">
+        <div className="p-6 space-y-6 overflow-y-auto relative z-10">
 
           {/* API Key Section */}
-          <div className="space-y-3">
-            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-              <KeyRound size={16} />
-              Google Gemini API Key
+          <div className="space-y-3 bg-gray-50/50 dark:bg-slate-800/50 p-4 rounded-2xl border border-gray-100 dark:border-slate-700">
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-2">
+              <KeyRound size={14} />
+              Configuration
             </label>
 
-            {/* Quick Link to Get API Key */}
-            <a
-              href={GOOGLE_AI_STUDIO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2 p-2.5 min-h-[44px] bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-[background-image,transform] text-sm"
-            >
-              <ExternalLink size={16} />
-              免費申請 API Key（Google AI Studio）
-            </a>
-
-            {/* API Key Input */}
             <div className="relative">
               <input
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="貼上您的 API Key (AIza...)"
-                className="w-full p-3 pr-10 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-japan-blue focus:border-transparent outline-none transition-all text-sm font-mono bg-white dark:bg-slate-800 dark:text-white"
+                placeholder="貼上您的 Google Gemini API Key"
+                className="w-full p-3 pr-10 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-japan-blue/50 focus:border-japan-blue outline-none transition-all text-sm font-mono text-ink dark:text-white placeholder-gray-400 shadow-sm"
               />
               {saveApiKey && apiKey && (
                 <button
                   type="button"
                   onClick={handleClearSavedKey}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-[color,background-color]"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                   title="清除已儲存的 API Key"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={14} />
                 </button>
               )}
             </div>
 
-            {/* Save API Key Checkbox */}
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="saveApiKey"
-                checked={saveApiKey}
-                onChange={(e) => setSaveApiKey(e.target.checked)}
-                className="w-4 h-4 accent-japan-blue cursor-pointer"
-              />
-              <label htmlFor="saveApiKey" className="text-xs text-gray-500 dark:text-gray-400 cursor-pointer select-none flex items-center gap-1">
-                <Save size={12} />
-                儲存 API Key 至瀏覽器（下次無需重新輸入）
-              </label>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="saveApiKey"
+                  checked={saveApiKey}
+                  onChange={(e) => setSaveApiKey(e.target.checked)}
+                  className="w-4 h-4 accent-japan-blue cursor-pointer rounded"
+                />
+                <label htmlFor="saveApiKey" className="text-xs text-gray-500 dark:text-gray-400 cursor-pointer select-none">
+                  記住 API Key
+                </label>
+              </div>
+
+              <a
+                href={GOOGLE_AI_STUDIO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-bold text-japan-blue dark:text-sky-400 flex items-center gap-1 hover:underline"
+              >
+                免費申請 <ExternalLink size={10} />
+              </a>
             </div>
 
-            <p className="text-xs text-gray-400">
-              {saveApiKey
-                ? '✓ API Key 將在生成成功後儲存至您的瀏覽器中。'
-                : '* 請至 Google AI Studio 免費申請 API Key。'}
-            </p>
-
             {/* Collapsible Help Section */}
-            <div className="border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden mt-3 transition-all duration-300">
               <button
                 type="button"
                 onClick={() => setShowHelp(!showHelp)}
-                className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-[background-color] text-sm"
+                className="w-full flex items-center justify-between p-3 bg-white/50 dark:bg-slate-800/50 hover:bg-white/80 dark:hover:bg-slate-800 transition-colors text-xs group"
               >
-                <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300 font-medium">
+                <span className="flex items-center gap-2 text-gray-500 dark:text-gray-400 group-hover:text-japan-blue dark:group-hover:text-sky-400 font-bold transition-colors">
                   <HelpCircle size={14} />
                   不知道如何複製 API Key？
                 </span>
-                <ChevronDown size={16} className={`text-gray-400 transition-transform ${showHelp ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${showHelp ? 'rotate-180' : ''}`} />
               </button>
-              {showHelp && (
-                <div className="p-3 bg-white dark:bg-slate-900 space-y-2">
-                  <p className="text-xs text-gray-600 dark:text-gray-300">
-                    登入 Google AI Studio 後，在表格中找到您的 API Key，點擊下圖紅圈處的複製按鈕：
+
+              <div className={`
+                overflow-hidden transition-[max-height,opacity] duration-500 ease-in-out
+                ${showHelp ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
+              `}>
+                <div className="p-3 bg-white/40 dark:bg-slate-900/40 space-y-3 border-t border-gray-100 dark:border-slate-700 backdrop-blur-sm">
+                  <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+                    1. 請登入 <a href={GOOGLE_AI_STUDIO_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-japan-blue hover:underline">Google AI Studio</a>。<br />
+                    2. 如下圖所示複製你的 API KEY。
                   </p>
-                  <img
-                    src="/api-key-help.png"
-                    alt="API Key 複製位置說明"
-                    className="w-full rounded-lg border border-gray-200 dark:border-slate-700"
-                  />
+                  <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-slate-700 shadow-sm">
+                    <img
+                      src="/api-key-help.png"
+                      alt="API Key 複製位置說明"
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
           {/* Mode Selection */}
           <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-              <CalendarRange size={16} />
-              生成範圍
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+              <CalendarRange size={14} />
+              Planning Scope
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <button
                 onClick={() => setTargetDay('all')}
-                className={`p-3 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition-[background-color,border-color,color] min-h-[48px] ${targetDay === 'all' ? 'bg-japan-blue text-white border-japan-blue' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
+                className={`
+                  p-3 rounded-xl border text-sm font-bold flex items-center justify-center gap-2 transition-all duration-200
+                  ${targetDay === 'all'
+                    ? 'bg-japan-blue text-white border-japan-blue shadow-md shadow-japan-blue/20'
+                    : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-slate-700 hover:border-japan-blue/50 hover:bg-gray-50 dark:hover:bg-slate-700'}
+                `}
               >
                 <CalendarRange size={16} />
                 整趟旅程 ({existingDays.length} 天)
               </button>
+
               <div className="flex gap-2">
-                <select
-                  value={targetDay}
-                  onChange={(e) => setTargetDay(e.target.value)}
-                  className={`flex-1 p-3 rounded-lg border text-sm font-bold outline-none transition-[background-color,border-color,color] min-h-[48px] ${targetDay !== 'all' ? 'bg-japan-blue text-white border-japan-blue' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
-                >
-                  <option value="all" className="text-gray-800 bg-white">單日修改 (請選擇)...</option>
-                  {existingDays.map(day => (
-                    <option key={day.day} value={day.day} className="text-gray-800 bg-white">
-                      {day.day} ({day.date})
-                    </option>
-                  ))}
-                </select>
+                <div className="relative flex-1">
+                  <select
+                    value={targetDay}
+                    onChange={(e) => setTargetDay(e.target.value)}
+                    className={`
+                      w-full appearance-none p-3 pl-4 pr-8 rounded-xl border text-sm font-bold outline-none transition-all duration-200
+                      ${targetDay !== 'all'
+                        ? 'bg-japan-blue text-white border-japan-blue shadow-md shadow-japan-blue/20'
+                        : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-slate-700 hover:border-japan-blue/50 hover:bg-gray-50 dark:hover:bg-slate-700'}
+                    `}
+                  >
+                    <option value="all" className="text-gray-800 bg-white">單日修改...</option>
+                    {existingDays.map(day => (
+                      <option key={day.day} value={day.day} className="text-gray-800 bg-white">
+                        {day.day} ({day.date})
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${targetDay !== 'all' ? 'text-white' : 'text-gray-400'}`} />
+                </div>
 
                 {targetDay !== 'all' && (
                   <select
                     value={targetPlan}
                     onChange={(e) => setTargetPlan(e.target.value)}
-                    className="w-24 p-3 rounded-lg border border-japan-blue bg-white text-japan-blue text-sm font-bold outline-none cursor-pointer"
+                    className="w-20 p-3 rounded-xl border border-japan-blue bg-white text-japan-blue text-sm font-bold outline-none cursor-pointer text-center"
                     title="選擇要存入的方案"
                   >
-                    <option value="A">方案 A</option>
-                    <option value="B">方案 B</option>
-                    <option value="C">方案 C</option>
+                    <option value="A">Plan A</option>
+                    <option value="B">Plan B</option>
+                    <option value="C">Plan C</option>
                   </select>
                 )}
               </div>
@@ -351,23 +378,23 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
 
           {/* Prompt Input */}
           <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-              <Send size={16} />
-              {targetDay === 'all' ? `規劃 "${tripName}" (${startDate} 出發)` : `告訴 AI ${targetDay} 想去哪裡`}
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+              <Send size={14} />
+              Your Request
             </label>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder={targetDay === 'all'
-                ? "例如：我要去東京五天四夜。第一天去淺草雷門，第二天去迪士尼，第三天去新宿購物..."
-                : "例如：早上我想去吃著名的鬆餅，下午去逛古著店，晚上要吃燒肉。"}
-              className="w-full p-3 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-japan-blue focus:border-transparent outline-none transition-all h-32 resize-none text-sm leading-relaxed bg-white dark:bg-slate-800 dark:text-white"
+                ? "例如：\n我要去東京五天四夜。\nDay 1 住新宿，想去淺草和晴空塔。\nDay 2 想去迪士尼樂園玩整天。\nDay 3..."
+                : "例如：\n早上想去築地市場吃壽司，\n下午去銀座逛街，\n晚上想看夜景（請推薦地點）。"}
+              className="w-full p-4 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-japan-blue/50 focus:border-japan-blue outline-none transition-all h-40 resize-none text-sm leading-relaxed bg-white dark:bg-slate-800 dark:text-white placeholder-gray-400 shadow-sm"
             />
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 text-red-500 text-sm p-3 rounded-lg flex items-center gap-2">
+            <div className="bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 text-sm p-3 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
               <X size={14} />
               {error}
             </div>
@@ -375,24 +402,26 @@ const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGenerate, 
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 flex justify-end">
+        <div className="p-6 pt-2 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50 flex justify-end relative z-20">
           <button
             onClick={handleGenerate}
             disabled={loading}
             className={`
-              flex items-center gap-2 px-6 py-3 min-h-[48px] rounded-lg font-bold text-white shadow-lg transition-[background-color,transform]
-              ${loading ? 'bg-gray-400 cursor-wait' : 'bg-japan-blue hover:bg-japan-blue/90 hover:scale-105'}
+              relative overflow-hidden group flex items-center gap-2 px-8 py-3 rounded-xl font-bold text-white shadow-xl transition-all duration-300
+              ${loading ? 'bg-gray-400 cursor-wait' : 'bg-gradient-to-r from-japan-blue to-blue-600 hover:shadow-japan-blue/30 hover:scale-[1.02]'}
             `}
           >
             {loading ? (
               <>
                 <Loader2 size={18} className="animate-spin" />
-                {targetDay === 'all' ? '正在規劃整趟旅程...' : '正在更新行程...'}
+                <span className="animate-pulse">
+                  {targetDay === 'all' ? '規劃旅程中...' : '更新行程中...'}
+                </span>
               </>
             ) : (
               <>
-                <Sparkles size={18} />
-                {targetDay === 'all' ? '開始生成' : '更新該日行程'}
+                <Sparkles size={18} className="group-hover:rotate-12 transition-transform" />
+                {targetDay === 'all' ? '開始生成行程' : '更新該日行程'}
               </>
             )}
           </button>
