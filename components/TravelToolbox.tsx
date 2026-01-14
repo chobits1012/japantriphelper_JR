@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { X, Wallet, CheckSquare, Plus, Trash2, RefreshCw, TrendingUp, Coins, Cloud, FileJson, ChevronDown, ChevronRight, FolderPlus, Pencil, Save, Upload, Copy, Check, AlertTriangle, Sparkles, GripVertical } from 'lucide-react';
+import { X, Wallet, CheckSquare, Plus, Trash2, RefreshCw, TrendingUp, Coins, Cloud, FileJson, ChevronDown, ChevronRight, FolderPlus, Pencil, Save, Upload, Copy, Check, AlertTriangle, Sparkles, GripVertical, ArrowDownUp } from 'lucide-react';
 import LZString from 'lz-string';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -356,7 +356,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center p-4 pt-16 sm:pt-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300">
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         title={confirmModal.title}
@@ -365,99 +365,69 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
         onConfirm={confirmModal.onConfirm}
         onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
       />
-      {/* Fixed height container to prevent jumping */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md h-[85vh] flex flex-col overflow-hidden">
 
+      {/* Modal Container: Classic Glassmorphism + Japan Blue Accents */}
+      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[2rem] shadow-2xl w-full max-w-lg h-[85vh] sm:h-[800px] max-h-[90vh] flex flex-col overflow-hidden border border-white/20 dark:border-slate-700 ring-1 ring-black/5 relative transition-all duration-300">
 
-        {/* Header - Washi Style */}
-        <div className="relative bg-gradient-to-br from-paper-light to-paper bg-paper border-b-2 border-japan-blue/20 px-6 py-5 overflow-hidden">
-          {/* Subtle Decorative Background */}
-          <div className="absolute -right-12 -top-12 w-40 h-40 bg-japan-blue/5 rounded-full blur-3xl" />
-          <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-kiniro/10 rounded-full blur-2xl" />
+        {/* Decorative Background Elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-japan-blue/10 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-kiniro/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none" />
 
-          {/* Content */}
-          <div className="relative z-10 flex items-center justify-between">
-            <div>
-              <h3 className="font-serif text-xl text-japan-blue-700 dark:text-japan-blue-300 tracking-wide flex items-center gap-2.5">
-                <Wallet size={22} className="text-kiniro" />
-                旅遊工具箱
-              </h3>
-              <p className="text-ink-lighter dark:text-ink-light text-xs mt-0.5 font-sans tracking-wider">
-                Travel Essentials
-              </p>
+        {/* Header Section */}
+        <div className="relative z-10 px-6 pt-6 pb-2 flex-shrink-0">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-japan-blue text-white rounded-xl shadow-lg shadow-japan-blue/30">
+                <Wallet size={20} />
+              </div>
+              <div>
+                <h3 className="font-serif text-2xl font-bold text-ink dark:text-white tracking-wide">
+                  旅遊工具箱
+                </h3>
+                <p className="text-[10px] text-ink-lighter dark:text-slate-400 font-bold tracking-[0.2em] uppercase mt-0.5">
+                  Travel Essentials
+                </p>
+              </div>
             </div>
+
             <button
               onClick={onClose}
-              className="hover:bg-japan-blue/10 dark:hover:bg-japan-blue-700/20 p-2 rounded-full transition-colors text-ink-light hover:text-japan-blue-600 dark:text-ink-lighter dark:hover:text-japan-blue-400"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 hover:text-ink dark:hover:text-white transition-all duration-200 active:scale-90"
             >
-              <X size={20} />
+              <X size={24} />
             </button>
           </div>
-        </div>
 
-
-        {/* Tabs - Refined Design */}
-        <div className="flex border-b border-japan-blue/10 dark:border-slate-700 overflow-x-auto no-scrollbar bg-paper-light/50 dark:bg-slate-900">
-          <button
-            onClick={() => setActiveTab('expense')}
-            className={`flex-1 min-w-[80px] py-3.5 text-sm font-bold flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'expense'
-              ? 'text-japan-blue-700 dark:text-japan-blue-300'
-              : 'text-ink-lighter hover:text-japan-blue-500 hover:bg-japan-blue/5 dark:text-slate-400 dark:hover:text-japan-blue-400'
-              }`}
-          >
-            <Coins size={16} /> <span className="hidden sm:inline">記帳</span>
-            {activeTab === 'expense' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-japan-blue-600 to-transparent dark:via-japan-blue-400" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('currency')}
-            className={`flex-1 min-w-[80px] py-3.5 text-sm font-bold flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'currency'
-              ? 'text-japan-blue-700 dark:text-japan-blue-300'
-              : 'text-ink-lighter hover:text-japan-blue-500 hover:bg-japan-blue/5 dark:text-slate-400 dark:hover:text-japan-blue-400'
-              }`}
-          >
-            <RefreshCw size={16} /> <span className="hidden sm:inline">匯率</span>
-            {activeTab === 'currency' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-japan-blue-600 to-transparent dark:via-japan-blue-400" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('checklist')}
-            className={`flex-1 min-w-[80px] py-3.5 text-sm font-bold flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'checklist'
-              ? 'text-japan-blue-700 dark:text-japan-blue-300'
-              : 'text-ink-lighter hover:text-japan-blue-500 hover:bg-japan-blue/5 dark:text-slate-400 dark:hover:text-japan-blue-400'
-              }`}
-          >
-            <CheckSquare size={16} /> <span className="hidden sm:inline">清單</span>
-            {activeTab === 'checklist' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-japan-blue-600 to-transparent dark:via-japan-blue-400" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('cloud')}
-            className={`flex-1 min-w-[80px] py-3.5 text-sm font-bold flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'cloud'
-              ? 'text-japan-blue-700 dark:text-japan-blue-300'
-              : 'text-ink-lighter hover:text-japan-blue-500 hover:bg-japan-blue/5 dark:text-slate-400 dark:hover:text-japan-blue-400'
-              }`}
-          >
-            <Cloud size={16} /> <span className="hidden sm:inline">雲端</span>
-            {activeTab === 'cloud' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-japan-blue-600 to-transparent dark:via-japan-blue-400" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('backup')}
-            className={`flex-1 min-w-[80px] py-3.5 text-sm font-bold flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'backup'
-              ? 'text-japan-blue-700 dark:text-japan-blue-300'
-              : 'text-ink-lighter hover:text-japan-blue-500 hover:bg-japan-blue/5 dark:text-slate-400 dark:hover:text-japan-blue-400'
-              }`}
-          >
-            <Copy size={16} /> <span className="hidden sm:inline">備份</span>
-            {activeTab === 'backup' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-japan-blue-600 to-transparent dark:via-japan-blue-400" />
-            )}
-          </button>
+          {/* New Segmented Control Tabs */}
+          <div className="flex p-1 bg-gray-100 dark:bg-slate-800/80 rounded-xl overflow-x-auto no-scrollbar scroll-smooth">
+            {[
+              { id: 'expense', icon: Coins, label: '記帳' },
+              { id: 'currency', icon: RefreshCw, label: '匯率' },
+              { id: 'checklist', icon: CheckSquare, label: '清單' },
+              { id: 'cloud', icon: Cloud, label: '雲端' },
+              { id: 'backup', icon: Copy, label: '備份' },
+            ].map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`
+                    flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-sm font-bold transition-all duration-300 whitespace-nowrap
+                    ${isActive
+                      ? 'bg-white dark:bg-slate-700 text-japan-blue dark:text-sky-400 shadow-sm scale-100'
+                      : 'text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 scale-95 hover:scale-100'
+                    }
+                  `}
+                >
+                  <tab.icon size={16} className={isActive ? "stroke-2" : "stroke-[1.5]"} />
+                  <span className={isActive ? "opacity-100" : "opacity-0 sm:opacity-100 sm:w-auto w-0 overflow-hidden transition-all duration-300"}>
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Content Body */}
@@ -465,211 +435,159 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
 
           {/* --- EXPENSE TAB --- */}
           {activeTab === 'expense' && (
-            <div className="space-y-4 pb-20">
+            <div className="space-y-4 pb-20 fade-in slide-in-from-bottom-4 duration-500">
 
-              {/* 1. Budget Settings - Glassmorphism Card */}
-              <div className="relative overflow-hidden bg-white/90 backdrop-blur-sm dark:bg-slate-900/90 p-5 rounded-2xl border border-japan-blue/10 dark:border-slate-800 shadow-lg shadow-japan-blue/5">
-                {/* Subtle Decorative Background */}
-                <div className="absolute -right-6 -top-6 w-24 h-24 bg-japan-blue/5 rounded-full blur-2xl" />
-
-                <div className="relative z-10">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-bold text-ink-lighter dark:text-slate-400 uppercase tracking-widest">Total Budget</span>
-                    {isEditingBudget ? (
-                      <button onClick={handleSaveBudget} className="text-japan-blue-600 bg-japan-blue-50 dark:bg-japan-blue-900/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-japan-blue-100 dark:hover:bg-japan-blue-900/50 transition-colors">儲存</button>
-                    ) : (
-                      <button onClick={() => setIsEditingBudget(true)} className="text-ink-lighter hover:text-japan-blue-600 dark:text-slate-400 dark:hover:text-japan-blue-400 transition-colors"><Pencil size={14} /></button>
-                    )}
-                  </div>
-
-                  {isEditingBudget ? (
-                    <input
-                      type="number"
-                      value={budgetInput}
-                      onChange={e => setBudgetInput(e.target.value)}
-                      className="w-full text-2xl font-mono font-bold border-b-2 border-japan-blue-600 dark:border-japan-blue-400 outline-none bg-transparent dark:text-white"
-                      autoFocus
-                    />
-                  ) : (
-                    <div className="flex flex-col">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-mono font-bold text-ink dark:text-white">
-                          ¥{(tripSettings.budgetJPY || 0).toLocaleString()}
-                        </span>
-                      </div>
-                      <span className="text-xs text-ink-lighter dark:text-slate-400 font-mono">({toTWD(tripSettings.budgetJPY || 0)})</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 2. Visual Chart - Glassmorphism Card */}
-              <div className="relative overflow-hidden bg-white/90 backdrop-blur-sm dark:bg-slate-900/90 p-5 rounded-2xl border border-japan-blue/10 dark:border-slate-800 shadow-lg shadow-japan-blue/5 space-y-3">
-                {/* Subtle Decorative Background */}
-                <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-kiniro/10 rounded-full blur-2xl" />
-
-                <div className="relative z-10">
-                  <div className="flex justify-between items-end">
-                    <div>
-                      <p className="text-xs font-bold text-ink-lighter dark:text-slate-400">已支出</p>
-                      <p className="text-xl font-mono font-bold text-japan-blue-700 dark:text-japan-blue-300">¥{totalJPY.toLocaleString()}</p>
-                      <p className="text-[10px] text-ink-lighter dark:text-slate-400 font-mono">{toTWD(totalJPY)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs font-bold text-ink-lighter dark:text-slate-400">剩餘</p>
-                      <p className={`text-xl font-mono font-bold ${remaining < 0 ? 'text-japan-red-500 dark:text-japan-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                        ¥{remaining.toLocaleString()}
-                      </p>
-                      <p className="text-[10px] text-ink-lighter dark:text-slate-400 font-mono">{toTWD(remaining)}</p>
-                    </div>
-                  </div>
-
-                  {/* Stacked Bar */}
-                  <div className="h-4 w-full bg-paper-dark/50 dark:bg-slate-800 rounded-full overflow-hidden flex">
-                    {totalJPY > 0 && Object.entries(categoryStats).map(([cat, amount]) => {
-                      if (amount === 0) return null;
-                      const pct = ((amount as number) / totalJPY) * 100;
-                      const colorClass = EXPENSE_CATEGORIES[cat]?.bg || 'bg-gray-400';
-                      return (
-                        <div key={cat} style={{ width: `${pct}%` }} className={`h-full ${colorClass}`} title={`${cat}: ¥${amount}`} />
-                      );
-                    })}
-                  </div>
-
-                  {/* Breakdown Legend */}
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    {Object.entries(categoryStats).map(([cat, amount]) => {
-                      if (amount === 0) return null;
-                      const conf = EXPENSE_CATEGORIES[cat] || { label: cat, bg: 'bg-gray-400', color: '#9ca3af' };
-                      return (
-                        <div key={cat} className="flex items-center gap-1.5 text-xs bg-paper-light/80 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-japan-blue/5 dark:border-slate-700">
-                          <div className={`w-2.5 h-2.5 rounded-full ${conf.bg}`} />
-                          <span className="text-ink dark:text-slate-300 font-bold">{conf.label}</span>
-                          <span className="font-mono text-ink-lighter dark:text-slate-400">¥{amount.toLocaleString()}</span>
+              {/* 1. Budget Summary Card */}
+              <div className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-md group transition-all hover:shadow-lg">
+                <div className="flex justify-between items-start relative z-10">
+                  <div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Budget</p>
+                    <div className="flex items-baseline gap-2">
+                      {isEditingBudget ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            value={budgetInput}
+                            onChange={e => setBudgetInput(e.target.value)}
+                            className="w-32 text-2xl font-mono font-bold border-b-2 border-japan-blue outline-none bg-transparent"
+                            autoFocus
+                          />
+                          <button onClick={handleSaveBudget} className="p-1 text-japan-blue bg-blue-50 rounded-md"><Check size={16} /></button>
                         </div>
-                      );
-                    })}
+                      ) : (
+                        <div className="flex items-center gap-2 group/edit cursor-pointer" onClick={() => setIsEditingBudget(true)}>
+                          <span className="text-3xl font-mono font-bold text-japan-blue dark:text-sky-400">
+                            ¥{(tripSettings.budgetJPY || 0).toLocaleString()}
+                          </span>
+                          <Pencil size={12} className="opacity-0 group-hover/edit:opacity-100 text-gray-400 transition-opacity" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400 font-mono mt-1">≈ {toTWD(tripSettings.budgetJPY || 0)}</p>
                   </div>
+
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Remaining</p>
+                    <p className={`text-2xl font-mono font-bold ${remaining < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                      ¥{remaining.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-400 font-mono mt-1">
+                      {Math.round((remaining / (tripSettings.budgetJPY || 1)) * 100)}% left
+                    </p>
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="mt-4 h-3 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
+                  {totalJPY > 0 && Object.entries(categoryStats).map(([cat, amount]) => {
+                    if (amount === 0) return null;
+                    const pct = ((amount as number) / totalJPY) * ((totalJPY / (tripSettings.budgetJPY || 1)) * 100);
+                    const colorClass = EXPENSE_CATEGORIES[cat]?.bg || 'bg-gray-400';
+                    return (
+                      <div key={cat} style={{ width: `${pct}%` }} className={`h-full ${colorClass} opacity-80`} />
+                    );
+                  })}
+                </div>
+
+                {/* Decorative Pattern */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-japan-blue/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              </div>
+
+              {/* 3. Add Expense (Compact) */}
+              <div className="bg-white dark:bg-slate-900 border border-japan-blue/10 dark:border-slate-700 p-1.5 rounded-2xl shadow-sm flex items-center gap-2">
+                <div className="grid grid-cols-[1.5fr,1fr] gap-2 flex-1 pl-2">
+                  <input
+                    type="text"
+                    placeholder="購物品名..."
+                    value={newExpTitle}
+                    onChange={e => setNewExpTitle(e.target.value)}
+                    className="w-full text-sm font-bold bg-transparent border-b border-transparent focus:border-japan-blue outline-none py-2 dark:text-white placeholder-gray-400 transition-colors"
+                  />
+                  <input
+                    type="number"
+                    placeholder="¥ 金額"
+                    value={newExpAmount}
+                    onChange={e => setNewExpAmount(e.target.value)}
+                    className="w-full text-sm font-mono font-bold bg-transparent border-b border-transparent focus:border-kiniro outline-none py-2 dark:text-white placeholder-gray-400 transition-colors"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1 pr-1">
+                  <select
+                    value={newExpCat}
+                    onChange={(e: any) => setNewExpCat(e.target.value)}
+                    className="h-10 pl-2 pr-6 text-xs font-bold bg-gray-50 dark:bg-slate-800 rounded-xl border-none outline-none focus:ring-1 focus:ring-japan-blue dark:text-white cursor-pointer appearance-none"
+                    style={{ backgroundImage: 'none' }}
+                  >
+                    <option value="food">🍜 食</option>
+                    <option value="shopping">🛍️ 購</option>
+                    <option value="transport">🚇 行</option>
+                    <option value="hotel">🏨 住</option>
+                    <option value="other">⭐ 他</option>
+                  </select>
+
+                  <button
+                    onClick={handleAddExpense}
+                    className="h-10 w-10 bg-japan-blue text-white rounded-xl flex items-center justify-center hover:bg-japan-blue-700 active:scale-95 transition-all shadow-md shadow-japan-blue/20"
+                  >
+                    <Plus size={20} />
+                  </button>
                 </div>
               </div>
 
-              {/* 3. Action Header */}
-              <div className="flex justify-between items-center pt-2">
-                <span className="text-xs font-bold text-gray-400 uppercase">新增記帳</span>
+              {/* 4. Action Header */}
+              <div className="flex justify-between items-center px-2">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Recent Activity</span>
                 {expenses.length > 0 && (
                   <button
                     onClick={handleClearExpensesWithConfirm}
-                    className="text-xs font-bold text-red-400 hover:text-red-500 flex items-center gap-1 bg-red-50 dark:bg-slate-800 px-2 py-1 rounded-md"
+                    className="text-[10px] font-bold text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded transition-colors"
                   >
-                    <Trash2 size={12} /> 清空
+                    Clear All
                   </button>
                 )}
               </div>
 
-              {/* 4. Add Expense Input - Enhanced Card */}
-              <div className="relative overflow-hidden bg-white/90 backdrop-blur-sm dark:bg-slate-900/90 p-4 rounded-2xl border border-japan-blue/10 dark:border-slate-800 shadow-lg shadow-japan-blue/5 flex flex-wrap gap-3 items-end">
-                {/* Subtle decorative element */}
-                <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-japan-blue/5 rounded-full blur-xl" />
-                <div className="flex-1 min-w-[140px] relative z-10">
-                  <label className="text-[10px] font-bold text-ink-lighter dark:text-slate-400 uppercase tracking-wider block mb-1.5">項目名稱</label>
-                  <input
-                    type="text"
-                    placeholder="例如：一蘭拉麵"
-                    value={newExpTitle}
-                    onChange={e => setNewExpTitle(e.target.value)}
-                    className="w-full text-sm font-bold border-b-2 border-japan-blue/20 dark:border-slate-700 focus:border-japan-blue-600 dark:focus:border-japan-blue-400 outline-none py-2 mb-3 bg-transparent dark:text-white placeholder-ink-lighter/40 dark:placeholder-slate-500 transition-colors"
-                  />
-                  <label className="text-[10px] font-bold text-ink-lighter dark:text-slate-400 uppercase tracking-wider block mb-1.5">金額 (日圓)</label>
-                  <input
-                    type="number"
-                    placeholder="1000"
-                    value={newExpAmount}
-                    onChange={e => setNewExpAmount(e.target.value)}
-                    className="w-full text-base font-mono font-bold border-b-2 border-japan-blue/20 dark:border-slate-700 focus:border-kiniro dark:focus:border-kiniro outline-none py-2 bg-transparent dark:text-white placeholder-ink-lighter/40 dark:placeholder-slate-500 transition-colors"
-                  />
-                </div>
-
-                <div className="flex gap-3 w-full sm:w-auto relative z-10">
-                  <div className="flex-1">
-                    <label className="text-[10px] font-bold text-ink-lighter dark:text-slate-400 uppercase tracking-wider block mb-1.5">類別</label>
-                    <select
-                      value={newExpCat}
-                      onChange={(e: any) => setNewExpCat(e.target.value)}
-                      className="w-full text-sm font-bold bg-paper-light dark:bg-slate-800 dark:text-white rounded-lg px-3 py-3 border border-japan-blue/10 dark:border-slate-700 outline-none focus:border-japan-blue-600 dark:focus:border-japan-blue-400 transition-colors cursor-pointer"
-                    >
-                      <option value="food">🍜 美食</option>
-                      <option value="shopping">🛍️ 購物</option>
-                      <option value="transport">🚇 交通</option>
-                      <option value="hotel">🏨 住宿</option>
-                      <option value="other">⭐ 其他</option>
-                    </select>
-                  </div>
-                  <button
-                    onClick={handleAddExpense}
-                    className="relative overflow-hidden group bg-gradient-to-r from-japan-blue-600 to-japan-blue-700 hover:from-japan-blue-700 hover:to-japan-blue-800 dark:from-japan-blue-500 dark:to-japan-blue-600 dark:hover:from-japan-blue-600 dark:hover:to-japan-blue-700 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 flex-shrink-0"
-                  >
-                    {/* Subtle shine effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                    <Plus size={22} className="relative z-10" />
-                  </button>
-                </div>
-              </div>
-
-              {/* 5. Expense List - Enhanced */}
-              <div className="space-y-3">
+              {/* 5. Expense List (Scrollable) */}
+              <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
                 {expenses.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-japan-blue/5 flex items-center justify-center">
-                      <Coins size={28} className="text-ink-lighter/30" />
-                    </div>
-                    <p className="text-ink-lighter dark:text-slate-400 text-sm font-serif">還沒有記帳紀錄</p>
-                    <p className="text-ink-lighter/60 dark:text-slate-500 text-xs mt-1">開始記錄您的旅遊花費</p>
+                  <div className="py-10 text-center opacity-50">
+                    <Coins size={40} className="mx-auto text-gray-300 mb-2" />
+                    <p className="text-xs text-gray-400">尚無記帳資料</p>
                   </div>
                 ) : (
                   expenses.map((item, index) => {
-                    const categoryConf = EXPENSE_CATEGORIES[item.category] || EXPENSE_CATEGORIES['other'];
+                    const conf = EXPENSE_CATEGORIES[item.category] || EXPENSE_CATEGORIES['other'];
                     return (
                       <div
                         key={item.id}
-                        className="relative overflow-hidden flex items-center justify-between bg-white/80 backdrop-blur-sm dark:bg-slate-900/80 p-4 rounded-xl border border-japan-blue/10 dark:border-slate-800 shadow-md hover:shadow-lg transition-all duration-300 animate-in slide-in-from-bottom-2"
-                        style={{ animationDelay: `${index * 50}ms` }}
+                        className="group flex items-center justify-between p-3 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl hover:border-japan-blue/30 transition-all shadow-sm hover:shadow-md animate-in slide-in-from-bottom-2"
+                        style={{ animationDelay: `${index * 30}ms` }}
                       >
-                        {/* Subtle decorative background */}
-                        <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full blur-2xl opacity-30" style={{ backgroundColor: categoryConf.color }} />
-
-                        <div className="flex items-center gap-3.5 flex-1 min-w-0 relative z-10">
-                          {/* Category Badge - Enhanced */}
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0 ${categoryConf.bg} bg-opacity-90`}>
-                            <span className="text-white drop-shadow">
-                              {item.category === 'food' ? '🍜' :
-                                item.category === 'shopping' ? '🛍️' :
-                                  item.category === 'transport' ? '🚇' :
-                                    item.category === 'hotel' ? '🏨' : '⭐'}
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <div className={`w-10 h-10 rounded-xl ${conf.bg} flex items-center justify-center text-white shadow-sm flex-shrink-0`}>
+                            <span className="text-lg drop-shadow-sm">
+                              {item.category === 'food' ? '🍜' : item.category === 'shopping' ? '🛍️' : item.category === 'transport' ? '🚇' : item.category === 'hotel' ? '🏨' : '⭐'}
                             </span>
                           </div>
-
-                          <div className="min-w-0 flex-1">
-                            <p className="font-bold text-ink dark:text-white text-base truncate leading-tight">{item.title}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-[10px] text-ink-lighter dark:text-slate-400 font-medium">{item.date}</span>
-                              <span className="text-ink-lighter/40">•</span>
-                              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: categoryConf.color }}>
-                                {categoryConf.label}
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-ink dark:text-white truncate">{item.title}</p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-opacity-10 dark:bg-opacity-20`} style={{ backgroundColor: conf.color, color: conf.color }}>
+                                {conf.label}
                               </span>
+                              <span className="text-[10px] text-gray-400">{item.date}</span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 flex-shrink-0 relative z-10">
-                          <div className="text-right">
-                            <span className="font-mono font-bold text-lg text-japan-blue-700 dark:text-japan-blue-300">¥{item.amountJPY.toLocaleString()}</span>
-                            <p className="text-[9px] text-ink-lighter dark:text-slate-400 font-mono mt-0.5">{toTWD(item.amountJPY)}</p>
-                          </div>
+                        <div className="text-right flex-shrink-0 pl-2">
+                          <p className="font-mono font-bold text-japan-blue dark:text-sky-400">¥{item.amountJPY.toLocaleString()}</p>
                           <button
                             onClick={() => handleDeleteExpense(item.id)}
-                            className="p-2 rounded-lg text-ink-lighter/40 hover:text-japan-red-500 hover:bg-japan-red-50 dark:hover:bg-japan-red-900/20 transition-colors"
+                            className="mt-1 text-gray-300 hover:text-red-400 transition-colors p-1"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={12} />
                           </button>
                         </div>
                       </div>
@@ -682,45 +600,72 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
 
           {/* --- CURRENCY TAB --- */}
           {activeTab === 'currency' && (
-            <div className="space-y-6 pt-4">
-              <div className="text-center">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Current Rate (JPY/TWD)</p>
-                <div className="flex items-center justify-center gap-2 text-japan-blue dark:text-sky-400">
-                  <TrendingUp size={20} />
-                  <span className="text-4xl font-mono font-bold">{rate}</span>
+            <div className="space-y-6 pt-6 px-2 fade-in slide-in-from-bottom-4 duration-500">
+
+              {/* Rate Card */}
+              <div className="text-center relative py-4">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Current Exchange Rate</p>
+                <div className="inline-flex items-center justify-center gap-3 bg-white dark:bg-slate-800 px-6 py-3 rounded-2xl shadow-sm border border-japan-blue/10 dark:border-slate-700">
+                  <div className="flex items-center gap-1.5 text-japan-blue dark:text-sky-400">
+                    <TrendingUp size={18} />
+                    <span className="text-3xl font-mono font-bold tracking-tight">{rate}</span>
+                  </div>
+                  <span className="text-xs text-gray-400 font-bold">JPY/TWD</span>
                 </div>
-                <p className="text-[10px] text-gray-400 mt-2">
-                  {loadingRate ? 'Updating...' : `Updated: ${lastUpdated}`}
+                <p className="text-[10px] text-gray-400 mt-3 opacity-60 font-mono">
+                  {loadingRate ? 'Updating...' : `Last Updated: ${lastUpdated}`}
                 </p>
               </div>
 
-              <div className="bg-gray-50 dark:bg-slate-900 p-6 rounded-2xl space-y-4 border border-gray-100 dark:border-slate-800">
+              {/* Converter */}
+              <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-2 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-xl shadow-japan-blue/5 relative">
+
                 {/* JPY Input */}
-                <div className="relative">
-                  <label className="text-xs font-bold text-gray-400 absolute left-3 top-2">JPY 日幣</label>
+                <div className="relative group transition-all rounded-2xl bg-gray-100/50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md border border-transparent hover:border-japan-blue/20">
+                  <label className="text-[10px] font-bold text-gray-400 absolute left-4 top-3 pointer-events-none">JPY 日幣</label>
                   <input
                     type="number"
                     value={jpyInput}
                     onChange={e => handleJpyChange(e.target.value)}
-                    className="w-full bg-white dark:bg-slate-800 p-3 pt-6 rounded-xl border border-gray-200 dark:border-slate-700 text-2xl font-mono font-bold text-ink dark:text-white focus:ring-2 focus:ring-japan-blue dark:focus:ring-sky-500 outline-none"
+                    className="w-full bg-transparent p-4 pt-7 text-2xl font-mono font-bold text-ink dark:text-white outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="0"
                   />
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full shadow-sm overflow-hidden border border-gray-100 dark:border-slate-600 pointer-events-none">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <rect width="100" height="100" fill="white" />
+                      <circle cx="50" cy="50" r="18" fill="#BC002D" />
+                    </svg>
+                  </div>
                 </div>
 
-                <div className="flex justify-center -my-2 relative z-10">
-                  <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full p-1.5 shadow-sm text-gray-400">
-                    <RefreshCw size={16} />
+                {/* Swap Icon */}
+                <div className="relative h-2 z-10">
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white dark:bg-slate-900 rounded-full border border-gray-100 dark:border-slate-700 flex items-center justify-center text-gray-400 shadow-sm">
+                    <RefreshCw size={14} className="opacity-50" />
                   </div>
                 </div>
 
                 {/* TWD Input */}
-                <div className="relative">
-                  <label className="text-xs font-bold text-gray-400 absolute left-3 top-2">TWD 台幣 (約)</label>
+                <div className="relative group transition-all rounded-2xl bg-gray-100/50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md border border-transparent hover:border-japan-blue/20">
+                  <label className="text-[10px] font-bold text-gray-400 absolute left-4 top-3 pointer-events-none">TWD 台幣 (約)</label>
                   <input
                     type="number"
                     value={twdInput}
                     onChange={e => handleTwdChange(e.target.value)}
-                    className="w-full bg-white dark:bg-slate-800 p-3 pt-6 rounded-xl border border-gray-200 dark:border-slate-700 text-2xl font-mono font-bold text-ink dark:text-white focus:ring-2 focus:ring-japan-blue dark:focus:ring-sky-500 outline-none"
+                    className="w-full bg-transparent p-4 pt-7 text-2xl font-mono font-bold text-ink dark:text-white outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="0"
                   />
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full shadow-sm overflow-hidden border border-gray-100 dark:border-slate-600 pointer-events-none">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <rect width="100" height="100" fill="#FE0000" />
+                      <rect width="50" height="50" fill="#000095" />
+                      {/* White Sun */}
+                      <g transform="translate(25, 25) scale(0.8)">
+                        <circle r="12" fill="white" />
+                        <path d="M0 -22 L3 -13 L11 -19 L10 -10 L19 -11 L13 -3 L22 0 L13 3 L19 11 L10 10 L11 19 L3 13 L0 22 L-3 13 L-11 19 L-10 10 L-19 11 L-13 3 L-22 0 L-13 -3 L-19 -11 L-10 -10 L-11 -19 L-3 -13 Z" fill="white" />
+                      </g>
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
@@ -728,19 +673,37 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
 
           {/* --- CHECKLIST TAB (Categorized) --- */}
           {activeTab === 'checklist' && (
-            <div className="space-y-4 pb-20">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-bold text-ink dark:text-white">檢查清單</h4>
-                  <span className="text-xs font-bold bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 px-2 py-1 rounded-full">
-                    {checklist.reduce((acc, cat) => acc + (cat.items?.filter(i => i.checked).length || 0), 0)} / {checklist.reduce((acc, cat) => acc + (cat.items?.length || 0), 0)}
-                  </span>
+            <div className="pb-24 fade-in slide-in-from-bottom-4 duration-500">
+
+              {/* Overall Progress Header */}
+              <div className="flex items-center justify-between mb-4 sticky top-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md py-3 border-b border-gray-100 dark:border-slate-800 -mx-4 px-4 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-10 h-10 flex items-center justify-center">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-gray-100 dark:text-slate-800" />
+                      <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="3" fill="transparent"
+                        strokeDasharray={100}
+                        strokeDashoffset={100 - (checklist.reduce((acc, cat) => acc + (cat.items?.filter(i => i.checked).length || 0), 0) / (checklist.reduce((acc, cat) => acc + (cat.items?.length || 0), 0) || 1) * 100)}
+                        className="text-japan-blue dark:text-sky-500 transition-all duration-1000 ease-out"
+                      />
+                    </svg>
+                    <span className="absolute text-[10px] font-bold text-japan-blue dark:text-sky-400">
+                      {Math.round((checklist.reduce((acc, cat) => acc + (cat.items?.filter(i => i.checked).length || 0), 0) / (checklist.reduce((acc, cat) => acc + (cat.items?.length || 0), 0) || 1) * 100))}%
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-ink dark:text-white text-sm">Packing List</h4>
+                    <p className="text-[10px] text-gray-400 font-mono">
+                      {checklist.reduce((acc, cat) => acc + (cat.items?.filter(i => i.checked).length || 0), 0)} of {checklist.reduce((acc, cat) => acc + (cat.items?.length || 0), 0)} items ready
+                    </p>
+                  </div>
                 </div>
                 <button
                   onClick={handleResetChecklistWithConfirm}
-                  className="text-xs font-bold text-gray-400 hover:text-japan-blue flex items-center gap-1"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 dark:bg-slate-800 text-gray-400 hover:text-japan-blue hover:bg-blue-50 transition-colors"
+                  title="Reset Checklist"
                 >
-                  <RefreshCw size={12} /> 重置
+                  <RefreshCw size={14} />
                 </button>
               </div>
 
@@ -752,7 +715,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 onDragEnd={handleChecklistDragEnd}
               >
                 <SortableContext items={checklist.map(cat => cat.id)} strategy={verticalListSortingStrategy}>
-                  <div className="space-y-4">
+                  <div className="space-y-4 px-1">
                     {checklist.map(cat => {
                       const total = cat.items?.length || 0;
                       const checkedCount = cat.items?.filter(i => i.checked).length || 0;
@@ -762,18 +725,24 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                       return (
                         <SortableChecklistCategory key={cat.id} category={cat}>
                           {(dragListeners) => (
-                            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+                            <div className="group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm transition-all hover:shadow-md hover:border-japan-blue/20">
                               {/* Cat Header */}
-                              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 transition-colors select-none">
-                                <div
-                                  onClick={() => toggleCategoryCollapse(cat.id)}
-                                  className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors -m-3 p-3 rounded-l-xl"
-                                >
-                                  {cat.isCollapsed ? <ChevronRight size={16} className="text-gray-400 flex-shrink-0" /> : <ChevronDown size={16} className="text-gray-400 flex-shrink-0" />}
+                              <div className="relative">
+                                {/* Progress Background */}
+                                <div className="absolute inset-0 bg-gray-50 dark:bg-slate-800/50" />
+                                <div className="absolute inset-y-0 left-0 bg-japan-blue/5 dark:bg-sky-500/10 transition-all duration-500" style={{ width: `${progress}%` }} />
 
-                                  {isEditingTitle ? (
-                                    <div className="flex items-center gap-2 flex-1 min-w-0" onClick={e => e.stopPropagation()}>
-                                      <div className="flex-1 min-w-0">
+                                <div className="relative flex items-center justify-between p-3 select-none">
+                                  <div
+                                    onClick={() => toggleCategoryCollapse(cat.id)}
+                                    className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                                  >
+                                    <div className={`transition-transform duration-300 ${cat.isCollapsed ? '' : 'rotate-90'}`}>
+                                      <ChevronRight size={16} className="text-gray-400" />
+                                    </div>
+
+                                    {isEditingTitle ? (
+                                      <div className="flex items-center gap-2 flex-1 min-w-0" onClick={e => e.stopPropagation()}>
                                         <input
                                           type="text"
                                           value={editingTitle}
@@ -781,84 +750,60 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                                           onKeyDown={e => {
                                             if (e.key === 'Enter') handleSaveTitle(cat.id);
                                           }}
-                                          className="text-sm font-bold p-1 border border-japan-blue rounded outline-none w-full bg-white dark:bg-slate-900 dark:text-white min-w-0"
+                                          className="text-sm font-bold bg-white dark:bg-slate-900 px-2 py-1 rounded border border-japan-blue outline-none w-full min-w-0"
                                           autoFocus
                                         />
+                                        <button onClick={() => handleSaveTitle(cat.id)} className="p-1 text-japan-blue"><Check size={16} /></button>
                                       </div>
-                                      <button
-                                        onClick={() => handleSaveTitle(cat.id)}
-                                        className="p-1.5 bg-blue-50 text-japan-blue rounded hover:bg-japan-blue hover:text-white transition-colors flex-shrink-0"
-                                      >
-                                        <Save size={16} />
-                                      </button>
+                                    ) : (
+                                      <div className="flex items-center gap-2 group/title min-w-0">
+                                        <span className="font-bold text-sm text-ink dark:text-white truncate">{cat.title}</span>
+                                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-white/50 dark:bg-slate-700/50 rounded-md text-gray-500 dark:text-gray-400 font-mono">
+                                          {checkedCount}/{total}
+                                        </span>
+                                        <button
+                                          onClick={(e) => handleStartEditTitle(cat, e)}
+                                          className="text-gray-300 hover:text-japan-blue p-1 opacity-0 group-hover/title:opacity-100 transition-opacity"
+                                        >
+                                          <Pencil size={12} />
+                                        </button>
+
+                                        {/* Sort Mode Toggle */}
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveCategoryEditId(prev => prev === cat.id ? null : cat.id);
+                                          }}
+                                          className={`ml-1 p-1 rounded-full transition-all ${activeCategoryEditId === cat.id ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'text-gray-300 hover:text-gray-500 opacity-0 group-hover:opacity-100'}`}
+                                          title="Sort Items"
+                                        >
+                                          <ArrowDownUp size={12} />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleDeleteCategoryWithConfirm(cat.id); }}
+                                      className="text-gray-300 hover:text-red-400 p-1.5 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors opacity-0 group-hover:opacity-100"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                    <div
+                                      {...dragListeners}
+                                      className="cursor-grab active:cursor-grabbing p-1.5 text-gray-300 hover:text-gray-500 touch-none"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <GripVertical size={16} />
                                     </div>
-                                  ) : (
-                                    <div className="flex items-center gap-2 group/title min-w-0">
-                                      <span className="font-bold text-sm text-ink dark:text-white truncate">{cat.title}</span>
-                                      <button
-                                        onClick={(e) => handleStartEditTitle(cat, e)}
-                                        className="text-gray-300 hover:text-japan-blue p-1 opacity-0 group-hover/title:opacity-100 transition-opacity flex-shrink-0"
-                                      >
-                                        <Pencil size={12} />
-                                      </button>
-                                      <span className="text-xs text-gray-400 font-mono flex-shrink-0">({checkedCount}/{total})</span>
-                                      {/* Circular edit mode indicator */}
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          // Toggle: if already active, turn off; otherwise activate this category
-                                          setActiveCategoryEditId(prev => prev === cat.id ? null : cat.id);
-                                        }}
-                                        className="ml-2 p-1.5 flex items-center justify-center flex-shrink-0 group/toggle"
-                                        title={activeCategoryEditId === cat.id ? '關閉排序模式' : '開啟排序模式'}
-                                      >
-                                        <div className={`
-                                          w-3 h-3 rounded-full transition-all duration-300 ease-in-out
-                                          ${activeCategoryEditId === cat.id
-                                            ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/50 dark:from-emerald-500 dark:to-emerald-700 dark:shadow-emerald-400/40'
-                                            : 'bg-gray-300 dark:bg-slate-600 group-hover/toggle:bg-gray-400 dark:group-hover/toggle:bg-slate-500'
-                                          }
-                                          ${activeCategoryEditId === cat.id ? 'scale-110' : 'scale-100 group-hover/toggle:scale-105'}
-                                        `}>
-                                          {/* Inner highlight for depth */}
-                                          <div className={`
-                                            w-full h-full rounded-full
-                                            ${activeCategoryEditId === cat.id
-                                              ? 'bg-gradient-to-br from-white/40 to-transparent'
-                                              : 'bg-gradient-to-br from-white/20 to-transparent'
-                                            }
-                                          `} />
-                                        </div>
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-1 flex-shrink-0">
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); handleDeleteCategoryWithConfirm(cat.id); }}
-                                    className="text-gray-300 hover:text-red-400 p-1 flex-shrink-0"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                  <div
-                                    {...dragListeners}
-                                    className="cursor-grab active:cursor-grabbing p-1.5 rounded-md text-gray-300 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 touch-none flex-shrink-0"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <GripVertical size={14} />
                                   </div>
                                 </div>
                               </div>
 
-                              {/* Progress Bar */}
-                              <div className="h-1 bg-gray-100 dark:bg-slate-800 w-full">
-                                <div className="h-full bg-japan-blue dark:bg-sky-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
-                              </div>
-
                               {/* Cat Items */}
                               {!cat.isCollapsed && (
-                                <div className="p-3 space-y-2">
-                                  {/* Only enable drag-and-drop when this category is in edit mode */}
+                                <div className="p-2 space-y-1 bg-white dark:bg-slate-900">
                                   {activeCategoryEditId === cat.id ? (
                                     <DndContext
                                       sensors={checklistSensors}
@@ -867,92 +812,26 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                                       onDragEnd={handleItemDragEnd(cat.id)}
                                     >
                                       <SortableContext items={(cat.items || []).map(item => item.id)} strategy={verticalListSortingStrategy}>
-                                        {(cat.items || []).map(item => {
-                                          const isEditingItem = editingItemId === item.id;
-
-                                          return (
-                                            <SortableChecklistItem key={item.id} item={item} categoryId={cat.id}>
-                                              {(dragListeners, isDragging) => (
-                                                <div className={`flex items-center justify-between group rounded-lg transition-all ${isDragging ? 'bg-gray-50 dark:bg-slate-800' : ''}`}>
-                                                  {isEditingItem ? (
-                                                    // Edit Mode
-                                                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                      <input
-                                                        type="text"
-                                                        value={editingItemText}
-                                                        onChange={e => setEditingItemText(e.target.value)}
-                                                        onKeyDown={e => {
-                                                          if (e.key === 'Enter') handleSaveItem(cat.id, item.id);
-                                                          if (e.key === 'Escape') handleCancelEditItem();
-                                                        }}
-                                                        className="flex-1 text-sm font-bold p-1 border border-japan-blue rounded outline-none bg-white dark:bg-slate-900 dark:text-white min-w-0"
-                                                        autoFocus
-                                                      />
-                                                      <button
-                                                        onClick={() => handleSaveItem(cat.id, item.id)}
-                                                        className="p-1.5 bg-blue-50 text-japan-blue rounded hover:bg-japan-blue hover:text-white transition-colors flex-shrink-0"
-                                                      >
-                                                        <Check size={14} />
-                                                      </button>
-                                                      <button
-                                                        onClick={handleCancelEditItem}
-                                                        className="p-1.5 bg-gray-50 text-gray-400 rounded hover:bg-gray-200 hover:text-gray-600 transition-colors flex-shrink-0"
-                                                      >
-                                                        <X size={14} />
-                                                      </button>
-                                                    </div>
-                                                  ) : (
-                                                    // View Mode - Make entire row draggable
-                                                    <>
-                                                      <div
-                                                        {...dragListeners}
-                                                        className="flex items-center gap-3 min-w-0 flex-1 cursor-grab active:cursor-grabbing py-1.5 px-2 -mx-2 rounded hover:bg-gray-50 dark:hover:bg-slate-800 touch-none"
-                                                        onClick={() => handleToggleItem(cat.id, item.id)}
-                                                      >
-                                                        <div className={`
-                                                            w-4 h-4 rounded border border-gray-300 dark:border-slate-600 flex items-center justify-center transition-colors flex-shrink-0
-                                                            ${item.checked ? 'bg-japan-blue border-japan-blue dark:bg-sky-500 dark:border-sky-500 text-white' : 'bg-white dark:bg-slate-800'}
-                                                         `}>
-                                                          {item.checked && <Check size={10} />}
-                                                        </div>
-                                                        <span className={`text-sm truncate ${item.checked ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-slate-300'}`}>
-                                                          {item.text}
-                                                        </span>
-                                                      </div>
-                                                      <div className="flex items-center gap-1 flex-shrink-0">
-                                                        <button
-                                                          onClick={(e) => { e.stopPropagation(); handleStartEditItem(cat.id, item.id, item.text); }}
-                                                          className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-japan-blue transition-opacity p-1"
-                                                        >
-                                                          <Pencil size={14} />
-                                                        </button>
-                                                        <button
-                                                          onClick={(e) => { e.stopPropagation(); handleDeleteItemWithConfirm(cat.id, item.id); }}
-                                                          className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-opacity p-1"
-                                                        >
-                                                          <X size={14} />
-                                                        </button>
-                                                      </div>
-                                                    </>
-                                                  )}
-                                                </div>
-                                              )}
-                                            </SortableChecklistItem>
-                                          );
-                                        })}
+                                        {(cat.items || []).map(item => (
+                                          <SortableChecklistItem key={item.id} item={item} categoryId={cat.id}>
+                                            {(dragListeners, isDragging) => (
+                                              <div className={`flex items-center gap-3 p-3 rounded-xl border border-dashed border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50 ${isDragging ? 'opacity-50' : ''}`}>
+                                                <div {...dragListeners} className="cursor-grab text-gray-400"><GripVertical size={14} /></div>
+                                                <span className="text-sm font-bold text-gray-500">{item.text}</span>
+                                              </div>
+                                            )}
+                                          </SortableChecklistItem>
+                                        ))}
                                       </SortableContext>
                                     </DndContext>
                                   ) : (
-                                    // Edit mode disabled - normal list without drag-and-drop
                                     <>
                                       {(cat.items || []).map(item => {
                                         const isEditingItem = editingItemId === item.id;
-
                                         return (
-                                          <div key={item.id} className="flex items-center justify-between group">
+                                          <div key={item.id} className="group/item relative overflow-hidden">
                                             {isEditingItem ? (
-                                              // Edit Mode
-                                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                              <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-slate-800 rounded-lg">
                                                 <input
                                                   type="text"
                                                   value={editingItemText}
@@ -961,54 +840,48 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                                                     if (e.key === 'Enter') handleSaveItem(cat.id, item.id);
                                                     if (e.key === 'Escape') handleCancelEditItem();
                                                   }}
-                                                  className="flex-1 text-sm font-bold p-1 border border-japan-blue rounded outline-none bg-white dark:bg-slate-900 dark:text-white min-w-0"
+                                                  className="flex-1 bg-transparent text-sm font-bold outline-none min-w-0"
                                                   autoFocus
                                                 />
-                                                <button
-                                                  onClick={() => handleSaveItem(cat.id, item.id)}
-                                                  className="p-1.5 bg-blue-50 text-japan-blue rounded hover:bg-japan-blue hover:text-white transition-colors flex-shrink-0"
-                                                >
-                                                  <Check size={14} />
-                                                </button>
-                                                <button
-                                                  onClick={handleCancelEditItem}
-                                                  className="p-1.5 bg-gray-50 text-gray-400 rounded hover:bg-gray-200 hover:text-gray-600 transition-colors flex-shrink-0"
-                                                >
-                                                  <X size={14} />
-                                                </button>
+                                                <button onClick={() => handleSaveItem(cat.id, item.id)} className="text-japan-blue"><Check size={14} /></button>
                                               </div>
                                             ) : (
-                                              // View Mode - normal clickable (no drag)
-                                              <>
-                                                <div
-                                                  className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer py-1.5 px-2 -mx-2 rounded hover:bg-gray-50 dark:hover:bg-slate-800"
-                                                  onClick={() => handleToggleItem(cat.id, item.id)}
-                                                >
-                                                  <div className={`
-                                                        w-4 h-4 rounded border border-gray-300 dark:border-slate-600 flex items-center justify-center transition-colors flex-shrink-0
-                                                        ${item.checked ? 'bg-japan-blue border-japan-blue dark:bg-sky-500 dark:border-sky-500 text-white' : 'bg-white dark:bg-slate-800'}
-                                                     `}>
-                                                    {item.checked && <Check size={10} />}
-                                                  </div>
-                                                  <span className={`text-sm truncate ${item.checked ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-slate-300'}`}>
-                                                    {item.text}
-                                                  </span>
+                                              <div
+                                                className={`
+                                                  flex items-center gap-3 p-3 rounded-xl transition-all duration-300 cursor-pointer border border-transparent
+                                                  ${item.checked ? 'bg-gray-50/50 dark:bg-slate-800/30' : 'hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-100 dark:hover:border-slate-700'}
+                                                `}
+                                                onClick={() => handleToggleItem(cat.id, item.id)}
+                                              >
+                                                {/* Custom Checkbox */}
+                                                <div className={`
+                                                  w-5 h-5 rounded-md flex items-center justify-center transition-all duration-300 border
+                                                  ${item.checked
+                                                    ? 'bg-japan-blue border-japan-blue dark:bg-sky-500 dark:border-sky-500 scale-100'
+                                                    : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 group-hover/item:border-japan-blue/50 scale-95'}
+                                                `}>
+                                                  {item.checked && <Check size={12} className="text-white" strokeWidth={3} />}
                                                 </div>
-                                                <div className="flex items-center gap-1 flex-shrink-0">
+
+                                                <span className={`text-sm font-medium transition-all ${item.checked ? 'text-gray-400 line-through decoration-gray-300' : 'text-ink dark:text-slate-200'}`}>
+                                                  {item.text}
+                                                </span>
+
+                                                <div className="flex ml-auto gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity">
                                                   <button
                                                     onClick={(e) => { e.stopPropagation(); handleStartEditItem(cat.id, item.id, item.text); }}
-                                                    className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-japan-blue transition-opacity p-1"
+                                                    className="text-gray-300 hover:text-japan-blue p-1"
                                                   >
-                                                    <Pencil size={14} />
+                                                    <Pencil size={12} />
                                                   </button>
                                                   <button
                                                     onClick={(e) => { e.stopPropagation(); handleDeleteItemWithConfirm(cat.id, item.id); }}
-                                                    className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-opacity p-1"
+                                                    className="text-gray-300 hover:text-red-400 p-1"
                                                   >
-                                                    <X size={14} />
+                                                    <Trash2 size={12} />
                                                   </button>
                                                 </div>
-                                              </>
+                                              </div>
                                             )}
                                           </div>
                                         );
@@ -1016,27 +889,21 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                                     </>
                                   )}
 
-                                  {/* Add Item Input */}
-                                  <div className="mt-2 pt-2 border-t border-gray-50 dark:border-slate-800 flex items-center gap-2">
-                                    <Plus size={14} className="text-gray-300 flex-shrink-0" />
+                                  {/* Add Item Input Inline */}
+                                  <div className="mt-1 p-2 flex items-center gap-3 opacity-60 hover:opacity-100 transition-opacity">
+                                    <div className="w-5 h-5 flex items-center justify-center text-gray-300">
+                                      <Plus size={14} />
+                                    </div>
                                     <input
                                       type="text"
-                                      placeholder="新增項目..."
-                                      className="flex-1 text-xs bg-transparent outline-none py-1 min-w-0 dark:text-white placeholder-gray-400"
+                                      placeholder="Add item..."
+                                      className="flex-1 text-sm bg-transparent outline-none min-w-0 dark:text-white placeholder-gray-400"
                                       value={newItemInputs[cat.id] || ''}
                                       onChange={(e) => handleAddItemInput(cat.id, e.target.value)}
                                       onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                          handleAddItemSubmit(cat.id);
-                                        }
+                                        if (e.key === 'Enter') handleAddItemSubmit(cat.id);
                                       }}
                                     />
-                                    <button
-                                      onClick={() => handleAddItemSubmit(cat.id)}
-                                      className="p-1 rounded bg-blue-50 text-japan-blue hover:bg-japan-blue hover:text-white transition-colors flex-shrink-0 dark:bg-slate-800 dark:text-sky-400"
-                                    >
-                                      <Plus size={14} />
-                                    </button>
                                   </div>
                                 </div>
                               )}
@@ -1048,324 +915,247 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                   </div>
                 </SortableContext>
 
-                {/* Drag Overlay */}
                 <DragOverlay>
-                  {activeChecklistCategory ? (
-                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xl scale-105 rotate-2 opacity-90">
-                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          {activeChecklistCategory.isCollapsed ? <ChevronRight size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
-                          <span className="font-bold text-sm text-ink dark:text-white truncate">{activeChecklistCategory.title}</span>
-                          <span className="text-xs text-gray-400 font-mono">
-                            ({activeChecklistCategory.items?.filter(i => i.checked).length || 0}/{activeChecklistCategory.items?.length || 0})
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
+                  {/* Custom drag overlay if needed */}
                 </DragOverlay>
               </DndContext>
 
-              {/* Add Category Button */}
-              {showNewCatInput ? (
-                <div className="flex gap-2 items-center bg-gray-50 dark:bg-slate-900 p-3 rounded-xl border border-gray-200 dark:border-slate-800">
-                  <input
-                    type="text"
-                    value={newCategoryName}
-                    onChange={e => setNewCategoryName(e.target.value)}
-                    placeholder="新分類名稱..."
-                    className="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded px-2 py-1 text-sm outline-none focus:border-japan-blue min-w-0 dark:text-white"
-                    autoFocus
-                  />
-                  <button onClick={handleAddCategory} className="text-japan-blue dark:text-sky-400 font-bold text-sm flex-shrink-0">新增</button>
-                  <button onClick={() => setShowNewCatInput(false)} className="text-gray-400 flex-shrink-0"><X size={16} /></button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowNewCatInput(true)}
-                  className="w-full py-3 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl text-gray-400 hover:border-japan-blue hover:text-japan-blue hover:bg-blue-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 font-bold text-sm"
-                >
-                  <FolderPlus size={16} /> 新增分類
-                </button>
-              )}
+              {/* Add Category Section */}
+              <div className="mt-4 px-1">
+                {showNewCatInput ? (
+                  <div className="flex gap-2 items-center bg-white dark:bg-slate-900 p-3 rounded-xl border border-japan-blue/20 shadow-lg ring-1 ring-japan-blue/10 animate-in fade-in zoom-in-95">
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={e => setNewCategoryName(e.target.value)}
+                      placeholder="New Category Name..."
+                      className="flex-1 bg-transparent text-sm font-bold outline-none text-ink dark:text-white"
+                      autoFocus
+                    />
+                    <button onClick={handleAddCategory} className="p-2 bg-japan-blue text-white rounded-lg shadow-md hover:bg-japan-blue-700 transition-colors"><Check size={16} /></button>
+                    <button onClick={() => setShowNewCatInput(false)} className="p-2 text-gray-400 hover:text-gray-600"><X size={16} /></button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowNewCatInput(true)}
+                    className="w-full py-3 border border-dashed border-gray-300 dark:border-slate-700 rounded-xl text-gray-400 hover:border-japan-blue hover:text-japan-blue hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider group"
+                  >
+                    <FolderPlus size={16} className="group-hover:scale-110 transition-transform" /> Create New Category
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
 
           {/* --- CLOUD SYNC TAB --- */}
+
+
+          {/* --- CLOUD SYNC TAB --- */}
           {activeTab === 'cloud' && (
-            <div className="space-y-6 pt-2 pb-10">
-              {/* Tutorial / Help Link */}
-              <div className="bg-blue-50 dark:bg-sky-900/10 border border-blue-100 dark:border-sky-900/30 rounded-xl p-4 flex items-start gap-3">
-                <div className="text-blue-500 mt-1 flex-shrink-0">
-                  <Sparkles size={18} />
+            <div className="space-y-6 pt-4 pb-12 fade-in slide-in-from-bottom-4 duration-500">
+              {/* Info Banner */}
+              <div className="bg-blue-50/50 dark:bg-sky-900/10 border border-blue-100 dark:border-sky-900/30 rounded-2xl p-4 flex gap-3">
+                <div className="bg-blue-100 dark:bg-sky-800/30 p-2 rounded-full h-fit text-blue-600 dark:text-sky-400">
+                  <Sparkles size={16} />
                 </div>
-                <div className="text-xs text-blue-700 dark:text-sky-400 leading-relaxed">
-                  <p className="font-bold mb-1">如何使用雲端同步？</p>
-                  <ol className="list-decimal list-inside space-y-1">
-                    <li>前往 <a href="https://console.firebase.google.com/" target="_blank" className="underline font-bold">Firebase 控制台</a> 建立專案。</li>
-                    <li>開啟 **Firestore** 與 **Anonymous Auth**。</li>
-                    <li>在專案設定中複製 **Config JSON** 貼到下方。</li>
-                  </ol>
+                <div className="text-xs text-blue-800 dark:text-sky-300 leading-relaxed">
+                  <p className="font-bold mb-1">Sync Across Devices</p>
+                  <p className="opacity-80">Sync your itinerary and expenses with friends. Setup a Firebase project and paste the config below.</p>
                 </div>
               </div>
 
-              {/* STORAGE INDICATOR */}
-              {(() => {
-                const totalData = { settings: tripSettings, itinerary: itineraryData, expenses, checklist };
-                const sizeMB = calculateDataSizeMB(totalData);
-                const percent = Math.min((sizeMB / STORAGE_LIMITS.CLOUD_MAX) * 100, 100);
-                const isWarning = sizeMB > STORAGE_LIMITS.CLOUD_WARNING;
+              {/* ACTION CARD */}
+              <div className="bg-white dark:bg-slate-900 rounded-3xl p-1 shadow-lg shadow-gray-100 dark:shadow-black/20 border border-gray-100 dark:border-slate-800">
+                {/* Storage Meter */}
+                {(() => {
+                  const totalData = { settings: tripSettings, itinerary: itineraryData, expenses, checklist };
+                  const sizeMB = calculateDataSizeMB(totalData);
+                  const percent = Math.min((sizeMB / STORAGE_LIMITS.CLOUD_MAX) * 100, 100);
+                  const isWarning = sizeMB > STORAGE_LIMITS.CLOUD_WARNING;
+                  return (
+                    <div className="px-5 py-4 border-b border-gray-50 dark:border-slate-800">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Storage</span>
+                        <span className={`text-[10px] font-bold ${isWarning ? 'text-orange-500' : 'text-gray-400'}`}>
+                          {formatSize(sizeMB)} / {STORAGE_LIMITS.CLOUD_MAX}.0 MB
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-1000 ${isWarning ? 'bg-orange-500' : 'bg-gradient-to-r from-japan-blue to-sky-400'}`} style={{ width: `${percent}%` }} />
+                      </div>
+                    </div>
+                  );
+                })()}
 
-                return (
-                  <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm">
-                    <div className="flex justify-between items-end mb-2">
-                      <h4 className="text-xs font-bold text-gray-500 dark:text-slate-400">目前資料大小</h4>
-                      <span className={`text-xs font-mono font-bold ${isWarning ? 'text-orange-500' : 'text-japan-blue dark:text-sky-400'}`}>
-                        {formatSize(sizeMB)} / {STORAGE_LIMITS.CLOUD_MAX}.0 MB
-                      </span>
-                    </div>
-                    <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-500 ${isWarning ? 'bg-orange-500' : 'bg-japan-blue dark:bg-sky-500'}`}
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
-                    {isWarning && (
-                      <p className="text-[10px] text-orange-500 mt-2 flex items-center gap-1">
-                        <AlertTriangle size={10} />
-                        接近雲端傳輸上限，建議移除部分照片以確保同步成功。
-                      </p>
+                <div className="p-5 space-y-6">
+                  {/* Upload Section */}
+                  <div className="text-center">
+                    <h4 className="font-bold text-ink dark:text-white mb-1">Cloud Upload</h4>
+                    <p className="text-xs text-gray-400 mb-4">Generate a Cloud ID to share with friends.</p>
+
+                    {syncError && (
+                      <div className="mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-xl flex items-center gap-2">
+                        <AlertTriangle size={14} /> {syncError}
+                      </div>
+                    )}
+
+                    {cloudId ? (
+                      <div className="bg-japan-blue/5 border border-japan-blue/20 rounded-2xl p-4 animate-in zoom-in-95">
+                        <p className="text-[10px] font-bold text-japan-blue uppercase mb-1">Your Cloud ID</p>
+                        <p className="text-2xl font-mono font-bold text-ink dark:text-white tracking-widest mb-3 select-all">{cloudId}</p>
+                        <div className="flex gap-2 justify-center">
+                          <button onClick={() => { navigator.clipboard.writeText(cloudId); alert("Copied!"); }} className="btn-secondary text-xs py-1.5 h-8">
+                            <Copy size={12} className="mr-1" /> Copy
+                          </button>
+                          <button onClick={handleUpdateCloud} disabled={isSyncing} className="btn-primary text-xs py-1.5 h-8">
+                            {isSyncing ? <RefreshCw size={12} className="animate-spin mr-1" /> : <RefreshCw size={12} className="mr-1" />} Update
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleUploadCloud}
+                        disabled={isSyncing || !firebaseConfig}
+                        className="w-full btn-premium py-3 rounded-xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-japan-blue/20"
+                      >
+                        {isSyncing ? <RefreshCw className="animate-spin" /> : <Cloud />}
+                        {isSyncing ? "Syncing..." : "Generate Cloud ID"}
+                      </button>
                     )}
                   </div>
-                );
-              })()}
 
-              {/* Config Section */}
-              <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="text-sm font-bold text-ink dark:text-white flex items-center gap-2">
-                    <Save size={14} /> Firebase 設定
-                  </h4>
-                  <button
-                    onClick={() => setShowConfigEdit(!showConfigEdit)}
-                    className="text-xs font-bold text-japan-blue dark:text-sky-400"
-                  >
-                    {showConfigEdit ? '取消' : '修改設定'}
-                  </button>
-                </div>
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100 dark:border-slate-800" /></div>
+                    <div className="relative flex justify-center text-xs ml-4"><span className="bg-white dark:bg-slate-900 px-2 text-gray-400 font-mono">OR</span></div>
+                  </div>
 
-                {showConfigEdit || !firebaseConfig ? (
+                  {/* Download Section */}
                   <div className="space-y-3">
+                    <div className="flex bg-gray-50 dark:bg-slate-800 p-1.5 rounded-xl border border-gray-100 dark:border-slate-700 focus-within:ring-2 focus-within:ring-japan-blue/20 transition-all">
+                      <input
+                        value={cloudIdInput}
+                        onChange={e => setCloudIdInput(e.target.value.toUpperCase())}
+                        placeholder="Enter Cloud ID to Download..."
+                        className="flex-1 bg-transparent px-3 text-sm font-mono font-bold outline-none min-w-0 dark:text-white placeholder-gray-400"
+                      />
+                      <button
+                        onClick={handleDownloadCloud}
+                        disabled={isSyncing || !firebaseConfig || !cloudIdInput}
+                        className="bg-white dark:bg-slate-700 text-ink dark:text-white px-4 rounded-lg font-bold text-xs shadow-sm hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                      >
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Config Toggle */}
+              <div className="text-center">
+                <button onClick={() => setShowConfigEdit(!showConfigEdit)} className="text-xs font-bold text-gray-400 hover:text-japan-blue flex items-center justify-center gap-1 mx-auto transition-colors">
+                  <Save size={12} /> {showConfigEdit ? 'Hide Config' : 'Edit Firebase Config'}
+                </button>
+                {showConfigEdit && (
+                  <div className="mt-4 animate-in slide-in-from-top-2">
                     <textarea
                       value={configInput}
                       onChange={e => setConfigInput(e.target.value)}
-                      placeholder='請貼上 Firebase Config JSON...'
-                      className="w-full h-32 p-3 text-[10px] font-mono bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg outline-none focus:border-japan-blue dark:text-white"
+                      className="w-full h-32 p-3 text-[10px] font-mono bg-gray-900 text-white rounded-xl resize-none outline-none border-2 border-transparent focus:border-japan-blue"
+                      placeholder="Paste Firebase Config JSON here..."
                     />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleSaveConfig}
-                        className="flex-1 py-2 bg-japan-blue text-white rounded-lg font-bold text-sm dark:bg-sky-600"
-                      >
-                        儲存設定
-                      </button>
-                      {firebaseConfig && (
-                        <button
-                          onClick={handleResetConfigWithConfirm}
-                          className="px-3 py-2 border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
-                          title="清除所有設定"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg">
-                      <span className="flex items-center gap-1"><Check size={14} /> 已連接專案: {firebaseConfig.projectId}</span>
+                    <div className="flex justify-end gap-2 mt-2">
+                      <button onClick={handleSaveConfig} className="text-xs bg-japan-blue text-white px-3 py-1.5 rounded-lg font-bold">Save Config</button>
                     </div>
                   </div>
                 )}
-              </div>
-
-              {/* Action Section */}
-              <div className="space-y-4">
-                <div className="bg-gray-50 dark:bg-slate-900 p-5 rounded-xl border border-gray-100 dark:border-slate-800 text-center">
-                  <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md text-japan-blue dark:text-sky-400">
-                    <Cloud size={24} className={isSyncing ? "animate-bounce" : ""} />
-                  </div>
-                  <h4 className="font-bold text-ink dark:text-white mb-2">上傳至雲端</h4>
-                  <p className="text-[10px] text-gray-500 dark:text-slate-400 mb-4 px-4">
-                    將目前的行程、記帳與清單上傳，並獲取一組 Cloud ID 分享給朋友。
-                  </p>
-
-                  {syncError && (
-                    <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-lg flex items-start gap-2">
-                      <AlertTriangle className="text-red-500 mt-0.5 flex-shrink-0" size={14} />
-                      <p className="text-[10px] text-red-600 dark:text-red-400 text-left leading-relaxed">
-                        {syncError}
-                      </p>
-                    </div>
-                  )}
-
-                  {cloudId ? (
-                    <div className="space-y-3">
-                      <div className="bg-japan-blue/5 dark:bg-sky-400/5 p-3 rounded-xl border-2 border-dashed border-japan-blue/30 dark:border-sky-400/30">
-                        <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">您的 Cloud ID</p>
-                        <p className="text-3xl font-mono font-bold text-japan-blue dark:text-sky-400 tracking-widest">{cloudId}</p>
-                      </div>
-                      <div className="flex gap-2 justify-center flex-wrap">
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(cloudId);
-                            alert("Cloud ID 已複製到剪貼簿！");
-                          }}
-                          className="text-xs font-bold text-japan-blue dark:text-sky-400 flex items-center justify-center gap-1 bg-blue-50 dark:bg-slate-800 px-3 py-2 rounded-lg"
-                        >
-                          <Copy size={12} /> 複製 ID
-                        </button>
-                        <button
-                          onClick={handleUpdateCloud}
-                          disabled={isSyncing}
-                          className="text-xs font-bold text-white bg-japan-blue dark:bg-sky-600 hover:bg-japan-blue/90 dark:hover:bg-sky-500 flex items-center justify-center gap-1 px-3 py-2 rounded-lg shadow-sm transition-colors"
-                        >
-                          {isSyncing ? <RefreshCw className="animate-spin" size={12} /> : <RefreshCw size={12} />}
-                          更新雲端資料
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={handleUploadCloud}
-                      disabled={isSyncing || !firebaseConfig}
-                      className="w-full py-3 bg-japan-blue text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 dark:bg-sky-600"
-                    >
-                      {isSyncing ? (syncStage || "同步中...") : "產生 Cloud ID 並上傳"}
-                    </button>
-                  )}
-                </div>
-
-                <div className="relative flex items-center py-2">
-                  <div className="flex-grow border-t border-gray-200 dark:border-slate-800"></div>
-                  <span className="flex-shrink-0 mx-4 text-gray-300 text-[10px] font-bold tracking-widest">或從雲端下載</span>
-                  <div className="flex-grow border-t border-gray-200 dark:border-slate-800"></div>
-                </div>
-
-                <div className="flex gap-2">
-                  <input
-                    value={cloudIdInput}
-                    onChange={e => setCloudIdInput(e.target.value.toUpperCase())}
-                    placeholder="輸入朋友的 Cloud ID..."
-                    className="flex-1 p-3 text-sm font-mono border border-gray-200 dark:border-slate-800 rounded-xl outline-none focus:border-japan-blue dark:bg-slate-900 dark:text-white"
-                  />
-                  <button
-                    onClick={handleDownloadCloud}
-                    disabled={isSyncing || !firebaseConfig || !cloudIdInput}
-                    className="px-6 bg-gray-900 dark:bg-slate-700 text-white rounded-xl font-bold hover:bg-black transition-colors disabled:opacity-50"
-                  >
-                    {isSyncing ? <RefreshCw className="animate-spin" size={18} /> : "下載"}
-                  </button>
-                </div>
               </div>
             </div>
           )}
 
           {/* --- BACKUP TAB --- */}
           {activeTab === 'backup' && (
-            <div className="space-y-6 pt-2">
-              {/* WARNING ALERT */}
-              <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 rounded-xl p-4 flex items-start gap-3">
-                <div className="text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0">
-                  <AlertTriangle size={20} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-yellow-800 dark:text-yellow-400 text-sm mb-1">重要提示：請定期備份</h4>
-                  <p className="text-xs text-yellow-700 dark:text-yellow-500/80 leading-relaxed">
-                    您的旅程資料目前僅儲存在這台裝置的瀏覽器中。
-                    若清除瀏覽紀錄或遺失手機，資料可能會消失。
-                    建議您定期點擊下方按鈕，將檔案下載保存或複製代碼傳給自己。
-                  </p>
-                </div>
-              </div>
+            <div className="space-y-6 pt-6 px-1 fade-in slide-in-from-bottom-4 duration-500">
 
-              <div className="bg-gray-50 dark:bg-slate-900 p-4 rounded-xl border border-gray-100 dark:border-slate-800 text-center">
-                <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-japan-blue dark:text-sky-400">
-                  <Cloud size={24} />
+              <div className="text-center space-y-2">
+                <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-2xl flex items-center justify-center mx-auto text-orange-500 dark:text-orange-400 shadow-sm rotate-3">
+                  <FileJson size={32} />
                 </div>
-                <h4 className="font-bold text-ink dark:text-white mb-1">備份與分享行程</h4>
-                <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed px-4">
-                  將您的行程轉成代碼，或下載成小包裹檔案 (.json) 傳給朋友。
+                <h4 className="font-bold text-lg text-ink dark:text-white">Backup & Restore</h4>
+                <p className="text-xs text-gray-400 max-w-[240px] mx-auto leading-relaxed">
+                  Your data is stored locally. Please backup regularly to prevent data loss.
                 </p>
               </div>
 
-              {/* Export Section */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={handleDownloadFile}
-                  className="flex flex-col items-center justify-center p-4 bg-japan-blue text-white rounded-xl shadow-md hover:bg-japan-blue/90 transition-all gap-2 dark:bg-sky-600 dark:hover:bg-sky-500"
+                  className="group relative overflow-hidden bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all text-left"
                 >
-                  <FileJson size={24} />
-                  <div className="text-center">
-                    <span className="block text-sm font-bold">下載檔案</span>
-                    <span className="text-[10px] opacity-80">(推薦 LINE 分享)</span>
+                  <div className="absolute right-0 top-0 w-20 h-20 bg-emerald-50 dark:bg-emerald-900/10 rounded-bl-[4rem] transition-colors" />
+                  <div className="relative z-10">
+                    <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3 group-hover:scale-110 transition-transform">
+                      <FileJson size={20} />
+                    </div>
+                    <h5 className="font-bold text-ink dark:text-white text-sm">Export File</h5>
+                    <p className="text-[10px] text-gray-400 mt-1">Download JSON file</p>
                   </div>
                 </button>
 
                 <button
                   onClick={handleCopyCode}
-                  className={`
-                     flex flex-col items-center justify-center p-4 border-2 border-dashed rounded-xl transition-all gap-2
-                     ${copied
-                      ? 'border-emerald-400 bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
-                      : 'border-japan-blue/30 text-japan-blue hover:bg-blue-50 dark:text-sky-400 dark:hover:bg-slate-800'}
-                   `}
+                  className="group relative overflow-hidden bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all text-left"
                 >
-                  {copied ? <Check size={24} /> : <Copy size={24} />}
-                  <div className="text-center">
-                    <span className="block text-sm font-bold">{copied ? '已複製！' : '複製代碼'}</span>
-                    <span className="text-[10px] opacity-70">(文字訊息)</span>
+                  <div className="absolute right-0 top-0 w-20 h-20 bg-blue-50 dark:bg-blue-900/10 rounded-bl-[4rem] transition-colors" />
+                  <div className="relative z-10">
+                    <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 mb-3 group-hover:scale-110 transition-transform">
+                      {copied ? <Check size={20} /> : <Copy size={20} />}
+                    </div>
+                    <h5 className="font-bold text-ink dark:text-white text-sm">Copy Code</h5>
+                    <p className="text-[10px] text-gray-400 mt-1">Copy raw data string</p>
                   </div>
                 </button>
               </div>
 
-              {/* Import Section */}
-              <div className="relative flex items-center py-2">
-                <div className="flex-grow border-t border-gray-200 dark:border-slate-700"></div>
-                <span className="flex-shrink-0 mx-4 text-gray-300 dark:text-slate-600 text-xs font-bold">OR IMPORT</span>
-                <div className="flex-grow border-t border-gray-200 dark:border-slate-700"></div>
-              </div>
+              <div className="pt-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="h-px bg-gray-100 dark:bg-slate-800 flex-1" />
+                  <span className="text-[10px] font-bold text-gray-300 tracking-widest uppercase">Restore from Backup</span>
+                  <span className="h-px bg-gray-100 dark:bg-slate-800 flex-1" />
+                </div>
 
-              <div className="space-y-3 pb-8">
-                <input
-                  type="file"
-                  accept=".json,application/json"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  style={{ opacity: 0, position: 'absolute', zIndex: -1, width: 0, height: 0 }}
-                />
-
-                <button
-                  onClick={triggerFileUpload}
-                  className="w-full py-3 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-600 dark:text-slate-300 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center justify-center gap-2"
-                >
-                  <Upload size={16} /> 選擇檔案 (.json) 匯入
-                </button>
-
-                <div className="flex gap-2">
+                <div className="bg-gray-50 dark:bg-slate-800/50 p-2 rounded-2xl border border-gray-100 dark:border-slate-800">
+                  <button
+                    onClick={triggerFileUpload}
+                    className="w-full py-3 bg-white dark:bg-slate-800 border border-dashed border-gray-300 dark:border-slate-600 rounded-xl text-gray-500 hover:text-japan-blue hover:border-japan-blue transition-colors flex items-center justify-center gap-2 text-xs font-bold"
+                  >
+                    <Upload size={14} /> Select Backup File (.json)
+                  </button>
                   <input
-                    value={importCode}
-                    onChange={(e) => setImportCode(e.target.value)}
-                    placeholder="或貼上壓縮代碼..."
-                    className="flex-1 p-3 text-sm font-mono border border-gray-200 dark:border-slate-800 rounded-xl outline-none focus:border-japan-blue dark:focus:border-sky-500 min-w-0 bg-transparent dark:text-white placeholder-gray-400"
+                    type="file"
+                    accept=".json,application/json"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    className="hidden"
                   />
+                </div>
+
+                <div className="mt-3 flex gap-2">
+                  <div className="flex-1 bg-gray-50 dark:bg-slate-800/50 p-3 rounded-xl border border-gray-100 dark:border-slate-800 flex items-center gap-2">
+                    <div className="text-gray-400"><Copy size={14} /></div>
+                    <input
+                      value={importCode}
+                      onChange={e => setImportCode(e.target.value)}
+                      className="bg-transparent text-xs font-mono w-full outline-none dark:text-white placeholder-gray-400"
+                      placeholder="Or paste code here..."
+                    />
+                  </div>
                   <button
                     onClick={handleImportCode}
                     disabled={!importCode}
-                    className="px-4 bg-gray-900 dark:bg-slate-700 text-white rounded-xl font-bold hover:bg-gray-800 dark:hover:bg-slate-600 disabled:bg-gray-300 dark:disabled:bg-slate-800 disabled:cursor-not-allowed flex-shrink-0"
+                    className="bg-gray-900 dark:bg-slate-700 text-white px-4 rounded-xl font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black transition-colors"
                   >
-                    讀取
+                    Load
                   </button>
                 </div>
               </div>
