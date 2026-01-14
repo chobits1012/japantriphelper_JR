@@ -99,7 +99,6 @@ export const useCloudSync = (
             return;
         }
 
-        alert(`[除錯模式] 正在連線下載 ID: [${idToDownload}]\n請確認括號內的 ID 是否正確，且前後無空白。`);
 
         setIsSyncing(true);
         setSyncStage('準備中...');
