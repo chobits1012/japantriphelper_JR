@@ -180,6 +180,24 @@ export const useChecklist = (
         onUpdateChecklist(reordered);
     };
 
+    const reorderItemsInCategory = (categoryId: string, activeId: string, overId: string) => {
+        const category = checklist.find(cat => cat.id === categoryId);
+        if (!category || !category.items) return;
+
+        const oldIndex = category.items.findIndex(item => item.id === activeId);
+        const newIndex = category.items.findIndex(item => item.id === overId);
+
+        if (oldIndex === -1 || newIndex === -1) return;
+
+        const newItems = [...category.items];
+        const [movedItem] = newItems.splice(oldIndex, 1);
+        newItems.splice(newIndex, 0, movedItem);
+
+        onUpdateChecklist(checklist.map(cat =>
+            cat.id === categoryId ? { ...cat, items: newItems } : cat
+        ));
+    };
+
     return {
         newCategoryName,
         setNewCategoryName,
@@ -209,6 +227,8 @@ export const useChecklist = (
         handleSaveItem,
         handleCancelEditItem,
         reorderCategories,
+        reorderItemsInCategory,
     };
 };
+
 
