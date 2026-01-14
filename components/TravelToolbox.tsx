@@ -543,7 +543,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                     onClick={handleClearExpensesWithConfirm}
                     className="text-[10px] font-bold text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded transition-colors"
                   >
-                    Clear All
+                    清除全部
                   </button>
                 )}
               </div>
@@ -694,7 +694,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                   <div>
                     <h4 className="font-bold text-ink dark:text-white text-sm">Packing List</h4>
                     <p className="text-[10px] text-gray-400 font-mono">
-                      {checklist.reduce((acc, cat) => acc + (cat.items?.filter(i => i.checked).length || 0), 0)} of {checklist.reduce((acc, cat) => acc + (cat.items?.length || 0), 0)} items ready
+                      {checklist.reduce((acc, cat) => acc + (cat.items?.filter(i => i.checked).length || 0), 0)} / {checklist.reduce((acc, cat) => acc + (cat.items?.length || 0), 0)} 個項目已準備
                     </p>
                   </div>
                 </div>
@@ -896,7 +896,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                                     </div>
                                     <input
                                       type="text"
-                                      placeholder="Add item..."
+                                      placeholder="新增項目..."
                                       className="flex-1 text-sm bg-transparent outline-none min-w-0 dark:text-white placeholder-gray-400"
                                       value={newItemInputs[cat.id] || ''}
                                       onChange={(e) => handleAddItemInput(cat.id, e.target.value)}
@@ -928,7 +928,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                       type="text"
                       value={newCategoryName}
                       onChange={e => setNewCategoryName(e.target.value)}
-                      placeholder="New Category Name..."
+                      placeholder="新分類名稱..."
                       className="flex-1 bg-transparent text-sm font-bold outline-none text-ink dark:text-white"
                       autoFocus
                     />
@@ -940,7 +940,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                     onClick={() => setShowNewCatInput(true)}
                     className="w-full py-3 border border-dashed border-gray-300 dark:border-slate-700 rounded-xl text-gray-400 hover:border-japan-blue hover:text-japan-blue hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider group"
                   >
-                    <FolderPlus size={16} className="group-hover:scale-110 transition-transform" /> Create New Category
+                    <FolderPlus size={16} className="group-hover:scale-110 transition-transform" /> 新增分類
                   </button>
                 )}
               </div>
@@ -961,7 +961,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 </div>
                 <div className="text-xs text-blue-800 dark:text-sky-300 leading-relaxed">
                   <p className="font-bold mb-1">Sync Across Devices</p>
-                  <p className="opacity-80">Sync your itinerary and expenses with friends. Setup a Firebase project and paste the config below.</p>
+                  <p className="opacity-80">與朋友同步您的行程與記帳。請建立 Firebase 專案並在下方貼上設定。</p>
                 </div>
               </div>
 
@@ -991,8 +991,8 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 <div className="p-5 space-y-6">
                   {/* Upload Section */}
                   <div className="text-center">
-                    <h4 className="font-bold text-ink dark:text-white mb-1">Cloud Upload</h4>
-                    <p className="text-xs text-gray-400 mb-4">Generate a Cloud ID to share with friends.</p>
+                    <h4 className="font-bold text-ink dark:text-white mb-1">雲端上傳</h4>
+                    <p className="text-xs text-gray-400 mb-4">產生雲端 ID 以分享給朋友。</p>
 
                     {syncError && (
                       <div className="mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-xl flex items-center gap-2">
@@ -1002,14 +1002,14 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
 
                     {cloudId ? (
                       <div className="bg-japan-blue/5 border border-japan-blue/20 rounded-2xl p-4 animate-in zoom-in-95">
-                        <p className="text-[10px] font-bold text-japan-blue uppercase mb-1">Your Cloud ID</p>
+                        <p className="text-[10px] font-bold text-japan-blue uppercase mb-1">您的雲端 ID</p>
                         <p className="text-2xl font-mono font-bold text-ink dark:text-white tracking-widest mb-3 select-all">{cloudId}</p>
                         <div className="flex gap-2 justify-center">
                           <button onClick={() => { navigator.clipboard.writeText(cloudId); alert("Copied!"); }} className="btn-secondary text-xs py-1.5 h-8">
-                            <Copy size={12} className="mr-1" /> Copy
+                            <Copy size={12} className="mr-1" /> 複製
                           </button>
                           <button onClick={handleUpdateCloud} disabled={isSyncing} className="btn-primary text-xs py-1.5 h-8">
-                            {isSyncing ? <RefreshCw size={12} className="animate-spin mr-1" /> : <RefreshCw size={12} className="mr-1" />} Update
+                            {isSyncing ? <RefreshCw size={12} className="animate-spin mr-1" /> : <RefreshCw size={12} className="mr-1" />} 更新
                           </button>
                         </div>
                       </div>
@@ -1020,14 +1020,14 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                         className="w-full btn-premium py-3 rounded-xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-japan-blue/20"
                       >
                         {isSyncing ? <RefreshCw className="animate-spin" /> : <Cloud />}
-                        {isSyncing ? "Syncing..." : "Generate Cloud ID"}
+                        {isSyncing ? "同步中..." : "產生雲端 ID"}
                       </button>
                     )}
                   </div>
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100 dark:border-slate-800" /></div>
-                    <div className="relative flex justify-center text-xs ml-4"><span className="bg-white dark:bg-slate-900 px-2 text-gray-400 font-mono">OR</span></div>
+                    <div className="relative flex justify-center text-xs ml-4"><span className="bg-white dark:bg-slate-900 px-2 text-gray-400 font-mono">或</span></div>
                   </div>
 
                   {/* Download Section */}
@@ -1036,7 +1036,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                       <input
                         value={cloudIdInput}
                         onChange={e => setCloudIdInput(e.target.value.toUpperCase())}
-                        placeholder="Enter Cloud ID to Download..."
+                        placeholder="輸入雲端 ID 下載..."
                         className="flex-1 bg-transparent px-3 text-sm font-mono font-bold outline-none min-w-0 dark:text-white placeholder-gray-400"
                       />
                       <button
@@ -1044,7 +1044,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                         disabled={isSyncing || !firebaseConfig || !cloudIdInput}
                         className="bg-white dark:bg-slate-700 text-ink dark:text-white px-4 rounded-lg font-bold text-xs shadow-sm hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
                       >
-                        Download (Fix)
+                        下載
                       </button>
                     </div>
                   </div>
@@ -1054,7 +1054,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
               {/* Config Toggle */}
               <div className="text-center">
                 <button onClick={() => setShowConfigEdit(!showConfigEdit)} className="text-xs font-bold text-gray-400 hover:text-japan-blue flex items-center justify-center gap-1 mx-auto transition-colors">
-                  <Save size={12} /> {showConfigEdit ? 'Hide Config' : 'Edit Firebase Config'}
+                  <Save size={12} /> {showConfigEdit ? '隱藏設定' : '編輯 Firebase 設定'}
                 </button>
                 {showConfigEdit && (
                   <div className="mt-4 animate-in slide-in-from-top-2">
@@ -1062,10 +1062,10 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                       value={configInput}
                       onChange={e => setConfigInput(e.target.value)}
                       className="w-full h-32 p-3 text-[10px] font-mono bg-gray-900 text-white rounded-xl resize-none outline-none border-2 border-transparent focus:border-japan-blue"
-                      placeholder="Paste Firebase Config JSON here..."
+                      placeholder="在此貼上 Firebase Config JSON..."
                     />
                     <div className="flex justify-end gap-2 mt-2">
-                      <button onClick={handleSaveConfig} className="text-xs bg-japan-blue text-white px-3 py-1.5 rounded-lg font-bold">Save Config</button>
+                      <button onClick={handleSaveConfig} className="text-xs bg-japan-blue text-white px-3 py-1.5 rounded-lg font-bold">儲存設定</button>
                     </div>
                   </div>
                 )}
@@ -1081,9 +1081,9 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-2xl flex items-center justify-center mx-auto text-orange-500 dark:text-orange-400 shadow-sm rotate-3">
                   <FileJson size={32} />
                 </div>
-                <h4 className="font-bold text-lg text-ink dark:text-white">Backup & Restore</h4>
+                <h4 className="font-bold text-lg text-ink dark:text-white">備份與還原</h4>
                 <p className="text-xs text-gray-400 max-w-[240px] mx-auto leading-relaxed">
-                  Your data is stored locally. Please backup regularly to prevent data loss.
+                  您的資料儲存在本地端。請定期備份以防資料遺失。
                 </p>
               </div>
 
@@ -1097,8 +1097,8 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                     <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3 group-hover:scale-110 transition-transform">
                       <FileJson size={20} />
                     </div>
-                    <h5 className="font-bold text-ink dark:text-white text-sm">Export File</h5>
-                    <p className="text-[10px] text-gray-400 mt-1">Download JSON file</p>
+                    <h5 className="font-bold text-ink dark:text-white text-sm">匯出檔案</h5>
+                    <p className="text-[10px] text-gray-400 mt-1">下載 JSON 檔案</p>
                   </div>
                 </button>
 
@@ -1111,8 +1111,8 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                     <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 mb-3 group-hover:scale-110 transition-transform">
                       {copied ? <Check size={20} /> : <Copy size={20} />}
                     </div>
-                    <h5 className="font-bold text-ink dark:text-white text-sm">Copy Code</h5>
-                    <p className="text-[10px] text-gray-400 mt-1">Copy raw data string</p>
+                    <h5 className="font-bold text-ink dark:text-white text-sm">複製代碼</h5>
+                    <p className="text-[10px] text-gray-400 mt-1">複製原始資料字串</p>
                   </div>
                 </button>
               </div>
@@ -1120,7 +1120,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
               <div className="pt-4">
                 <div className="flex items-center gap-3 mb-3">
                   <span className="h-px bg-gray-100 dark:bg-slate-800 flex-1" />
-                  <span className="text-[10px] font-bold text-gray-300 tracking-widest uppercase">Restore from Backup</span>
+                  <span className="text-[10px] font-bold text-gray-300 tracking-widest uppercase">從備份還原</span>
                   <span className="h-px bg-gray-100 dark:bg-slate-800 flex-1" />
                 </div>
 
@@ -1129,7 +1129,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                     onClick={triggerFileUpload}
                     className="w-full py-3 bg-white dark:bg-slate-800 border border-dashed border-gray-300 dark:border-slate-600 rounded-xl text-gray-500 hover:text-japan-blue hover:border-japan-blue transition-colors flex items-center justify-center gap-2 text-xs font-bold"
                   >
-                    <Upload size={14} /> Select Backup File (.json)
+                    <Upload size={14} /> 選擇備份檔案 (.json)
                   </button>
                   <input
                     type="file"
@@ -1147,7 +1147,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                       value={importCode}
                       onChange={e => setImportCode(e.target.value)}
                       className="bg-transparent text-xs font-mono w-full outline-none dark:text-white placeholder-gray-400"
-                      placeholder="Or paste code here..."
+                      placeholder="或在此貼上代碼..."
                     />
                   </div>
                   <button
@@ -1155,7 +1155,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                     disabled={!importCode}
                     className="bg-gray-900 dark:bg-slate-700 text-white px-4 rounded-xl font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black transition-colors"
                   >
-                    Load
+                    讀取
                   </button>
                 </div>
               </div>
