@@ -1040,11 +1040,11 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                         className="flex-1 bg-transparent px-3 text-sm font-mono font-bold outline-none min-w-0 dark:text-white placeholder-gray-400"
                       />
                       <button
-                        onClick={handleDownloadCloud}
+                        onClick={handleDownloadWithConfirm}
                         disabled={isSyncing || !firebaseConfig || !cloudIdInput}
                         className="bg-white dark:bg-slate-700 text-ink dark:text-white px-4 rounded-lg font-bold text-xs shadow-sm hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
                       >
-                        Download
+                        Download (Fix)
                       </button>
                     </div>
                   </div>

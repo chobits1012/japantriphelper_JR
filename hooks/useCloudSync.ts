@@ -91,12 +91,21 @@ export const useCloudSync = (
             setShowConfigEdit(true);
             return;
         }
-        if (!cloudIdInput.trim()) return;
+        const idToDownload = cloudIdInput.trim().toUpperCase();
+        if (!idToDownload) return;
+
+        if (idToDownload.length !== 6) {
+            alert(`雲端 ID 格式錯誤\n\n請輸入 6 碼英數字。\n您輸入的 ID 長度為：${idToDownload.length}`);
+            return;
+        }
+
+        alert(`[除錯模式] 正在連線下載 ID: [${idToDownload}]\n請確認括號內的 ID 是否正確，且前後無空白。`);
+
         setIsSyncing(true);
         setSyncStage('準備中...');
         setSyncError(null);
         try {
-            const data = await downloadFromCloud(firebaseConfig, cloudIdInput.trim(), (stage) => setSyncStage(stage));
+            const data = await downloadFromCloud(firebaseConfig, idToDownload, (stage) => setSyncStage(stage));
             onConfirm(data);
         } catch (e: any) {
             setSyncError(e.message);

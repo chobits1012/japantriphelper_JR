@@ -48,6 +48,9 @@ export const uploadToCloud = async (config: FirebaseConfig, data: any, onProgres
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // DEBUG: Alert Project ID
+        alert(`[DEBUG] Firebase Initialized\nProject ID: ${app.options.projectId}\nAuth Domain: ${app.options.authDomain}`);
+
         onProgress?.('正在進行匿名認證...');
         await signInAnonymously(auth);
 
@@ -75,10 +78,16 @@ export const uploadToCloud = async (config: FirebaseConfig, data: any, onProgres
 
         const cleanData = sanitizeForFirestore(data);
 
+        // DEBUG: Alert Path
+        alert(`[DEBUG] Uploading to:\nCollection: trips\nDocument ID: ${cloudId}\n\nClean Data Keys: ${Object.keys(cleanData).join(', ')}`);
+
         await setDoc(doc(db, "trips", cloudId), {
             data: cleanData,
             updatedAt: new Date().toISOString()
         });
+
+        // DEBUG: Success
+        alert(`[DEBUG] Write Success!\nCloud ID: ${cloudId}`);
 
         clearTimeout(timeout);
         return cloudId;
@@ -99,11 +108,18 @@ export const downloadFromCloud = async (config: FirebaseConfig, cloudId: string,
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // DEBUG: Alert Project ID
+        alert(`[DEBUG] Firebase Initialized for Download\nProject ID: ${app.options.projectId}`);
+
         onProgress?.('正在進行匿名認證...');
         await signInAnonymously(auth);
 
         onProgress?.('正在下載資料...');
         const docRef = doc(db, "trips", cloudId.toUpperCase());
+
+        // DEBUG: Alert Path
+        alert(`[DEBUG] Reading from:\nCollection: trips\nDocument ID: ${cloudId.toUpperCase()}`);
+
         const docSnap = await getDoc(docRef);
 
         clearTimeout(timeout);
