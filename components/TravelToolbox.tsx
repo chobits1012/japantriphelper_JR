@@ -83,11 +83,14 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
     newItemInputs, setNewItemInputs,
     editingCatId, setEditingCatId,
     editingTitle, setEditingTitle,
+    editingItemId, setEditingItemId,
+    editingItemText, setEditingItemText,
     handleResetChecklist, toggleCategoryCollapse,
     handleDeleteCategory, handleAddCategory,
     handleStartEditTitle, handleSaveTitle,
     handleAddItemInput, handleAddItemSubmit,
-    handleToggleItem, handleDeleteItem
+    handleToggleItem, handleDeleteItem,
+    handleStartEditItem, handleSaveItem, handleCancelEditItem
   } = checklistHook;
 
   const backupHook = useBackup(
@@ -242,6 +245,19 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
       isDangerous: true,
       onConfirm: () => {
         handleDeleteCategory(catId);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
+
+  const handleDeleteItemWithConfirm = (catId: string, itemId: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "刪除項目",
+      message: "確定要刪除這個項目嗎？",
+      isDangerous: true,
+      onConfirm: () => {
+        handleDeleteItem(catId, itemId);
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
       }
     });
@@ -694,7 +710,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                           )}
                         </div>
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleDeleteCategory(cat.id); }}
+                          onClick={(e) => { e.stopPropagation(); handleDeleteCategoryWithConfirm(cat.id); }}
                           className="text-gray-300 hover:text-red-400 p-1 flex-shrink-0"
                         >
                           <Trash2 size={14} />
@@ -709,31 +725,77 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                       {/* Cat Items */}
                       {!cat.isCollapsed && (
                         <div className="p-3 space-y-2">
-                          {cat.items.map(item => (
-                            <div
-                              key={item.id}
-                              onClick={() => handleToggleItem(cat.id, item.id)}
-                              className="flex items-center justify-between group cursor-pointer"
-                            >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <div className={`
-                                         w-4 h-4 rounded border border-gray-300 dark:border-slate-600 flex items-center justify-center transition-colors flex-shrink-0
-                                         ${item.checked ? 'bg-japan-blue border-japan-blue dark:bg-sky-500 dark:border-sky-500 text-white' : 'bg-white dark:bg-slate-800'}
-                                      `}>
-                                  {item.checked && <Check size={10} />}
-                                </div>
-                                <span className={`text-sm truncate ${item.checked ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-slate-300'}`}>
-                                  {item.text}
-                                </span>
-                              </div>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleDeleteItem(cat.id, item.id); }}
-                                className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-opacity flex-shrink-0"
+                          {cat.items.map(item => {
+                            const isEditingItem = editingItemId === item.id;
+
+                            return (
+                              <div
+                                key={item.id}
+                                className="flex items-center justify-between group"
                               >
-                                <X size={14} />
-                              </button>
-                            </div>
-                          ))}
+                                {isEditingItem ? (
+                                  // Edit Mode
+                                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    <input
+                                      type="text"
+                                      value={editingItemText}
+                                      onChange={e => setEditingItemText(e.target.value)}
+                                      onKeyDown={e => {
+                                        if (e.key === 'Enter') handleSaveItem(cat.id, item.id);
+                                        if (e.key === 'Escape') handleCancelEditItem();
+                                      }}
+                                      className="flex-1 text-sm font-bold p-1 border border-japan-blue rounded outline-none bg-white dark:bg-slate-900 dark:text-white min-w-0"
+                                      autoFocus
+                                    />
+                                    <button
+                                      onClick={() => handleSaveItem(cat.id, item.id)}
+                                      className="p-1.5 bg-blue-50 text-japan-blue rounded hover:bg-japan-blue hover:text-white transition-colors flex-shrink-0"
+                                    >
+                                      <Check size={14} />
+                                    </button>
+                                    <button
+                                      onClick={handleCancelEditItem}
+                                      className="p-1.5 bg-gray-50 text-gray-400 rounded hover:bg-gray-200 hover:text-gray-600 transition-colors flex-shrink-0"
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  // View Mode
+                                  <>
+                                    <div
+                                      className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                                      onClick={() => handleToggleItem(cat.id, item.id)}
+                                    >
+                                      <div className={`
+                                               w-4 h-4 rounded border border-gray-300 dark:border-slate-600 flex items-center justify-center transition-colors flex-shrink-0
+                                               ${item.checked ? 'bg-japan-blue border-japan-blue dark:bg-sky-500 dark:border-sky-500 text-white' : 'bg-white dark:bg-slate-800'}
+                                            `}>
+                                        {item.checked && <Check size={10} />}
+                                      </div>
+                                      <span className={`text-sm truncate ${item.checked ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-slate-300'}`}>
+                                        {item.text}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); handleStartEditItem(cat.id, item.id, item.text); }}
+                                        className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-japan-blue transition-opacity p-1"
+                                      >
+                                        <Pencil size={14} />
+                                      </button>
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); handleDeleteItemWithConfirm(cat.id, item.id); }}
+                                        className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-opacity p-1"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            );
+                          })}
 
                           {/* Add Item Input */}
                           <div className="mt-2 pt-2 border-t border-gray-50 dark:border-slate-800 flex items-center gap-2">

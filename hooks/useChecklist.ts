@@ -18,6 +18,8 @@ export const useChecklist = (
     const [newItemInputs, setNewItemInputs] = useState<Record<string, string>>({});
     const [editingCatId, setEditingCatId] = useState<string | null>(null);
     const [editingTitle, setEditingTitle] = useState('');
+    const [editingItemId, setEditingItemId] = useState<string | null>(null);
+    const [editingItemText, setEditingItemText] = useState('');
 
     // Initialize Checklist if empty
     useEffect(() => {
@@ -134,6 +136,34 @@ export const useChecklist = (
         }));
     };
 
+    const handleStartEditItem = (catId: string, itemId: string, currentText: string) => {
+        setEditingItemId(itemId);
+        setEditingItemText(currentText);
+    };
+
+    const handleSaveItem = (catId: string, itemId: string) => {
+        if (editingItemText.trim()) {
+            onUpdateChecklist(checklist.map(cat => {
+                if (cat.id === catId) {
+                    return {
+                        ...cat,
+                        items: cat.items.map(item =>
+                            item.id === itemId ? { ...item, text: editingItemText.trim() } : item
+                        )
+                    };
+                }
+                return cat;
+            }));
+        }
+        setEditingItemId(null);
+        setEditingItemText('');
+    };
+
+    const handleCancelEditItem = () => {
+        setEditingItemId(null);
+        setEditingItemText('');
+    };
+
     return {
         newCategoryName,
         setNewCategoryName,
@@ -145,6 +175,10 @@ export const useChecklist = (
         setEditingCatId,
         editingTitle,
         setEditingTitle,
+        editingItemId,
+        setEditingItemId,
+        editingItemText,
+        setEditingItemText,
         handleResetChecklist,
         toggleCategoryCollapse,
         handleDeleteCategory,
@@ -155,5 +189,8 @@ export const useChecklist = (
         handleAddItemSubmit,
         handleToggleItem,
         handleDeleteItem,
+        handleStartEditItem,
+        handleSaveItem,
+        handleCancelEditItem,
     };
 };
