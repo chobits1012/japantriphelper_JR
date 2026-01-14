@@ -263,6 +263,32 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
     });
   };
 
+  const handleClearExpensesWithConfirm = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: "清空記帳",
+      message: "確定要清空所有記帳紀錄嗎？此操作無法復原。",
+      isDangerous: true,
+      onConfirm: () => {
+        handleClearExpenses();
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
+
+  const handleResetConfigWithConfirm = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: "重置設定",
+      message: "確定要重置雲端同步設定嗎？",
+      isDangerous: true,
+      onConfirm: () => {
+        handleResetConfig();
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
+
 
 
 
@@ -471,7 +497,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 <span className="text-xs font-bold text-gray-400 uppercase">新增記帳</span>
                 {expenses.length > 0 && (
                   <button
-                    onClick={handleClearExpenses}
+                    onClick={handleClearExpensesWithConfirm}
                     className="text-xs font-bold text-red-400 hover:text-red-500 flex items-center gap-1 bg-red-50 dark:bg-slate-800 px-2 py-1 rounded-md"
                   >
                     <Trash2 size={12} /> 清空
@@ -650,7 +676,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                   </span>
                 </div>
                 <button
-                  onClick={handleResetChecklist}
+                  onClick={handleResetChecklistWithConfirm}
                   className="text-xs font-bold text-gray-400 hover:text-japan-blue flex items-center gap-1"
                 >
                   <RefreshCw size={12} /> 重置
@@ -931,7 +957,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                       </button>
                       {firebaseConfig && (
                         <button
-                          onClick={handleResetConfig}
+                          onClick={handleResetConfigWithConfirm}
                           className="px-3 py-2 border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
                           title="清除所有設定"
                         >
