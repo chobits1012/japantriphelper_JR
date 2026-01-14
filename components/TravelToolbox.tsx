@@ -646,7 +646,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 <div className="flex items-center gap-2">
                   <h4 className="font-bold text-ink dark:text-white">檢查清單</h4>
                   <span className="text-xs font-bold bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 px-2 py-1 rounded-full">
-                    {checklist.reduce((acc, cat) => acc + cat.items.filter(i => i.checked).length, 0)} / {checklist.reduce((acc, cat) => acc + cat.items.length, 0)}
+                    {checklist.reduce((acc, cat) => acc + (cat.items?.filter(i => i.checked).length || 0), 0)} / {checklist.reduce((acc, cat) => acc + (cat.items?.length || 0), 0)}
                   </span>
                 </div>
                 <button
@@ -660,8 +660,8 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
               {/* Categories */}
               <div className="space-y-4">
                 {checklist.map(cat => {
-                  const total = cat.items.length;
-                  const checkedCount = cat.items.filter(i => i.checked).length;
+                  const total = cat.items?.length || 0;
+                  const checkedCount = cat.items?.filter(i => i.checked).length || 0;
                   const progress = total > 0 ? (checkedCount / total) * 100 : 0;
                   const isEditingTitle = editingCatId === cat.id;
 
@@ -725,7 +725,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                       {/* Cat Items */}
                       {!cat.isCollapsed && (
                         <div className="p-3 space-y-2">
-                          {cat.items.map(item => {
+                          {(cat.items || []).map(item => {
                             const isEditingItem = editingItemId === item.id;
 
                             return (
