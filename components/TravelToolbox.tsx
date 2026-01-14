@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { X, Wallet, CheckSquare, Plus, Trash2, RefreshCw, TrendingUp, Coins, Cloud, FileJson, ChevronDown, ChevronRight, FolderPlus, Pencil, Save, Upload, Copy, Check, AlertTriangle, Sparkles } from 'lucide-react';
+import { X, Wallet, CheckSquare, Plus, Trash2, RefreshCw, TrendingUp, Coins, Cloud, FileJson, ChevronDown, ChevronRight, FolderPlus, Pencil, Save, Upload, Copy, Check, AlertTriangle, Sparkles, GripVertical } from 'lucide-react';
 import LZString from 'lz-string';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import type { ExpenseItem, ChecklistCategory, ChecklistItem, TripSettings, ItineraryDay } from '../types';
 import ConfirmModal from './ConfirmModal';
 import { EXCHANGE_RATE_API_URL, CLOUD_SYNC_CONFIG_KEY } from '../constants';
@@ -14,6 +16,7 @@ import { useExpenses } from '../hooks/useExpenses';
 import { useChecklist } from '../hooks/useChecklist';
 import { useBackup } from '../hooks/useBackup';
 import { useCloudSync } from '../hooks/useCloudSync';
+import { SortableChecklistCategory } from './SortableChecklistCategory';
 
 interface TravelToolboxProps {
   isOpen: boolean;
@@ -90,8 +93,35 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
     handleStartEditTitle, handleSaveTitle,
     handleAddItemInput, handleAddItemSubmit,
     handleToggleItem, handleDeleteItem,
-    handleStartEditItem, handleSaveItem, handleCancelEditItem
+    handleStartEditItem, handleSaveItem, handleCancelEditItem,
+    reorderCategories
   } = checklistHook;
+
+  // DnD Sensors for checklist
+  const checklistSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  // Drag state for checklist categories
+  const [activeChecklistCategoryId, setActiveChecklistCategoryId] = useState<string | null>(null);
+
+  // Drag handlers for checklist
+  const handleChecklistDragStart = (event: DragStartEvent) => {
+    setActiveChecklistCategoryId(event.active.id as string);
+  };
+
+  const handleChecklistDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveChecklistCategoryId(null);
+    if (over && active.id !== over.id) {
+      reorderCategories(active.id as string, over.id as string);
+    }
+  };
+
+  const activeChecklistCategory = activeChecklistCategoryId
+    ? checklist.find(cat => cat.id === activeChecklistCategoryId)
+    : null;
 
   const backupHook = useBackup(
     tripSettings,
@@ -536,11 +566,11 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                       onChange={(e: any) => setNewExpCat(e.target.value)}
                       className="w-full text-sm font-bold bg-paper-light dark:bg-slate-800 dark:text-white rounded-lg px-3 py-3 border border-japan-blue/10 dark:border-slate-700 outline-none focus:border-japan-blue-600 dark:focus:border-japan-blue-400 transition-colors cursor-pointer"
                     >
-                      <option value="food">🌸 美食</option>
-                      <option value="shopping">🍵 購物</option>
-                      <option value="transport">⚫ 交通</option>
-                      <option value="hotel">✨ 住宿</option>
-                      <option value="other">🌸 其他</option>
+                      <option value="food">🍜 美食</option>
+                      <option value="shopping">🛍️ 購物</option>
+                      <option value="transport">🚇 交通</option>
+                      <option value="hotel">🏨 住宿</option>
+                      <option value="other">⭐ 其他</option>
                     </select>
                   </div>
                   <button
@@ -580,10 +610,10 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                           {/* Category Badge - Enhanced */}
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0 ${categoryConf.bg} bg-opacity-90`}>
                             <span className="text-white drop-shadow">
-                              {item.category === 'food' ? '🌸' :
-                                item.category === 'shopping' ? '🍵' :
+                              {item.category === 'food' ? '🍜' :
+                                item.category === 'shopping' ? '🛍️' :
                                   item.category === 'transport' ? '🚇' :
-                                    item.category === 'hotel' ? '✨' : '🌸'}
+                                    item.category === 'hotel' ? '🏨' : '⭐'}
                             </span>
                           </div>
 
@@ -683,174 +713,213 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 </button>
               </div>
 
-              {/* Categories */}
-              <div className="space-y-4">
-                {checklist.map(cat => {
-                  const total = cat.items?.length || 0;
-                  const checkedCount = cat.items?.filter(i => i.checked).length || 0;
-                  const progress = total > 0 ? (checkedCount / total) * 100 : 0;
-                  const isEditingTitle = editingCatId === cat.id;
+              {/* Categories with Drag and Drop */}
+              <DndContext
+                sensors={checklistSensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleChecklistDragStart}
+                onDragEnd={handleChecklistDragEnd}
+              >
+                <SortableContext items={checklist.map(cat => cat.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-4">
+                    {checklist.map(cat => {
+                      const total = cat.items?.length || 0;
+                      const checkedCount = cat.items?.filter(i => i.checked).length || 0;
+                      const progress = total > 0 ? (checkedCount / total) * 100 : 0;
+                      const isEditingTitle = editingCatId === cat.id;
 
-                  return (
-                    <div key={cat.id} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
-                      {/* Cat Header */}
-                      <div
-                        onClick={() => toggleCategoryCollapse(cat.id)}
-                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors select-none"
-                      >
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          {cat.isCollapsed ? <ChevronRight size={16} className="text-gray-400 flex-shrink-0" /> : <ChevronDown size={16} className="text-gray-400 flex-shrink-0" />}
+                      return (
+                        <SortableChecklistCategory key={cat.id} category={cat}>
+                          {(dragListeners) => (
+                            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+                              {/* Cat Header */}
+                              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 transition-colors select-none">
+                                <div
+                                  onClick={() => toggleCategoryCollapse(cat.id)}
+                                  className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors -m-3 p-3 rounded-l-xl"
+                                >
+                                  {cat.isCollapsed ? <ChevronRight size={16} className="text-gray-400 flex-shrink-0" /> : <ChevronDown size={16} className="text-gray-400 flex-shrink-0" />}
 
-                          {isEditingTitle ? (
-                            <div className="flex items-center gap-2 flex-1 min-w-0" onClick={e => e.stopPropagation()}>
-                              <div className="flex-1 min-w-0">
-                                <input
-                                  type="text"
-                                  value={editingTitle}
-                                  onChange={e => setEditingTitle(e.target.value)}
-                                  onKeyDown={e => {
-                                    if (e.key === 'Enter') handleSaveTitle(cat.id);
-                                  }}
-                                  className="text-sm font-bold p-1 border border-japan-blue rounded outline-none w-full bg-white dark:bg-slate-900 dark:text-white min-w-0"
-                                  autoFocus
-                                />
+                                  {isEditingTitle ? (
+                                    <div className="flex items-center gap-2 flex-1 min-w-0" onClick={e => e.stopPropagation()}>
+                                      <div className="flex-1 min-w-0">
+                                        <input
+                                          type="text"
+                                          value={editingTitle}
+                                          onChange={e => setEditingTitle(e.target.value)}
+                                          onKeyDown={e => {
+                                            if (e.key === 'Enter') handleSaveTitle(cat.id);
+                                          }}
+                                          className="text-sm font-bold p-1 border border-japan-blue rounded outline-none w-full bg-white dark:bg-slate-900 dark:text-white min-w-0"
+                                          autoFocus
+                                        />
+                                      </div>
+                                      <button
+                                        onClick={() => handleSaveTitle(cat.id)}
+                                        className="p-1.5 bg-blue-50 text-japan-blue rounded hover:bg-japan-blue hover:text-white transition-colors flex-shrink-0"
+                                      >
+                                        <Save size={16} />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2 group/title min-w-0">
+                                      <span className="font-bold text-sm text-ink dark:text-white truncate">{cat.title}</span>
+                                      <button
+                                        onClick={(e) => handleStartEditTitle(cat, e)}
+                                        className="text-gray-300 hover:text-japan-blue p-1 opacity-0 group-hover/title:opacity-100 transition-opacity flex-shrink-0"
+                                      >
+                                        <Pencil size={12} />
+                                      </button>
+                                      <span className="text-xs text-gray-400 font-mono flex-shrink-0">({checkedCount}/{total})</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1 flex-shrink-0">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleDeleteCategoryWithConfirm(cat.id); }}
+                                    className="text-gray-300 hover:text-red-400 p-1 flex-shrink-0"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                  <div
+                                    {...dragListeners}
+                                    className="cursor-grab active:cursor-grabbing p-1.5 rounded-md text-gray-300 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 touch-none flex-shrink-0"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <GripVertical size={14} />
+                                  </div>
+                                </div>
                               </div>
-                              <button
-                                onClick={() => handleSaveTitle(cat.id)}
-                                className="p-1.5 bg-blue-50 text-japan-blue rounded hover:bg-japan-blue hover:text-white transition-colors flex-shrink-0"
-                              >
-                                <Save size={16} />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2 group min-w-0">
-                              <span className="font-bold text-sm text-ink dark:text-white truncate">{cat.title}</span>
-                              <button
-                                onClick={(e) => handleStartEditTitle(cat, e)}
-                                className="text-gray-300 hover:text-japan-blue p-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                              >
-                                <Pencil size={12} />
-                              </button>
-                              <span className="text-xs text-gray-400 font-mono flex-shrink-0">({checkedCount}/{total})</span>
-                            </div>
-                          )}
-                        </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDeleteCategoryWithConfirm(cat.id); }}
-                          className="text-gray-300 hover:text-red-400 p-1 flex-shrink-0"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
 
-                      {/* Progress Bar */}
-                      <div className="h-1 bg-gray-100 dark:bg-slate-800 w-full">
-                        <div className="h-full bg-japan-blue dark:bg-sky-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
-                      </div>
+                              {/* Progress Bar */}
+                              <div className="h-1 bg-gray-100 dark:bg-slate-800 w-full">
+                                <div className="h-full bg-japan-blue dark:bg-sky-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
+                              </div>
 
-                      {/* Cat Items */}
-                      {!cat.isCollapsed && (
-                        <div className="p-3 space-y-2">
-                          {(cat.items || []).map(item => {
-                            const isEditingItem = editingItemId === item.id;
+                              {/* Cat Items */}
+                              {!cat.isCollapsed && (
+                                <div className="p-3 space-y-2">
+                                  {(cat.items || []).map(item => {
+                                    const isEditingItem = editingItemId === item.id;
 
-                            return (
-                              <div
-                                key={item.id}
-                                className="flex items-center justify-between group"
-                              >
-                                {isEditingItem ? (
-                                  // Edit Mode
-                                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    return (
+                                      <div
+                                        key={item.id}
+                                        className="flex items-center justify-between group"
+                                      >
+                                        {isEditingItem ? (
+                                          // Edit Mode
+                                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                                            <input
+                                              type="text"
+                                              value={editingItemText}
+                                              onChange={e => setEditingItemText(e.target.value)}
+                                              onKeyDown={e => {
+                                                if (e.key === 'Enter') handleSaveItem(cat.id, item.id);
+                                                if (e.key === 'Escape') handleCancelEditItem();
+                                              }}
+                                              className="flex-1 text-sm font-bold p-1 border border-japan-blue rounded outline-none bg-white dark:bg-slate-900 dark:text-white min-w-0"
+                                              autoFocus
+                                            />
+                                            <button
+                                              onClick={() => handleSaveItem(cat.id, item.id)}
+                                              className="p-1.5 bg-blue-50 text-japan-blue rounded hover:bg-japan-blue hover:text-white transition-colors flex-shrink-0"
+                                            >
+                                              <Check size={14} />
+                                            </button>
+                                            <button
+                                              onClick={handleCancelEditItem}
+                                              className="p-1.5 bg-gray-50 text-gray-400 rounded hover:bg-gray-200 hover:text-gray-600 transition-colors flex-shrink-0"
+                                            >
+                                              <X size={14} />
+                                            </button>
+                                          </div>
+                                        ) : (
+                                          // View Mode
+                                          <>
+                                            <div
+                                              className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                                              onClick={() => handleToggleItem(cat.id, item.id)}
+                                            >
+                                              <div className={`
+                                                      w-4 h-4 rounded border border-gray-300 dark:border-slate-600 flex items-center justify-center transition-colors flex-shrink-0
+                                                      ${item.checked ? 'bg-japan-blue border-japan-blue dark:bg-sky-500 dark:border-sky-500 text-white' : 'bg-white dark:bg-slate-800'}
+                                                   `}>
+                                                {item.checked && <Check size={10} />}
+                                              </div>
+                                              <span className={`text-sm truncate ${item.checked ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-slate-300'}`}>
+                                                {item.text}
+                                              </span>
+                                            </div>
+                                            <div className="flex items-center gap-1 flex-shrink-0">
+                                              <button
+                                                onClick={(e) => { e.stopPropagation(); handleStartEditItem(cat.id, item.id, item.text); }}
+                                                className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-japan-blue transition-opacity p-1"
+                                              >
+                                                <Pencil size={14} />
+                                              </button>
+                                              <button
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteItemWithConfirm(cat.id, item.id); }}
+                                                className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-opacity p-1"
+                                              >
+                                                <X size={14} />
+                                              </button>
+                                            </div>
+                                          </>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+
+                                  {/* Add Item Input */}
+                                  <div className="mt-2 pt-2 border-t border-gray-50 dark:border-slate-800 flex items-center gap-2">
+                                    <Plus size={14} className="text-gray-300 flex-shrink-0" />
                                     <input
                                       type="text"
-                                      value={editingItemText}
-                                      onChange={e => setEditingItemText(e.target.value)}
-                                      onKeyDown={e => {
-                                        if (e.key === 'Enter') handleSaveItem(cat.id, item.id);
-                                        if (e.key === 'Escape') handleCancelEditItem();
+                                      placeholder="新增項目..."
+                                      className="flex-1 text-xs bg-transparent outline-none py-1 min-w-0 dark:text-white placeholder-gray-400"
+                                      value={newItemInputs[cat.id] || ''}
+                                      onChange={(e) => handleAddItemInput(cat.id, e.target.value)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          handleAddItemSubmit(cat.id);
+                                        }
                                       }}
-                                      className="flex-1 text-sm font-bold p-1 border border-japan-blue rounded outline-none bg-white dark:bg-slate-900 dark:text-white min-w-0"
-                                      autoFocus
                                     />
                                     <button
-                                      onClick={() => handleSaveItem(cat.id, item.id)}
-                                      className="p-1.5 bg-blue-50 text-japan-blue rounded hover:bg-japan-blue hover:text-white transition-colors flex-shrink-0"
+                                      onClick={() => handleAddItemSubmit(cat.id)}
+                                      className="p-1 rounded bg-blue-50 text-japan-blue hover:bg-japan-blue hover:text-white transition-colors flex-shrink-0 dark:bg-slate-800 dark:text-sky-400"
                                     >
-                                      <Check size={14} />
-                                    </button>
-                                    <button
-                                      onClick={handleCancelEditItem}
-                                      className="p-1.5 bg-gray-50 text-gray-400 rounded hover:bg-gray-200 hover:text-gray-600 transition-colors flex-shrink-0"
-                                    >
-                                      <X size={14} />
+                                      <Plus size={14} />
                                     </button>
                                   </div>
-                                ) : (
-                                  // View Mode
-                                  <>
-                                    <div
-                                      className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
-                                      onClick={() => handleToggleItem(cat.id, item.id)}
-                                    >
-                                      <div className={`
-                                               w-4 h-4 rounded border border-gray-300 dark:border-slate-600 flex items-center justify-center transition-colors flex-shrink-0
-                                               ${item.checked ? 'bg-japan-blue border-japan-blue dark:bg-sky-500 dark:border-sky-500 text-white' : 'bg-white dark:bg-slate-800'}
-                                            `}>
-                                        {item.checked && <Check size={10} />}
-                                      </div>
-                                      <span className={`text-sm truncate ${item.checked ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-slate-300'}`}>
-                                        {item.text}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-1 flex-shrink-0">
-                                      <button
-                                        onClick={(e) => { e.stopPropagation(); handleStartEditItem(cat.id, item.id, item.text); }}
-                                        className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-japan-blue transition-opacity p-1"
-                                      >
-                                        <Pencil size={14} />
-                                      </button>
-                                      <button
-                                        onClick={(e) => { e.stopPropagation(); handleDeleteItemWithConfirm(cat.id, item.id); }}
-                                        className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-opacity p-1"
-                                      >
-                                        <X size={14} />
-                                      </button>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            );
-                          })}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </SortableChecklistCategory>
+                      );
+                    })}
+                  </div>
+                </SortableContext>
 
-                          {/* Add Item Input */}
-                          <div className="mt-2 pt-2 border-t border-gray-50 dark:border-slate-800 flex items-center gap-2">
-                            <Plus size={14} className="text-gray-300 flex-shrink-0" />
-                            <input
-                              type="text"
-                              placeholder="新增項目..."
-                              className="flex-1 text-xs bg-transparent outline-none py-1 min-w-0 dark:text-white placeholder-gray-400"
-                              value={newItemInputs[cat.id] || ''}
-                              onChange={(e) => handleAddItemInput(cat.id, e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleAddItemSubmit(cat.id);
-                                }
-                              }}
-                            />
-                            <button
-                              onClick={() => handleAddItemSubmit(cat.id)}
-                              className="p-1 rounded bg-blue-50 text-japan-blue hover:bg-japan-blue hover:text-white transition-colors flex-shrink-0 dark:bg-slate-800 dark:text-sky-400"
-                            >
-                              <Plus size={14} />
-                            </button>
-                          </div>
+                {/* Drag Overlay */}
+                <DragOverlay>
+                  {activeChecklistCategory ? (
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xl scale-105 rotate-2 opacity-90">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          {activeChecklistCategory.isCollapsed ? <ChevronRight size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                          <span className="font-bold text-sm text-ink dark:text-white truncate">{activeChecklistCategory.title}</span>
+                          <span className="text-xs text-gray-400 font-mono">
+                            ({activeChecklistCategory.items?.filter(i => i.checked).length || 0}/{activeChecklistCategory.items?.length || 0})
+                          </span>
                         </div>
-                      )}
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
 
               {/* Add Category Button */}
               {showNewCatInput ? (
@@ -876,6 +945,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
               )}
             </div>
           )}
+
 
           {/* --- CLOUD SYNC TAB --- */}
           {activeTab === 'cloud' && (

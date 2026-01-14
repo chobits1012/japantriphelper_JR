@@ -167,6 +167,19 @@ export const useChecklist = (
         setEditingItemText('');
     };
 
+    const reorderCategories = (activeId: string, overId: string) => {
+        const oldIndex = checklist.findIndex(cat => cat.id === activeId);
+        const newIndex = checklist.findIndex(cat => cat.id === overId);
+
+        if (oldIndex === -1 || newIndex === -1) return;
+
+        const reordered = [...checklist];
+        const [movedItem] = reordered.splice(oldIndex, 1);
+        reordered.splice(newIndex, 0, movedItem);
+
+        onUpdateChecklist(reordered);
+    };
+
     return {
         newCategoryName,
         setNewCategoryName,
@@ -195,5 +208,7 @@ export const useChecklist = (
         handleStartEditItem,
         handleSaveItem,
         handleCancelEditItem,
+        reorderCategories,
     };
 };
+
