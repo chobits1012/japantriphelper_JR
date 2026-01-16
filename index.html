@@ -56,6 +56,24 @@
   </style>
 
   <link rel="stylesheet" href="/index.css">
+
+  <!-- IMMEDIATE Service Worker Cleanup (runs BEFORE page load) -->
+  <script>
+    // Execute IMMEDIATELY to unregister Service Workers BEFORE they intercept requests
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
+          console.log('[DEBUG] Force unregistering Service Worker:', registration.scope);
+          registration.unregister();
+        }
+        if (registrations.length > 0) {
+          console.log('[DEBUG] Unregistered', registrations.length, 'Service Worker(s). Reloading...');
+          // Hard reload after unregister to ensure clean state
+          window.location.reload(true);
+        }
+      });
+    }
+  </script>
 </head>
 
 <body>

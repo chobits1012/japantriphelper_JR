@@ -56,6 +56,15 @@ export default {
                     light: '#5a5a5a',
                     lighter: '#8a8a8a',
                 },
+
+                // Comfort Mode Theme Colors (New Design)
+                'comfort': {
+                    beige: '#FDF6E5',   // More saturated warm beige (M.cares match)
+                    dark: '#1A1A1A',    // Soft Black (High contrast but not #000)
+                    paper: '#FDF6E5',   // Card matches bg for "outline" style (transparent look)
+                    surface: '#EAE0D5', // Darker beige for 'Contact' style inner cards
+                    green: '#4F6F52',   // Nature accent
+                },
             },
             fontFamily: {
                 sans: ['"Noto Sans TC"', 'sans-serif'],

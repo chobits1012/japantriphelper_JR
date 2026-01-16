@@ -57,12 +57,13 @@ const getLocationQuery = (loc: string) => {
   return loc;
 };
 
+// Force HMR update
 const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdate, onHome, onNext, onPrev, hasPrev, hasNext, className }) => {
   // Confirm Modal State
   const [confirmState, setConfirmState] = useState<{ isOpen: boolean; type: 'deleteEvent' | 'removePass' | null; payload?: any; }>({ isOpen: false, type: null });
 
   // Use custom hooks
-  const { liveWeather, forecast, loadingWeather, weatherError } = useWeatherData(day.location);
+  const { liveWeather, forecast, loadingWeather, weatherError, debugInfo } = useWeatherData(day.location);
   const editingHook = useDetailEditing(day, onUpdate);
   const { isEditing, editData, setEditData, startEdit, cancelEdit, saveEdit, updateEditData } = editingHook;
 
@@ -175,9 +176,9 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ day, allDays, season, onUpdat
             <div className="flex flex-col flex-1 min-w-0">
               <div className="flex gap-2 w-full sm:w-auto mt-2">
                 <span className="text-xs font-bold tracking-widest text-japan-blue dark:text-sky-400 uppercase">{day.date} • {day.weekday}</span>
-                {day.temp && !isEditing && (
+                {day.weatherIcon && !isEditing && (
                   <div className="flex flex-col gap-2 mt-1 w-full">
-                    <a href={weatherUrl} target="_blank" rel="noreferrer" className="group flex items-center gap-3 text-sm font-medium text-gray-500 dark:text-slate-400 cursor-pointer transition-transform active:scale-95 origin-left">
+                    <a href={weatherUrl} target="_blank" rel="noreferrer" title={debugInfo ? `Lat: ${debugInfo.lat}, Lon: ${debugInfo.lon}` : ''} className="group flex items-center gap-3 text-sm font-medium text-gray-500 dark:text-slate-400 cursor-pointer transition-transform active:scale-95 origin-left">
                       <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">{getWeatherIcon(day.weatherIcon)}<span>{day.temp}</span></div>
                       <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-full shadow-sm border border-gray-200/60 dark:border-slate-700/60 text-ink dark:text-slate-200 group-hover:border-japan-blue/50 group-hover:text-japan-blue transition-colors">
                         {loadingWeather ? <Loader2 size={12} className="animate-spin text-japan-blue dark:text-sky-400" /> : liveWeather ? <>{getLiveWeatherIcon(liveWeather.code)}<span className="text-xs font-bold font-mono">Live: {liveWeather.temp}°</span></> : <div className="flex items-center gap-1 text-xs text-gray-400"><ExternalLink size={10} /><span>{day.location}</span></div>}

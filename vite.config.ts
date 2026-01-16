@@ -7,12 +7,13 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
     server: {
-      port: 3000,
+      port: 3001, // Change port to 3001 to bypass old Service Worker on 3000
       host: '0.0.0.0',
     },
     plugins: [
       react(),
-      VitePWA({
+      // Only enable PWA in production to avoid dev conflicts
+      ...(mode === 'production' ? [VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'kansai.png'],
         manifest: {
@@ -46,7 +47,7 @@ export default defineConfig(({ mode }) => {
                 cacheName: 'google-fonts-cache',
                 expiration: {
                   maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+                  maxAgeSeconds: 60 * 60 * 24 * 365
                 },
                 cacheableResponse: {
                   statuses: [0, 200]
@@ -60,7 +61,7 @@ export default defineConfig(({ mode }) => {
                 cacheName: 'gstatic-fonts-cache',
                 expiration: {
                   maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+                  maxAgeSeconds: 60 * 60 * 24 * 365
                 },
                 cacheableResponse: {
                   statuses: [0, 200]
@@ -69,7 +70,7 @@ export default defineConfig(({ mode }) => {
             }
           ]
         }
-      })
+      })] : [])
     ],
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),

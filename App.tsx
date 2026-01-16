@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Map, Calendar, ChevronRight, Copy, Plane, Sparkles } from 'lucide-react';
+import { Plus, Map, Calendar, ChevronRight, Copy, Plane, Sparkles, Palette } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -11,7 +11,22 @@ import { SortableTripCard } from './components/SortableTripCard';
 import { TripCard } from './components/TripCard';
 import type { TripSeason } from './types';
 
+// ... imports
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+
 const App: React.FC = () => {
+  // ... existing hooks
+
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+};
+
+// Extracting the main content to a separate component to use the hook if needed inside
+const AppContent: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
   const { trips, createTrip, createTemplateTrip, deleteTrip, updateTripMeta, reorderTrips } = useTripManager();
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [isSetupOpen, setIsSetupOpen] = useState(false);
@@ -74,40 +89,76 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full font-sans text-ink overflow-x-hidden">
+    <div className={`
+      relative min-h-screen w-full font-sans overflow-x-hidden transition-colors duration-500
+      ${theme === 'comfort' ? 'bg-comfort-beige text-comfort-dark' : 'text-ink'}
+    `}>
 
       <TripSetup isOpen={isSetupOpen} onClose={() => setIsSetupOpen(false)} onSetup={handleSetupTrip} />
 
       {/* --- Background Layers --- */}
-      {/* 1. Base Image */}
-      <div
-        className="fixed inset-0 bg-cover bg-center z-0"
-        style={{ backgroundImage: `url('${HERO_IMAGE}')` }}
-      />
+      {theme === 'classic' && (
+        <>
+          {/* 1. Base Image */}
+          <div
+            className="fixed inset-0 bg-cover bg-center z-0"
+            style={{ backgroundImage: `url('${HERO_IMAGE}')` }}
+          />
 
-      {/* 2. Gradient Overlay (Darkens image for text readability) */}
-      <div className="fixed inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 z-0 backdrop-blur-[2px]" />
+          {/* 2. Gradient Overlay (Darkens image for text readability) */}
+          <div className="fixed inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 z-0 backdrop-blur-[2px]" />
 
-      {/* 3. Washi Texture Overlay */}
-      <div
-        className="fixed inset-0 z-0 opacity-30 pointer-events-none"
-        style={{ backgroundImage: `url("${WASHI_PATTERN}")` }}
-      />
+          {/* 3. Washi Texture Overlay */}
+          <div
+            className="fixed inset-0 z-0 opacity-30 pointer-events-none"
+            style={{ backgroundImage: `url("${WASHI_PATTERN}")` }}
+          />
+        </>
+      )}
 
       {/* --- Main Content --- */}
       <div className="relative z-10 max-w-4xl mx-auto px-6 py-12 md:py-20 flex flex-col min-h-screen">
 
         {/* Header Section */}
-        <div className="mb-12 text-center md:text-left animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-xs font-bold tracking-widest uppercase mb-4 shadow-lg">
+        <div className={`
+          mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700
+          ${theme === 'comfort' ? 'text-left' : 'text-center md:text-left'}
+        `}>
+          <div className={`
+             inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-4 shadow-lg
+             ${theme === 'comfort'
+              ? 'bg-transparent border border-comfort-dark text-comfort-dark'
+              : 'bg-white/20 backdrop-blur-md border border-white/30 text-white'}
+          `}>
             <Plane size={14} className="animate-pulse" />
             Travel Planner
           </div>
-          <h1 className="text-4xl md:text-6xl font-serif font-bold text-white drop-shadow-lg tracking-wide mb-2">
-            我的旅程
+
+          <button
+            onClick={toggleTheme}
+            className={`
+               ml-4 inline-flex items-center gap-2 px-3 py-1 rounded-full transition-all text-xs font-bold uppercase tracking-widest shadow-lg mb-4
+               ${theme === 'comfort'
+                ? 'bg-white border border-comfort-dark text-comfort-dark hover:bg-comfort-dark hover:text-comfort-beige'
+                : 'bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/30'
+              }
+             `}
+          >
+            {theme === 'comfort' ? <Palette size={12} /> : <Palette size={12} />}
+            {theme === 'comfort' ? 'Comfort Mode' : 'Classic Mode'}
+          </button>
+
+          <h1 className={`
+            text-4xl md:text-6xl font-bold tracking-wide mb-2
+            ${theme === 'comfort' ? 'text-comfort-dark font-sans' : 'text-white font-serif drop-shadow-lg'}
+          `}>
+            {theme === 'comfort' ? 'My Trips' : '我的旅程'}
           </h1>
-          <p className="text-white/80 text-lg md:text-xl font-light tracking-wider drop-shadow-md">
-            下一站，想去哪裡？
+          <p className={`
+            text-lg md:text-xl font-light tracking-wider
+            ${theme === 'comfort' ? 'text-comfort-dark/60' : 'text-white/80 drop-shadow-md'}
+          `}>
+            {theme === 'comfort' ? 'Where to next?' : '下一站，想去哪裡？'}
           </p>
         </div>
 
@@ -151,52 +202,127 @@ const App: React.FC = () => {
           </DndContext>
         </div>
 
+        {/* Explicit Spacer to prevent sticking */}
+        <div className="h-20 shrink-0" aria-hidden="true" />
+
         {/* Floating Action Buttons (or Bottom Area) */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+          {/* Card 1: Plan a Trip */}
           <button
             onClick={() => setIsSetupOpen(true)}
-            className="flex items-center justify-center gap-3 py-5 bg-white/10 hover:bg-white/20 backdrop-blur-md border-2 border-white/30 border-dashed rounded-2xl text-white font-bold transition-all group hover:border-white/60 hover:shadow-lg"
+            className={`
+              relative flex flex-col justify-between p-8 rounded-[40px] font-bold transition-all group overflow-hidden text-left min-h-[180px]
+              ${theme === 'comfort'
+                ? 'bg-[#E5DDD0] text-[#1A1A1A] hover:brightness-[0.97] shadow-none'
+                : 'bg-white/10 hover:bg-white/20 backdrop-blur-md border-2 border-white/30 border-dashed rounded-2xl text-white hover:border-white/60 hover:shadow-lg'
+              }
+            `}
           >
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-japan-blue transition-colors">
-              <Plus size={24} />
-            </div>
-            <span className="text-lg tracking-wide">建立新旅程</span>
+            {theme === 'comfort' ? (
+              <>
+                {/* Top Section */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.15em] opacity-50">開始新旅程</span>
+                  <span className="text-3xl font-extrabold tracking-tight leading-tight">Plan a Trip</span>
+                </div>
+                {/* Bottom Section with Pill Badge */}
+                <div className="flex items-end justify-between mt-4">
+                  <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-[#1A1A1A]/10 text-[11px] font-bold tracking-wide">
+                    自訂行程
+                  </span>
+                  <div className="w-14 h-14 rounded-full border-2 border-[#1A1A1A] flex items-center justify-center text-[#1A1A1A] group-hover:bg-[#1A1A1A] group-hover:text-white transition-all">
+                    <Plus size={24} strokeWidth={2.5} />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center gap-3 w-full h-full">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-japan-blue transition-colors">
+                  <Plus size={24} />
+                </div>
+                <span className="text-lg tracking-wide">建立新旅程</span>
+              </div>
+            )}
           </button>
 
+          {/* Card 2: Use Template */}
           <button
             onClick={handleCreateTemplate}
-            className="flex items-center justify-center gap-3 py-5 bg-japan-blue/80 hover:bg-japan-blue/90 backdrop-blur-md rounded-2xl text-white font-bold transition-all group shadow-lg hover:shadow-japan-blue/50 hover:-translate-y-1"
+            className={`
+              relative flex flex-col justify-between p-8 rounded-[40px] font-bold transition-all group overflow-hidden text-left min-h-[180px]
+              ${theme === 'comfort'
+                ? 'bg-[#E5DDD0] text-[#1A1A1A] hover:brightness-[0.97] shadow-none'
+                : 'bg-japan-blue/80 hover:bg-japan-blue/90 backdrop-blur-md rounded-2xl text-white shadow-lg hover:shadow-japan-blue/50 hover:-translate-y-1'
+              }
+            `}
           >
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-japan-blue transition-colors">
-              <Sparkles size={20} />
-            </div>
-            <div className="flex flex-col items-start">
-              <span className="text-lg tracking-wide leading-none">建立範本</span>
-              <span className="text-xs opacity-70 font-normal mt-1">複製「關西冬之旅」</span>
-            </div>
+            {theme === 'comfort' ? (
+              <>
+                {/* Top Section */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.15em] opacity-50">快速開始</span>
+                  <span className="text-3xl font-extrabold tracking-tight leading-tight">Use Template</span>
+                </div>
+                {/* Bottom Section with Pill Badge */}
+                <div className="flex items-end justify-between mt-4">
+                  <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-[#1A1A1A]/10 text-[11px] font-bold tracking-wide">
+                    關西冬之旅
+                  </span>
+                  <div className="w-14 h-14 rounded-full bg-[#1A1A1A] flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                    <Sparkles size={22} strokeWidth={2.5} />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center gap-3 w-full h-full">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-japan-blue transition-colors">
+                  <Sparkles size={20} />
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="text-lg tracking-wide leading-none">建立範本</span>
+                  <span className="text-xs opacity-70 font-normal mt-1">複製「關西冬之旅」</span>
+                </div>
+              </div>
+            )}
           </button>
         </div>
 
-        <div className="mt-16 text-center text-white/40 text-xs font-mono tracking-widest space-y-2 pb-8">
-          <p>TRAVEL ASSISTANT v2.2</p>
+        {/* Footer Section */}
+        <div className={`
+             mt-16 text-center text-xs tracking-widest space-y-3 pb-8
+             ${theme === 'comfort' ? 'text-[#1A1A1A]/40 font-sans' : 'text-white/40 font-mono'}
+        `}>
+          <p className="uppercase tracking-[0.2em]">Travel Assistant v2.3</p>
           <div className="flex flex-col items-center gap-1">
-            <p className="text-white/60 font-bold">James Wang</p>
+            <p className={`font-bold ${theme === 'comfort' ? 'text-[#1A1A1A]/60' : 'text-white/60'}`}>James Wang</p>
             <a
               href="https://www.threads.net/@jameswangwangwang"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/40 hover:text-white transition-colors border-b border-transparent hover:border-white/40"
+              className={`
+                transition-colors border-b border-transparent 
+                ${theme === 'comfort'
+                  ? 'text-[#1A1A1A]/40 hover:text-[#1A1A1A] hover:border-[#1A1A1A]/40'
+                  : 'text-white/40 hover:text-white hover:border-white/40'}
+              `}
             >
               threads: jameswangwangwang
             </a>
           </div>
 
-          {/* PWA Tip */}
-          <div className="mt-6 p-3 bg-white/10 rounded-lg backdrop-blur-sm inline-block max-w-xs mx-auto border border-white/10">
-            <p className="text-white/90 font-sans font-bold mb-1 text-xs">防丟失小撇步 💡</p>
-            <p className="text-white/60 leading-tight text-[10px]">
-              在 Safari 點擊「分享」<br />
-              選擇「加入主畫面」<br />
+          {/* PWA Tip - M.cares Style Card */}
+          <div className={`
+             mt-8 p-6 rounded-[30px] inline-block max-w-sm mx-auto text-left
+             ${theme === 'comfort'
+              ? 'bg-[#E5DDD0] text-[#1A1A1A]'
+              : 'bg-white/10 border border-white/10 text-white backdrop-blur-sm'
+            }
+          `}>
+            <p className={`font-bold mb-2 text-sm ${theme === 'comfort' ? 'text-[#1A1A1A]/90' : 'text-white/90'}`}>
+              💡 防丟失小撇步
+            </p>
+            <p className={`leading-relaxed text-xs ${theme === 'comfort' ? 'text-[#1A1A1A]/60' : 'text-white/60'}`}>
+              在 Safari 點擊「分享」→ 選擇「加入主畫面」<br />
               可讓資料保存更長久！
             </p>
           </div>

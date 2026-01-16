@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { X, Wallet, CheckSquare, Plus, Trash2, RefreshCw, TrendingUp, Coins, Cloud, FileJson, ChevronDown, ChevronRight, FolderPlus, Pencil, Save, Upload, Copy, Check, AlertTriangle, Sparkles, GripVertical, ArrowDownUp } from 'lucide-react';
+import { X, Wallet, CheckSquare, Plus, Trash2, RefreshCw, TrendingUp, Coins, Cloud, FileJson, ChevronDown, ChevronRight, FolderPlus, Pencil, Save, Upload, Copy, Check, AlertTriangle, Sparkles, GripVertical, ArrowDownUp, Palette } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 import LZString from 'lz-string';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -58,6 +59,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
   expenses, onUpdateExpenses,
   checklist, onUpdateChecklist
 }) => {
+  const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'currency' | 'expense' | 'checklist' | 'backup' | 'cloud'>('expense');
 
 
