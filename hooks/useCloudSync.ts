@@ -119,7 +119,7 @@ export const useCloudSync = (
         firebaseConfig: user ? {} as any : null,
         cloudId: tripId,
         cloudIdInput: '',
-        setCloudIdInput: () => { },
+        setCloudIdInput: (_v: string) => { },
         showConfigEdit: !user,
         setShowConfigEdit: () => { },
         handleSaveConfig: () => { },

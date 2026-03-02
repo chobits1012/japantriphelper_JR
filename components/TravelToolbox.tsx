@@ -175,10 +175,9 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
     triggerFileUpload, executeImport
   } = backupHook;
 
-  const cloudSyncHook = useCloudSync(getExportData);
+  const cloudSyncHook = useCloudSync('', getExportData);
   const {
     firebaseConfig,
-    configInput, setConfigInput,
     cloudId,
     cloudIdInput, setCloudIdInput,
     isSyncing, syncStage, showConfigEdit, setShowConfigEdit, syncError,
@@ -233,30 +232,9 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
   };
 
   const handleDownloadWithConfirm = () => {
-    handleDownloadCloud((data) => {
-      setConfirmModal({
-        isOpen: true,
-        title: "確認匯入",
-        message: `⚠️ 確定要匯入雲端行程「${data.tripSettings.name}」嗎？\\n\\n您目前手機上的所有資料將會被覆蓋！`,
-        isDangerous: true,
-        onConfirm: () => {
-          executeImport(data);
-          setConfirmModal(prev => ({ ...prev, isOpen: false }));
-          setTimeout(() => {
-            setConfirmModal({
-              isOpen: true,
-              title: "下載成功",
-              message: "雲端資料已成功下載！",
-              isDangerous: false,
-              onConfirm: () => {
-                setConfirmModal(prev => ({ ...prev, isOpen: false }));
-                onClose();
-              }
-            });
-          }, 100);
-        }
-      });
-    });
+    // Cloud download is disabled in the Supabase version
+    // Data syncs automatically via TripView's useCloudSync
+    handleDownloadCloud();
   };
 
   const handleFileUploadWithConfirm = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1053,25 +1031,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                 </div>
               </div>
 
-              {/* Config Toggle */}
-              <div className="text-center">
-                <button onClick={() => setShowConfigEdit(!showConfigEdit)} className="text-xs font-bold text-gray-400 hover:text-japan-blue flex items-center justify-center gap-1 mx-auto transition-colors">
-                  <Save size={12} /> {showConfigEdit ? '隱藏設定' : '編輯 Firebase 設定'}
-                </button>
-                {showConfigEdit && (
-                  <div className="mt-4 animate-in slide-in-from-top-2">
-                    <textarea
-                      value={configInput}
-                      onChange={e => setConfigInput(e.target.value)}
-                      className="w-full h-32 p-3 text-[10px] font-mono bg-gray-900 text-white rounded-xl resize-none outline-none border-2 border-transparent focus:border-japan-blue"
-                      placeholder="在此貼上 Firebase Config JSON..."
-                    />
-                    <div className="flex justify-end gap-2 mt-2">
-                      <button onClick={handleSaveConfig} className="text-xs bg-japan-blue text-white px-3 py-1.5 rounded-lg font-bold">儲存設定</button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* Config section removed — Supabase auth replaces Firebase config */}
             </div>
           )}
 
@@ -1137,7 +1097,7 @@ const TravelToolbox: React.FC<TravelToolboxProps> = ({
                     type="file"
                     accept=".json,application/json"
                     ref={fileInputRef}
-                    onChange={handleFileUpload}
+                    onChange={handleFileUploadWithConfirm}
                     className="hidden"
                   />
                 </div>
