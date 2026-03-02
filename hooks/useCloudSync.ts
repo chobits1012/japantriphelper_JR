@@ -16,6 +16,9 @@ export const useCloudSync = (
     const [syncStage, setSyncStage] = useState<string>('');
     const [syncError, setSyncError] = useState<string | null>(null);
 
+    // Whether cloud sync is actually active for this trip
+    const isCloudEnabled = !!user && isValidUUID(tripId);
+
     // Auto-save debouncer
     useEffect(() => {
         if (!user || !tripId) return;
@@ -109,6 +112,7 @@ export const useCloudSync = (
         isSyncing,
         syncStage,
         syncError,
+        isCloudEnabled,
         handleUpdateCloud,
         // Expose a dummy config/id for compatibility with the existing UI for now, 
         // to avoid breaking the TravelToolbox component entirely before we refactor it.

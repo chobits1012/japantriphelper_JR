@@ -18,6 +18,7 @@ import { useTripActions } from '../hooks/useTripActions';
 import { useTitleEditor } from '../hooks/useTitleEditor';
 import { useClipboard } from '../hooks/useClipboard';
 import { useCloudSync } from '../hooks/useCloudSync';
+import { useAuth } from '../contexts/AuthContext';
 
 interface TripViewProps {
   tripId: string;
@@ -29,6 +30,7 @@ interface TripViewProps {
 const DARK_MODE_KEY = 'kansai-trip-dark-mode';
 
 const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updateTripMeta }) => {
+  const { user } = useAuth();
   // Dynamic Keys based on Trip ID
   const SETTINGS_KEY = `trip-${tripId}-settings`;
   const EXPENSE_KEY = `trip-${tripId}-expenses`;
@@ -121,6 +123,7 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
     isSyncing,
     syncStage,
     syncError,
+    isCloudEnabled,
     handleUpdateCloud
   } = useCloudSync(tripId, () => ({
     settings: tripSettings,
@@ -282,22 +285,28 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
             </div>
 
             {/* SYNC STATUS INDICATOR */}
-            <div className="absolute top-20 right-4 md:top-24 md:right-8 z-50">
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border text-xs font-medium transition-all duration-300 ${syncError
+            {user && (
+              <div className="absolute top-20 right-4 md:top-24 md:right-8 z-50">
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border text-xs font-medium transition-all duration-300 ${syncError
                   ? 'bg-red-500/20 border-red-500/50 text-red-200'
                   : isSyncing
                     ? 'bg-japan-blue/20 border-japan-blue/50 text-sky-200'
-                    : 'bg-white/10 border-white/20 text-white/70'
-                }`}>
-                {syncError ? (
-                  <><CloudOff size={14} /> 雲端同步失敗</>
-                ) : isSyncing ? (
-                  <><RefreshCw size={14} className="animate-spin" /> {syncStage || '同步中...'}</>
-                ) : (
-                  <><Cloud size={14} /> 已儲存至雲端</>
-                )}
+                    : isCloudEnabled
+                      ? 'bg-white/10 border-white/20 text-white/70'
+                      : 'bg-yellow-500/10 border-yellow-500/30 text-yellow-200/70'
+                  }`}>
+                  {syncError ? (
+                    <><CloudOff size={14} /> 雲端同步失敗</>
+                  ) : isSyncing ? (
+                    <><RefreshCw size={14} className="animate-spin" /> {syncStage || '同步中...'}</>
+                  ) : isCloudEnabled ? (
+                    <><Cloud size={14} /> 已儲存至雲端</>
+                  ) : (
+                    <><Cloud size={14} /> 本地儲存（新建行程可雲端同步）</>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex items-center gap-2 mb-3 mt-8">
               {getSeasonIcon(tripSettings.season, 24, "animate-pulse")}
