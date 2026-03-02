@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Map, Calendar, ChevronRight, Copy, Plane, Sparkles, Palette } from 'lucide-react';
+import { Plus, Map, Calendar, ChevronRight, Copy, Plane, Sparkles, Palette, LogOut, User as UserIcon } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -13,13 +13,17 @@ import type { TripSeason } from './types';
 
 // ... imports
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthOverlay } from './components/AuthOverlay';
 
 const App: React.FC = () => {
   // ... existing hooks
 
   return (
     <ThemeProvider>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </ThemeProvider>
   );
 };
@@ -27,9 +31,11 @@ const App: React.FC = () => {
 // Extracting the main content to a separate component to use the hook if needed inside
 const AppContent: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+  const { user, signOut } = useAuth();
   const { trips, createTrip, createTemplateTrip, deleteTrip, updateTripMeta, reorderTrips } = useTripManager();
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [isSetupOpen, setIsSetupOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -95,6 +101,7 @@ const AppContent: React.FC = () => {
     `}>
 
       <TripSetup isOpen={isSetupOpen} onClose={() => setIsSetupOpen(false)} onSetup={handleSetupTrip} />
+      <AuthOverlay isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
       {/* --- Background Layers --- */}
       {theme === 'classic' && (
@@ -124,29 +131,60 @@ const AppContent: React.FC = () => {
           mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700
           ${theme === 'comfort' ? 'text-left' : 'text-center md:text-left'}
         `}>
-          <div className={`
-             inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-4 shadow-lg
-             ${theme === 'comfort'
-              ? 'bg-transparent border border-comfort-dark text-comfort-dark'
-              : 'bg-white/20 backdrop-blur-md border border-white/30 text-white'}
-          `}>
-            <Plane size={14} className="animate-pulse" />
-            Travel Planner
-          </div>
-
-          <button
-            onClick={toggleTheme}
-            className={`
-               ml-4 inline-flex items-center gap-2 px-3 py-1 rounded-full transition-all text-xs font-bold uppercase tracking-widest shadow-lg mb-4
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className={`
+               inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase shadow-lg
                ${theme === 'comfort'
-                ? 'bg-white border border-comfort-dark text-comfort-dark hover:bg-comfort-dark hover:text-comfort-beige'
-                : 'bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/30'
-              }
-             `}
-          >
-            {theme === 'comfort' ? <Palette size={12} /> : <Palette size={12} />}
-            {theme === 'comfort' ? 'Comfort Mode' : 'Classic Mode'}
-          </button>
+                ? 'bg-transparent border border-comfort-dark text-comfort-dark'
+                : 'bg-white/20 backdrop-blur-md border border-white/30 text-white'}
+            `}>
+              <Plane size={14} className="animate-pulse" />
+              Travel Planner
+            </div>
+
+            <button
+              onClick={toggleTheme}
+              className={`
+                 inline-flex items-center gap-2 px-3 py-1 rounded-full transition-all text-xs font-bold uppercase tracking-widest shadow-lg
+                 ${theme === 'comfort'
+                  ? 'bg-white border border-comfort-dark text-comfort-dark hover:bg-comfort-dark hover:text-comfort-beige'
+                  : 'bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/30'
+                }
+               `}
+            >
+              <Palette size={12} />
+              {theme === 'comfort' ? 'Comfort Mode' : 'Classic Mode'}
+            </button>
+
+            {/* Auth Button */}
+            {user ? (
+              <button
+                onClick={signOut}
+                className={`
+                    inline-flex items-center gap-2 px-3 py-1 rounded-full transition-all text-xs font-bold uppercase tracking-widest shadow-lg
+                    ${theme === 'comfort'
+                    ? 'bg-[#1A1A1A]/10 text-[#1A1A1A] hover:bg-[#1A1A1A]/20'
+                    : 'bg-white/10 text-white hover:bg-white/20'}
+                  `}
+              >
+                <LogOut size={12} />
+                登出 ({user.user_metadata?.display_name || user.email?.split('@')[0]})
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsAuthOpen(true)}
+                className={`
+                    inline-flex items-center gap-2 px-3 py-1 rounded-full transition-all text-xs font-bold uppercase tracking-widest shadow-lg
+                    ${theme === 'comfort'
+                    ? 'bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/80'
+                    : 'bg-japan-blue text-white hover:bg-japan-blue/80'}
+                  `}
+              >
+                <UserIcon size={12} />
+                登入 / 註冊
+              </button>
+            )}
+          </div>
 
           <h1 className={`
             text-4xl md:text-6xl font-bold tracking-wide mb-2

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Snowflake, Sparkles, RotateCcw, Briefcase, Flower2, Sun, Leaf, Plus, Moon, ArrowLeft, Trash2, Pencil, Check, X, ClipboardCopy } from 'lucide-react';
+import { Snowflake, Sparkles, RotateCcw, Briefcase, Flower2, Sun, Leaf, Plus, Moon, ArrowLeft, Trash2, Pencil, Check, X, ClipboardCopy, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -17,6 +17,7 @@ import { DayCard } from './DayCard';
 import { useTripActions } from '../hooks/useTripActions';
 import { useTitleEditor } from '../hooks/useTitleEditor';
 import { useClipboard } from '../hooks/useClipboard';
+import { useCloudSync } from '../hooks/useCloudSync';
 
 interface TripViewProps {
   tripId: string;
@@ -114,6 +115,19 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
     updateTripMeta,
     setSelectedDayIndex
   });
+
+  // 9. Cloud Sync Hook
+  const {
+    isSyncing,
+    syncStage,
+    syncError,
+    handleUpdateCloud
+  } = useCloudSync(tripId, () => ({
+    settings: tripSettings,
+    itinerary: itineraryData,
+    expenses,
+    checklist
+  }));
 
   // DnD Sensors
   const sensors = useSensors(
@@ -267,7 +281,25 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
               </div>
             </div>
 
-            <div className="flex items-center gap-2 mb-3">
+            {/* SYNC STATUS INDICATOR */}
+            <div className="absolute top-20 right-4 md:top-24 md:right-8 z-50">
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border text-xs font-medium transition-all duration-300 ${syncError
+                  ? 'bg-red-500/20 border-red-500/50 text-red-200'
+                  : isSyncing
+                    ? 'bg-japan-blue/20 border-japan-blue/50 text-sky-200'
+                    : 'bg-white/10 border-white/20 text-white/70'
+                }`}>
+                {syncError ? (
+                  <><CloudOff size={14} /> 雲端同步失敗</>
+                ) : isSyncing ? (
+                  <><RefreshCw size={14} className="animate-spin" /> {syncStage || '同步中...'}</>
+                ) : (
+                  <><Cloud size={14} /> 已儲存至雲端</>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mb-3 mt-8">
               {getSeasonIcon(tripSettings.season, 24, "animate-pulse")}
               <span className="text-sm font-bold tracking-[0.4em] uppercase">{tripSettings.startDate.split('-')[0]} Trip</span>
             </div>

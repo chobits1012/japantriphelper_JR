@@ -18,6 +18,8 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@google/genai": "^1.30.0",
+    "@supabase/supabase-js": "^2.98.0",
+    "dotenv": "^17.3.1",
     "firebase": "^12.7.0",
     "lucide-react": "^0.555.0",
     "lz-string": "^1.5.0",
