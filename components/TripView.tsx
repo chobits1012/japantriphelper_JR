@@ -287,23 +287,21 @@ const TripView: React.FC<TripViewProps> = ({ tripId, onBack, onDeleteTrip, updat
             {/* SYNC STATUS INDICATOR */}
             {user && (
               <div className="absolute top-20 right-4 md:top-24 md:right-8 z-50">
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border text-xs font-medium transition-all duration-300 ${syncError
+                <div className={`flex items-center gap-1.5 p-2 md:px-3 md:py-1.5 rounded-full backdrop-blur-md border text-xs font-medium transition-all duration-300 ${syncError
                   ? 'bg-red-500/20 border-red-500/50 text-red-200'
                   : isSyncing
                     ? 'bg-japan-blue/20 border-japan-blue/50 text-sky-200'
-                    : isCloudEnabled
-                      ? 'bg-white/10 border-white/20 text-white/70'
-                      : 'bg-yellow-500/10 border-yellow-500/30 text-yellow-200/70'
-                  }`}>
+                    : 'bg-white/5 border-white/10 text-white/50'
+                  }`}
+                  title={syncError ? '雲端同步失敗' : isSyncing ? '同步中...' : isCloudEnabled ? '已儲存至雲端' : '本地儲存'}
+                >
                   {syncError ? (
-                    <><CloudOff size={14} /> 雲端同步失敗</>
+                    <><CloudOff size={12} /><span className="hidden md:inline">同步失敗</span></>
                   ) : isSyncing ? (
-                    <><RefreshCw size={14} className="animate-spin" /> {syncStage || '同步中...'}</>
+                    <><RefreshCw size={12} className="animate-spin" /><span className="hidden md:inline">{syncStage || '同步中...'}</span></>
                   ) : isCloudEnabled ? (
-                    <><Cloud size={14} /> 已儲存至雲端</>
-                  ) : (
-                    <><Cloud size={14} /> 本地儲存（新建行程可雲端同步）</>
-                  )}
+                    <><Cloud size={12} /><span className="hidden md:inline">已同步</span></>
+                  ) : null}
                 </div>
               </div>
             )}
