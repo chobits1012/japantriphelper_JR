@@ -3,6 +3,10 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import type { TripSettings, ItineraryDay, ExpenseItem, ChecklistCategory } from '../types';
 
+// UUID v4 format check — Supabase trips.id is type uuid
+const isValidUUID = (id: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
 export const useCloudSync = (
     tripId: string,
     getExportData: () => any
@@ -15,6 +19,8 @@ export const useCloudSync = (
     // Auto-save debouncer
     useEffect(() => {
         if (!user || !tripId) return;
+        // Skip sync for legacy non-UUID trip IDs (e.g. "default-kansai", "legacy-trip")
+        if (!isValidUUID(tripId)) return;
 
         const saveTimeout = setTimeout(async () => {
             const data = getExportData();
@@ -24,15 +30,29 @@ export const useCloudSync = (
             setIsSyncing(true);
             setSyncStage('自動存檔中...');
             try {
+                // Use upsert so it works even if the trip doesn't exist in cloud yet
                 const { error } = await supabase
                     .from('trips')
-                    .update({
+                    .upsert({
+                        id: tripId,
+                        owner_id: user.id,
+                        title: data.settings.name,
                         data: data,
                         updated_at: new Date().toISOString()
-                    })
-                    .eq('id', tripId);
+                    });
 
                 if (error) throw error;
+
+                // Also ensure trip_members entry exists
+                await supabase
+                    .from('trip_members')
+                    .upsert({
+                        trip_id: tripId,
+                        user_id: user.id,
+                        role: 'owner'
+                    }, { onConflict: 'trip_id,user_id' });
+
+                setSyncError(null);
             } catch (err: any) {
                 console.error("Auto-save failed:", err);
                 setSyncError(err.message);
@@ -48,6 +68,10 @@ export const useCloudSync = (
     // Manual upload is now essentially just forcing a save
     const handleUpdateCloud = async () => {
         if (!user || !tripId) return;
+        if (!isValidUUID(tripId)) {
+            setSyncError('此行程尚未同步至雲端（需要新建行程才能同步）');
+            return;
+        }
         setIsSyncing(true);
         setSyncStage('強制同步中...');
         setSyncError(null);
@@ -55,12 +79,24 @@ export const useCloudSync = (
             const data = getExportData();
             const { error } = await supabase
                 .from('trips')
-                .update({
+                .upsert({
+                    id: tripId,
+                    owner_id: user.id,
+                    title: data.settings.name,
                     data: data,
                     updated_at: new Date().toISOString()
-                })
-                .eq('id', tripId);
+                });
             if (error) throw error;
+
+            await supabase
+                .from('trip_members')
+                .upsert({
+                    trip_id: tripId,
+                    user_id: user.id,
+                    role: 'owner'
+                }, { onConflict: 'trip_id,user_id' });
+
+            setSyncError(null);
         } catch (e: any) {
             setSyncError(e.message);
         } finally {
@@ -88,3 +124,4 @@ export const useCloudSync = (
         handleDownloadCloud: async () => { }, // Disabled for now
     };
 };
+
